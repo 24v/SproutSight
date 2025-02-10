@@ -1,0 +1,1 @@
+<image sprite={@Mods/24v.SproutSight/Sprites/Building:Bin}/>

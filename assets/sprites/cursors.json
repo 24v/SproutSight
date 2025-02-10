@@ -1,0 +1,36 @@
+{
+  "Texture": "LooseSprites/Cursors",
+  "Sprites": {
+    "GoldIcon": {
+      "SourceRect": "280, 411, 16, 16"
+    },
+    "Coin": {
+      "SourceRect": "193, 373, 9, 9",
+      "Scale": 4
+    },
+    "QualityStarGold": {
+      "SourceRect": "346, 400, 8, 8"
+    },
+    "QualityStarIridium": {
+      "SourceRect": "346, 392, 8, 8"
+    },
+    "QualityStarSilver": {
+      "SourceRect": "338, 400, 8, 8"
+    },
+    "Bar": {
+      "SourceRect": "331, 308, 2, 2"
+    },
+    "Spring": {
+      "SourceRect": "406, 442, 12, 8"
+    },
+    "Summer": {
+      "SourceRect": "406, 450, 12, 8"
+    },
+    "Winter": {
+      "SourceRect": "406, 458, 12, 8"
+    },
+    "Fall": {
+      "SourceRect": "406, 466, 12, 8"
+    }
+  }
+}

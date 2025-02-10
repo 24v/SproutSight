@@ -1,0 +1,16 @@
+{
+    "Name": "SproutSight",
+    "Author": "24v",
+    "Version": "0.1.0",
+    "Description": "Track and analyze your farm's shipping data",
+    "UniqueID": "24v.SproutSight",
+    "EntryDll": "SproutSight.dll",
+    "UpdateKeys": ["Nexus:31705"],
+    "MinimumApiVersion": "3.0.0",
+    "Dependencies": [
+        {
+            "UniqueID": "focustense.StardewUI",
+            "Version": "0.6.0"
+        }
+    ]
+}

@@ -1,0 +1,65 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      env:
+        GITHUB_ACTIONS: true
+    
+    - name: Create mod package
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        ZIP_NAME="SproutSight-${VERSION}.zip"
+        cd bin/Release/net6.0
+        zip -r "../../../$ZIP_NAME" ./*
+      
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: SproutSight-*.zip
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+    
+    - name: Upload to Nexus Mods
+      if: env.NEXUS_API_KEY != '' && env.MOD_ID != ''
+      env:
+        NEXUS_API_KEY: ${{ secrets.NEXUS_API_KEY }}
+        MOD_ID: ${{ secrets.NEXUS_MOD_ID }}
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        ZIP_NAME="SproutSight-${VERSION}.zip"
+        
+        # You'll need to replace NEXUS_MOD_ID with your actual mod ID once you have it
+        curl -H "apikey: $NEXUS_API_KEY" \
+          -F "file=@$ZIP_NAME" \
+          -F "file_version=$VERSION" \
+          -F "game_version=1.6" \
+          -F "changelog_markup_type=markdown" \
+          -F "changelog=$(cat CHANGELOG.md)" \
+          "https://api.nexusmods.com/v1/games/stardewvalley/mods/$MOD_ID/files.json"
