@@ -17,7 +17,7 @@ SproutSight&trade; allows you to track and analyze your shipping data in Stardew
 ## Usage
 - Press F8 (configurable) or click the shipping bin icon in the HUD to open the statistics viewer
 - The mod automatically tracks all items you put in shipping bins and save the data at the end of the day.
-- CSV files are saved as "[PlayerName] Track Stats.csv" in the mod directory
+- CSV files are saved as "[FarmName]_[SaveID].csv" in the mod directory
 ```
 Stardew Valley/Mods/SproutSight/data/[FarmName]_[SaveID].csv
 ```
