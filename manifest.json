@@ -6,7 +6,7 @@
     "UniqueID": "24v.SproutSight",
     "EntryDll": "SproutSight.dll",
     "UpdateKeys": ["Nexus:31705"],
-    "MinimumApiVersion": "3.0.0",
+    "MinimumApiVersion": "4.0.0",
     "Dependencies": [
         {
             "UniqueID": "focustense.StardewUI",
