@@ -1,6 +1,6 @@
-# SproutSight&trade;
+# SproutSight Pro&trade;
 
-SproutSight&trade; allows you to track and analyze your shipping data in Stardew Valley with an easy-to-use interface brought to you by SproutSight &trade;. SproutSight &trade; mod saves your shipping data to CSV files and provides an in-game viewer to analyze your farming profits.
+SproutSight Pro&trade; allows you to track and analyze your shipping data in for your farm with an easy-to-use interface brought to you by SproutSight Pro &trade;. SproutSight Pro&trade; mod saves your shipping data to CSV files and provides an in-game viewer to analyze your farming profits in the SproutSight Pro&trade; UI.
 
 **Download on [Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/31705/)** \
 **Source on [Github](https://github.com/24v/SproutSight)**

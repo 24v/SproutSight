@@ -17,24 +17,8 @@ using System.Runtime.CompilerServices;
 
 /*
 
-// TODO: Packaging
-// TODO: Github project
-// TODO: New Name 
-// TODO: Same farm name + same player name  -- test
-// TODO: Rebase -- check
-// TODO: Readme -- check
-// TODO: Changelog -- check
-// TODO: Nexus -- check
-// TODO: Manifest -- check
-// TODO: Contributing -- Check
-// TODO: License -- Check
-// TODO: Better images
-// TODO: Update Keys
-// TODO: Update Keys
 
 // Issues
-    // TODO: Write stuff out before or after save?
-    // TOOD: Create backups of stat files?
     // TODO: Scrollable has issues
 
 // Adv
@@ -218,7 +202,7 @@ namespace SproutSight
             var mousePos = Helper.Input.GetCursorPosition().GetScaledScreenPixels();
             if (nonScaledHudArea.Contains(mousePos))
             {
-                IClickableMenu.drawHoverText(e.SpriteBatch, "SproutSight(TM)", Game1.smallFont, 0, 0);
+                IClickableMenu.drawHoverText(e.SpriteBatch, "SproutSight Pro(TM)", Game1.smallFont, 0, 0);
             }
         }
 
