@@ -6,11 +6,21 @@
     "UniqueID": "24v.SproutSight",
     "EntryDll": "SproutSight.dll",
     "UpdateKeys": ["Nexus:31705"],
-    "MinimumApiVersion": "4.0.0",
+    "MinimumApiVersion": "4.1.7",
+    "MinimumGameVersion": "1.6.14",
     "Dependencies": [
         {
             "UniqueID": "focustense.StardewUI",
             "Version": "0.6.0"
+        },
+        {
+            "UniqueID": "focustense.StarControl",
+            "Version": "1.0.3",
+            "IsRequired": false
+        },
+        {
+            "UniqueID": "spacechase0.GenericModConfigMenu",
+            "IsRequired": false
         }
     ]
 }

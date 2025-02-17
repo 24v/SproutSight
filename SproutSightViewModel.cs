@@ -119,7 +119,6 @@ namespace SproutSight
                         var rowHeight = Math.Max(2, scale * maxRowHeight);
                         string layout = $"20px {rowHeight}px";
                         string tooltip = $"{season}-{day}: {dayTotal}g";
-                        Monitor?.Log($"Year: {year}, Season: {season}, day: {day}, dayTotal: {dayTotal}, {highest}, scale: {scale}, rowheight: {rowHeight} layout: {layout}", LogLevel.Trace);
                         DayGridElement dayGridElement = new("", layout, tooltip, 
                             season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
 
@@ -174,6 +173,7 @@ namespace SproutSight
             _isActive = isActive;
         }
         public Tuple<int, int, int, int> Margin => IsActive ? new(0, 0, -12, 0) : new(0, 0, 0, 0);
+
         public ShipmentTab Value { get; } 
 
         [Notify]

@@ -20,6 +20,7 @@ using System.Runtime.CompilerServices;
 
 // Issues
     // TODO: Scrollable has issues
+    // TODO: Those binding warnings in log (use ':')
 
 // Adv
     // TODO: MultiPlayers multiFarms
@@ -61,7 +62,11 @@ namespace SproutSight
         private Rectangle hudClickableArea;
         private string statsFilePath = "";
         private string viewAssetPrefix = "";
+
         private IViewEngine? viewEngine;
+        private IStarControlApi? starControl;
+        private IGenericModConfigMenuApi? configMenu;
+
 
         public override void Entry(IModHelper helper)
         {
@@ -84,42 +89,51 @@ namespace SproutSight
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
             viewEngine = Helper.ModRegistry.GetApi<IViewEngine>("focustense.StardewUI");
+            starControl = Helper.ModRegistry.GetApi<IStarControlApi>("focustense.StarControl");
+            configMenu = this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
             if (viewEngine == null)
             {
                 Monitor.Log("Failed to load StardewUI API. Make sure the mod is installed.", LogLevel.Error);
                 return;
+            } 
+            else 
+            {
+                viewEngine.RegisterViews(viewAssetPrefix, "assets/views");
+                viewEngine.RegisterSprites($"Mods/{ModManifest.UniqueID}/Sprites", "assets/sprites");
+                viewEngine.EnableHotReloading("/Users/demo/CascadeProjects/stardew_valley/CascadeProjects/windsurf-project/stardew_mod/SproutSight");
             }
 
-            viewEngine.RegisterViews(viewAssetPrefix, "assets/views");
-            viewEngine.RegisterSprites($"Mods/{ModManifest.UniqueID}/Sprites", "assets/sprites");
-            viewEngine.EnableHotReloading("/Users/demo/CascadeProjects/stardew_valley/CascadeProjects/windsurf-project/stardew_mod/SproutSight");
+            // Setup gmcm
+            if (configMenu is not null) 
+            {
+                configMenu.Register(
+                    mod: this.ModManifest,
+                    reset: () => this.Config = new ModConfig(),
+                    save: () => this.Helper.WriteConfig(this.Config)
+                );
+
+                configMenu.AddBoolOption(
+                    mod: this.ModManifest,
+                    name: () => "Show Hud Icon",
+                    tooltip: () => "Display a shipping to toggle the tracker view.",
+                    getValue: () => this.Config.EnableHudIcon,
+                    setValue: value => this.Config.EnableHudIcon = value
+                );
+                configMenu.AddKeybindList(
+                    mod: this.ModManifest,
+                    name: () => "Tracker View Toggle",
+                    getValue: () => this.Config.ToggleKey,
+                    setValue: value => this.Config.ToggleKey = value
+                );
+            }
+
+            // Star Control
+            if (starControl is not null)
+            {
+                StarControlIntegration.Register(starControl, ModManifest, new Action(ShowStatsMenu));
+            }
             Monitor.Log("Sprout Sight Updated => Game Launched!", LogLevel.Trace);
 
-            // Setup config
-            // get Generic Mod Config Menu's API (if it's installed)
-            var configMenu = this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
-            if (configMenu is null)
-                return;
-
-            configMenu.Register(
-                mod: this.ModManifest,
-                reset: () => this.Config = new ModConfig(),
-                save: () => this.Helper.WriteConfig(this.Config)
-            );
-
-            configMenu.AddBoolOption(
-                mod: this.ModManifest,
-                name: () => "Show Hud Icon",
-                tooltip: () => "Display a shipping to toggle the tracker view.",
-                getValue: () => this.Config.EnableHudIcon,
-                setValue: value => this.Config.EnableHudIcon = value
-            );
-            configMenu.AddKeybindList(
-                mod: this.ModManifest,
-                name: () => "Tracker View Toggle",
-                getValue: () => this.Config.ToggleKey,
-                setValue: value => this.Config.ToggleKey = value
-            );
         }
 
         private void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -306,6 +320,11 @@ namespace SproutSight
         }
 
         private void ShowStatsMenu(string? command = null, string[]? args = null)
+        {
+            ShowStatsMenu();
+        }
+
+        private void ShowStatsMenu() 
         {
             if (viewEngine == null)
             {
