@@ -13,6 +13,7 @@ SproutSight Pro&trade; allows you to track and analyze your shipping data in for
 - 💰 **Real-time Tracking**: See currently shipped items and their total proceeds
 - 📁 **CSV Export**: All data is saved in CSV format (at the end of the day) for easy external analysis
 - ⚙️ **Configurable Interface**: Access via hotkey (default: F8) or optional HUD icon
+- ️⭐ **Star Control Support**: Integrated with StarControl for easty controller setup
 
 ## Usage
 - Press F8 (configurable) or click the shipping bin icon in the HUD to open the statistics viewer

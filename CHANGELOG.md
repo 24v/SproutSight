@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 - Add support for StarControl
+SproutSight should show up in the "Library" for StarControl.
+
+## 0.1.1 - Rename to SproutSight Pro
+More official sounding.
+
 ## 0.1.0 - Initial Release
 First release of the Sprout Sight Mod.
 
