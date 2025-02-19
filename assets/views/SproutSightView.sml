@@ -1,7 +1,7 @@
 <lane orientation="vertical" horizontal-content-alignment="middle" >
     <banner text="SproutSight Pro(TM)"  background={@Mods/StardewUI/Sprites/BannerBackground} background-border-thickness="48,0" padding="12" /> 
-
     <lane>
+
         <lane layout="150px content"
               margin="0, 16, 0, 0"
               orientation="vertical"
@@ -125,6 +125,8 @@
                 </scrollable>
 
            </lane> 
+
+
         </frame>
     </lane>
 </lane>
