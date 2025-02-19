@@ -12,12 +12,6 @@ internal class DataFileHandler
 {
     // Col Format
     private const String HEADER = "PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,ItemId,ItemName,QualityId,QualityName,Count,Price,CategoryId,CategoryName";
-    private readonly IMonitor _monitor;
-
-    public DataFileHandler(IMonitor monitor)
-    {
-        _monitor = monitor;
-    }
 
     private string GetStatsFilePath(string statsFolderPath, string playerName, ulong saveId)
     {
@@ -29,75 +23,18 @@ internal class DataFileHandler
         return statsFilePath + ".bak";
     }
 
-    public void SaveShippedItems(
-        string statsFolderPath,
-        string playerName,
-        string farmName,
-        List<TrackedItemStack> items,
-        StardewDate date,
-        ulong saveId)
+    public TrackedData LoadTrackedData(string statsFolderPath, string playerName, ulong saveId)
     {
-        string statsFilePath = GetStatsFilePath(statsFolderPath, playerName, saveId);
-
-        try
+        var data = new TrackedData
         {
-            // Create backup of existing file
-            if (File.Exists(statsFilePath))
-            {
-                string backupPath = GetBackupFilePath(statsFilePath);
-                File.Copy(statsFilePath, backupPath, true);
-                _monitor.Log($"Created backup at {backupPath}", LogLevel.Trace);
-            }
+            AllData = ReadShippedItems(statsFolderPath, playerName, saveId)
+        };
 
-            var csv = new StringBuilder();
-            if (!File.Exists(statsFilePath))
-            {
-                csv.AppendLine(HEADER);
-            }
+        // Log summary
+        int totalItems = data.AllData.Values.Sum(list => list.Count);
+        Logging.Monitor.Log($"Loaded {totalItems} items across {data.AllData.Count} days", LogLevel.Trace);
 
-            foreach (var item in items)
-            {
-                // Order must match HEADER
-                string[] fields = new[]
-                {
-                    playerName,                    // PlayerName
-                    farmName,                      // FarmName
-                    DateTime.Now.ToString("yyyyMMddHHmmss"), // SaveDate
-                    date.Year.ToString(),          // Year
-                    ((int)date.Season).ToString(), // SeasonId
-                    date.Season.ToString(),        // SeasonName
-                    date.Day.ToString(),           // Day
-                    item.Id,                       // ItemId
-                    item.Name,                     // ItemName
-                    item.Quality.ToString(),       // QualityId
-                    item.QualityName,              // QualityName
-                    item.StackCount.ToString(),    // Count
-                    item.SalePrice.ToString(),     // Price
-                    item.Category.ToString(),      // CategoryId
-                    item.CategoryName              // CategoryName
-                };
-
-                csv.AppendLine(string.Join(",", fields.Select(EscapeCsvField)));
-            }
-
-            File.AppendAllText(statsFilePath, csv.ToString());
-            _monitor.Log($"Saved {items.Count} items to {statsFilePath}", LogLevel.Trace);
-        }
-        catch (Exception ex)
-        {
-            _monitor.Log($"Error saving items: {ex.Message}", LogLevel.Error);
-            throw;
-        }
-    }
-
-    private static string EscapeCsvField(string field)
-    {
-        if (string.IsNullOrEmpty(field)) return "";
-        if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
-        {
-            return $"\"{field.Replace("\"", "\"\"")}\"";
-        }
-        return field;
+        return data;
     }
 
     private Dictionary<StardewDate, List<TrackedItemStack>> ReadShippedItems(
@@ -107,11 +44,11 @@ internal class DataFileHandler
     {
         string statsFilePath = GetStatsFilePath(statsFolderPath, playerName, saveId);
         var result = new Dictionary<StardewDate, List<TrackedItemStack>>();
-        _monitor.Log($"Reading stats from {statsFilePath}", LogLevel.Trace);
+        Logging.Monitor.Log($"Reading stats from {statsFilePath}", LogLevel.Trace);
 
         if (!File.Exists(statsFilePath))
         {
-            _monitor.Log("Stats file not found", LogLevel.Trace);
+            Logging.Monitor.Log("Stats file not found", LogLevel.Trace);
             return result;
         }
 
@@ -120,7 +57,7 @@ internal class DataFileHandler
             string[] lines = File.ReadAllLines(statsFilePath);
             if (lines.Length == 0)
             {
-                _monitor.Log("Stats file empty", LogLevel.Trace);
+                Logging.Monitor.Log("Stats file empty", LogLevel.Trace);
                 return result;
             }
 
@@ -128,11 +65,11 @@ internal class DataFileHandler
             var headerFields = lines[0].Split(',');
             if (!headerFields.SequenceEqual(HEADER.Split(',')))
             {
-                _monitor.Log("CSV file has an invalid header format", LogLevel.Error);
+                Logging.Monitor.Log("CSV file has an invalid header format", LogLevel.Error);
                 return result;
             }
             
-            _monitor.Log($"Found {lines.Length} lines in save file", LogLevel.Trace);
+            Logging.Monitor.Log($"Found {lines.Length} lines in save file", LogLevel.Trace);
 
             // Process data rows
             for (int lineNum = 1; lineNum < lines.Length; lineNum++)
@@ -142,7 +79,7 @@ internal class DataFileHandler
                     var fields = ParseCsvLine(lines[lineNum]);
                     if (fields.Length != headerFields.Length)
                 {
-                        _monitor.Log($"Line {lineNum + 1}: Invalid number of columns, skipping", LogLevel.Warn);
+                        Logging.Monitor.Log($"Line {lineNum + 1}: Invalid number of columns, skipping", LogLevel.Warn);
                     continue;
                 }
 
@@ -151,14 +88,14 @@ internal class DataFileHandler
                         !int.TryParse(fields[4], out int seasonId) ||
                         !int.TryParse(fields[6], out int day))
                     {
-                        _monitor.Log($"Line {lineNum + 1}: Invalid date values, skipping", LogLevel.Warn);
+                        Logging.Monitor.Log($"Line {lineNum + 1}: Invalid date values, skipping", LogLevel.Warn);
                         continue;
                     }
 
                     // Validate season
                     if (!Enum.IsDefined(typeof(StardewValley.Season), seasonId))
                     {
-                        _monitor.Log($"Line {lineNum + 1}: Invalid season ID: {seasonId}, skipping", LogLevel.Warn);
+                        Logging.Monitor.Log($"Line {lineNum + 1}: Invalid season ID: {seasonId}, skipping", LogLevel.Warn);
                         continue;
                     }
 
@@ -169,7 +106,7 @@ internal class DataFileHandler
                         !int.TryParse(fields[12], out int salePrice) ||
                         !int.TryParse(fields[13], out int category))
                     {
-                        _monitor.Log($"Line {lineNum + 1}: Invalid numeric values, skipping", LogLevel.Warn);
+                        Logging.Monitor.Log($"Line {lineNum + 1}: Invalid numeric values, skipping", LogLevel.Warn);
                         continue;
                     }
 
@@ -188,17 +125,17 @@ internal class DataFileHandler
                         result[date] = items;
                     }
                     items.Add(stack);
-                    _monitor.Log($"Added item: {stack}", LogLevel.Trace);
+                    Logging.Monitor.Log($"Added item: {stack}", LogLevel.Trace);
                 }
                 catch (Exception ex)
                 {
-                    _monitor.Log($"Line {lineNum + 1}: Failed to parse line: {ex.Message}, skipping", LogLevel.Warn);
+                    Logging.Monitor.Log($"Line {lineNum + 1}: Failed to parse line: {ex.Message}, skipping", LogLevel.Warn);
                 }
             }
         }
         catch (Exception ex)
         {
-            _monitor.Log($"Failed to read shipped items: {ex.Message}", LogLevel.Error);
+            Logging.Monitor.Log($"Failed to read shipped items: {ex.Message}", LogLevel.Error);
             throw;
         }
 
@@ -242,27 +179,94 @@ internal class DataFileHandler
         return fields.ToArray();
     }
 
-    public TrackedData LoadTrackedData(string statsFolderPath, string playerName, ulong saveId)
+    public void SaveShippedItems(
+        string statsFolderPath,
+        string playerName,
+        string farmName,
+        List<TrackedItemStack> items,
+        StardewDate date,
+        ulong saveId)
     {
-        var data = new TrackedData() {
-            Monitor = _monitor
-        };
+        string statsFilePath = GetStatsFilePath(statsFolderPath, playerName, saveId);
 
-        // Load tracked data
-        data.AllData = ReadShippedItems(statsFolderPath, playerName, saveId);
+        try
+        {
+            // Create backup of existing file
+            if (File.Exists(statsFilePath))
+            {
+                string backupPath = GetBackupFilePath(statsFilePath);
+                File.Copy(statsFilePath, backupPath, true);
+                Logging.Monitor.Log($"Created backup at {backupPath}", LogLevel.Trace);
+            }
 
-        // Log summary
-        int totalItems = data.AllData.Values.Sum(list => list.Count);
-        _monitor.Log($"Loaded {totalItems} items across {data.AllData.Count} days", LogLevel.Trace);
+            var csv = new StringBuilder();
+            if (!File.Exists(statsFilePath))
+            {
+                csv.AppendLine(HEADER);
+            }
 
-        return data;
+            foreach (var item in items)
+            {
+                // Order must match HEADER
+                string[] fields = new[]
+                {
+                    playerName,                    // PlayerName
+                    farmName,                      // FarmName
+                    DateTime.Now.ToString("yyyyMMddHHmmss"), // SaveDate
+                    date.Year.ToString(),          // Year
+                    ((int)date.Season).ToString(), // SeasonId
+                    date.Season.ToString(),        // SeasonName
+                    date.Day.ToString(),           // Day
+                    item.Id,                       // ItemId
+                    item.Name,                     // ItemName
+                    item.Quality.ToString(),       // QualityId
+                    item.QualityName,              // QualityName
+                    item.StackCount.ToString(),    // Count
+                    item.SalePrice.ToString(),     // Price
+                    item.Category.ToString(),      // CategoryId
+                    item.CategoryName              // CategoryName
+                };
+
+                csv.AppendLine(string.Join(",", fields.Select(EscapeCsvField)));
+            }
+
+            File.AppendAllText(statsFilePath, csv.ToString());
+            Logging.Monitor.Log($"Saved {items.Count} items to {statsFilePath}", LogLevel.Trace);
+        }
+        catch (Exception ex)
+        {
+            Logging.Monitor.Log($"Error saving items: {ex.Message}", LogLevel.Error);
+            throw;
+        }
     }
+
+    private static string EscapeCsvField(string field)
+    {
+        if (string.IsNullOrEmpty(field)) return "";
+        if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
+        {
+            return $"\"{field.Replace("\"", "\"\"")}\"";
+        }
+        return field;
+    }
+
 }
 
 internal partial class TrackedData
 {
     // List of items tracked per date
     public Dictionary<StardewDate, List<TrackedItemStack>> AllData { get; set; } = new();
+
+    internal void PrintTrackedData()
+    {
+        foreach (var kv in AllData)
+        {
+            foreach (var item in kv.Value)
+            {
+                Logging.Monitor.Log("    " + kv.Key.ToString() + " - " + item.ToString(), LogLevel.Info);
+            }
+        }
+    }
 }
 
 enum ItemQuality { Normal, Silver, Gold, Iridium }

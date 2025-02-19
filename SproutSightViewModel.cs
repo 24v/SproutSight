@@ -48,8 +48,6 @@ namespace SproutSight
     /// </summary>
     internal partial class TrackedData
     {
-        public IMonitor? Monitor;
-
         private void LoadAll() 
         {
             // We need:
