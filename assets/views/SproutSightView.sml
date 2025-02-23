@@ -131,9 +131,9 @@
                                     <label text={Text} margin="5,0,0,0"/> <!-- Season -->
                                 </lane>
                                 <image *repeat={Item2} *if={isSpring} tint="Green" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={isSummer} tint="Yellow" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={isFall} tint="Brown" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={isWinter} tint="Blue" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
+                                <image *repeat={Item2} *if={isSummer} tint="Yellow" fit="Stretch" margin="1,0,0,10" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
+                                <image *repeat={Item2} *if={isFall} tint="Brown" fit="Stretch" margin="1,0,0,10" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
+                                <image *repeat={Item2} *if={isWinter} tint="Blue" fit="Stretch" margin="1,0,0,10" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
                             </lane>
                         </lane>
                     </lane>

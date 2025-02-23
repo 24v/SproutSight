@@ -63,6 +63,7 @@ internal partial class TrackedData
         Dictionary<(int, Season), int> seasonTotals = new();
         Dictionary<StardewDate, int> dayTotals = new();
         Dictionary<(int, Season), int> highestTotalPerSeason = new();
+        int highestOverallTotal = 1;
         // Make sure we have data for every grid cell, even if no entries in file
         for (int year = 1; year <= Game1.year; year++)
         {
@@ -88,6 +89,7 @@ internal partial class TrackedData
             {
                 highestTotalPerSeason[(date.Year, date.Season)] = total;
             }
+            highestOverallTotal = Math.Max(highestOverallTotal, total);
         }
 
         _seasonGrid = new();
@@ -102,12 +104,15 @@ internal partial class TrackedData
         }
 
         _dayGrid = new();
-        var maxRowHeight = 50;
+        var maxRowHeight = 128;
+        var minRowHeight = 1;
+        Season[] seasons = (Season[])Enum.GetValues(typeof(Season));
+        Array.Reverse(seasons); 
         for (int year = Game1.year; year > 0; year--)
         {
             List<(DayGridElement, List<DayGridElement>)> seasonsPerYear = new();
             _dayGrid.Add((year, seasonsPerYear));
-            foreach (Season season in Enum.GetValues(typeof(Season)))
+            foreach (Season season in seasons)
             {
                 List<DayGridElement> daysPerSeason = new();
                 DayGridElement seasonElement = new(season.ToString(), "", "",
@@ -116,10 +121,14 @@ internal partial class TrackedData
                 seasonsPerYear.Add((seasonElement, daysPerSeason));
                 for (int day = 1; day <= 28; day++)
                 {
-                    var highest = Math.Max(1, highestTotalPerSeason[(year, season)]);
+                    var highest = Math.Max(1, highestOverallTotal);
                     var dayTotal = dayTotals[new StardewDate(year, season, day)];
-                    var scale = (float)dayTotal / highest;
-                    var rowHeight = Math.Max(2, scale * maxRowHeight);
+                    var rowHeight = 1.0;
+                    if (dayTotal > 0)
+                    {
+                        var scale = (float)dayTotal / highest;
+                        rowHeight = Math.Max(minRowHeight, scale * maxRowHeight);
+                    }
                     string layout = $"20px {rowHeight}px";
                     string tooltip = $"{season}-{day}: {dayTotal}g";
                     DayGridElement dayGridElement = new("", layout, tooltip,
@@ -190,4 +199,3 @@ internal partial class ShipmentTabViewModel : INotifyPropertyChanged
         _isActive = isActive;
     }
 }
-
