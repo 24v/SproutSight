@@ -106,6 +106,7 @@ internal partial class TrackedData
         _dayGrid = new();
         var maxRowHeight = 128;
         var minRowHeight = 1;
+        var rowWidth = 20;
         Season[] seasons = (Season[])Enum.GetValues(typeof(Season));
         Array.Reverse(seasons); 
         for (int year = Game1.year; year > 0; year--)
@@ -129,7 +130,7 @@ internal partial class TrackedData
                         var scale = (float)dayTotal / highest;
                         rowHeight = Math.Max(minRowHeight, scale * maxRowHeight);
                     }
-                    string layout = $"20px {rowHeight}px";
+                    string layout = $"{rowWidth}px {rowHeight}px";
                     string tooltip = $"{season}-{day}: {dayTotal}g";
                     DayGridElement dayGridElement = new("", layout, tooltip,
                         season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);

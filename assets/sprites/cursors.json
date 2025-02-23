@@ -26,10 +26,10 @@
     "Summer": {
       "SourceRect": "406, 450, 12, 8"
     },
-    "Winter": {
+    "Fall": {
       "SourceRect": "406, 458, 12, 8"
     },
-    "Fall": {
+    "Winter": {
       "SourceRect": "406, 466, 12, 8"
     }
   }

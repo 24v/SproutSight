@@ -107,23 +107,19 @@
             </lane>
 
            <lane *case="Day" layout="820px content" orientation="vertical">
-               <lane layout="820px 40px" horizontal-content-alignment="end" >
+               <!-- <lane layout="820px 40px" horizontal-content-alignment="end" >
                     <label text="Current Date: " />
                     <label text={Date} margin="0,0,0,20"/>
-                </lane>
+                </lane> -->
 
                 <scrollable peeking="128">
                     <lane *context={TrackedData} layout="816px content" orientation="vertical" >
                         <lane *repeat={DayGrid} orientation="vertical" margin="0,0,0,40">
                             <!-- Item1=Year, Item2=List<(Season, List<GridElement>)> -->
-                            <lane vertical-content-alignment="middle">
-                                <label text="Y-" />
-                                <label text={Item1}/> <!-- Year -->
-                                <image layout="24px" margin="5,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
-                            </lane>
-                            <lane *repeat={Item2} vertical-content-alignment="end"> 
+
+                            <lane *repeat={Item2} vertical-content-alignment="end" margin="0,0,0,10"> 
                                 <!-- Item1=Season Item2=List<GridElement>) -->
-                                <lane *context={Item1} layout="130px 60px" vertical-content-alignment="end" >
+                                <lane *context={Item1} layout="140px 60px" vertical-content-alignment="end" >
                                     <image *if={isSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                     <image *if={isSummer} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
                                     <image *if={isFall} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
@@ -131,9 +127,16 @@
                                     <label text={Text} margin="5,0,0,0"/> <!-- Season -->
                                 </lane>
                                 <image *repeat={Item2} *if={isSpring} tint="Green" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={isSummer} tint="Yellow" fit="Stretch" margin="1,0,0,10" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={isFall} tint="Brown" fit="Stretch" margin="1,0,0,10" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={isWinter} tint="Blue" fit="Stretch" margin="1,0,0,10" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
+                                <image *repeat={Item2} *if={isSummer} tint="Yellow" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
+                                <image *repeat={Item2} *if={isFall} tint="Brown" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
+                                <image *repeat={Item2} *if={isWinter} tint="Blue" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
+                                <lane *context={Item1} horizontal-content-alignment="end" layout="stretch content">
+                                    <lane *if={isWinter} layout="content stretch" vertical-content-alignment="start">
+                                        <label text="Y-" />
+                                        <label text={^^Item1}/>
+                                        <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
+                                        </lane>
+                                </lane>
                             </lane>
                         </lane>
                     </lane>
