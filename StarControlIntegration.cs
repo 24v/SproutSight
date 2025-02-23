@@ -30,7 +30,7 @@ internal static class StarControlIntegration
 
         public string Title => "SproutSight";
 
-        public string Description => "Toggle SproutSight Pro(TM)";
+        public string Description => "Toggle SproutSight Pro";
 
         public Texture2D Texture => texture;
 

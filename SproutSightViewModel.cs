@@ -13,8 +13,10 @@ internal partial class SproutSightViewModel
 {
     public StardewDate Date = StardewDate.GetStardewDate();
     public List<TrackedItemStack> CurrentItems { get; internal set; } = new();
+    public int TodayGoldIn;
+    public int TodayGoldOut;
     public bool ShippedSomething => CurrentItems.Count > 0;
-    public string TotalProceeds => $"Total Proceeds: {CurrentItems.Select(item => item.StackCount * item.SalePrice).Sum()}g";
+    public string TotalProceeds => $"Current Shipped: {CurrentItems.Select(item => item.StackCount * item.SalePrice).Sum()}g";
     public TrackedData TrackedData { get; internal set; } = new();
 
     public IReadOnlyList<ShipmentTabViewModel> AllTabs { get; } =
@@ -76,9 +78,9 @@ internal partial class TrackedData
             }
         }
 
-        foreach (StardewDate date in AllData.Keys)
+        foreach (StardewDate date in ShippedData.Keys)
         {
-            int total = AllData[date].Sum(d => d.TotalSalePrice);
+            int total = ShippedData[date].Sum(d => d.TotalSalePrice);
             yearTotals[date.Year] += total;
             seasonTotals[(date.Year, date.Season)] += total;
             dayTotals[date] += total;
@@ -161,15 +163,16 @@ internal partial class TrackedData
 
 internal record DayGridElement(string Text, string Layout, string Tooltip, bool isSpring, bool isSummer, bool isFall, bool isWinter);
 
-//////////////////
-// Tabs Stuff
-//////////////////
+// ================================ 
+// Tabs Stuff =====================
+// ================================
 
 internal enum ShipmentTab
 {
     Today,
     Day,
     Year,
+    CashFlow,
 }
 
 internal partial class ShipmentTabViewModel : INotifyPropertyChanged

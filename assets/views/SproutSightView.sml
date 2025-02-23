@@ -1,5 +1,5 @@
 <lane orientation="vertical" horizontal-content-alignment="middle" >
-    <banner text="SproutSight Pro(TM)"  background={@Mods/StardewUI/Sprites/BannerBackground} background-border-thickness="48,0" padding="12" /> 
+    <banner text="SproutSight Pro"  background={@Mods/StardewUI/Sprites/BannerBackground} background-border-thickness="48,0" padding="12" /> 
     <lane>
 
         <lane layout="150px content"
@@ -26,32 +26,47 @@
                padding="32, 24"
                background={@Mods/StardewUI/Sprites/ControlBorder}>
 
-            <lane *case="Today"
-                orientation="vertical" 
-                horizontal-content-alignment="middle">
-                <lane layout="820px 40px" horizontal-content-alignment="end">
-                    <label text={TotalProceeds}/>
-                    <image layout="24px" margin="5,4,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
-               </lane>
+            <lane *case="Today">
                 <scrollable peeking="128">
-                    <lane orientation="vertical" layout="stretch" >
-                        <label *!if={ShippedSomething} margin="0,20,0,0" text="You have not shipped anything today." />
-                        <lane *repeat={CurrentItems} tooltip={Name} vertical-content-alignment="middle">
-                            <panel *switch={QualityName} layout="64px" vertical-content-alignment="end">
-                                <image layout="stretch" margin="4" sprite={Sprite} />
-                                <lane vertical-content-alignment="end">
-                                    <image *case="Silver" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarSilver} />
-                                    <image *case="Gold" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarGold} />
-                                    <image *case="Iridium" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarIridium} />
-                                    <!-- <image layout="24px" sprite={QualitySprite} /> -->
-                                    <spacer layout="stretch 0px" />
-                                    <digits layout="content" scale="3.0" number={StackCount} />
+                    <lane>
+                        <lane orientation="vertical">
+                            <lane>
+                                <label text={TotalProceeds}/>
+                                <image layout="24px" margin="5,0,0,10" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
+                            </lane>
+                            <label *!if={ShippedSomething} margin="0,20,0,0" text="You have not shipped anything today." />
+                            <lane *repeat={CurrentItems} tooltip={Name} vertical-content-alignment="middle">
+                                <panel *switch={QualityName} layout="64px" vertical-content-alignment="end">
+                                    <image layout="stretch" margin="4" sprite={Sprite} />
+                                    <lane vertical-content-alignment="end">
+                                        <image *case="Silver" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarSilver} />
+                                        <image *case="Gold" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarGold} />
+                                        <image *case="Iridium" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarIridium} />
+                                        <spacer layout="stretch 0px" />
+                                        <digits layout="content" scale="3.0" number={StackCount} />
+                                    </lane>
+                                </panel>
+                                <lane vertical-content-alignment="middle">
+                                    <label text={TotalSalePrice} margin="10,0,5,0"/>
+                                    <image layout="24px" margin="0,0,10,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
+                                    <label text={FormattedSale}/>
                                 </lane>
-                            </panel>
-                            <lane vertical-content-alignment="middle">
-                                <label text={TotalSalePrice} margin="10,0,5,0"/>
-                                <image layout="24px" margin="0,0,10,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
-                                <label text={FormattedSale}/>
+                            </lane>
+                        </lane>
+                        <lane orientation="vertical" margin="100,0,0,0">
+                            <lane>
+                                <label text="Other Spending"/>
+                                <image layout="24px" margin="5,0,0,10" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
+                            </lane>
+                            <lane layout="content 64px">
+                                <label text="In:" margin="10,20,0,0"/>
+                                <label text={TodayGoldIn} margin="10,20,0,0"/>
+                                <label text="g" margin="0,20,0,0"/>
+                            </lane>
+                            <lane>
+                                <label text="Out:" margin="10,20,0,0"/>
+                                <label text={TodayGoldOut} color="Red" margin="10,20,0,0"/>
+                                <label text="g" margin="0,20,0,10"/>
                             </lane>
                         </lane>
                     </lane>

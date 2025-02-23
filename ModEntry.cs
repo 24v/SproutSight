@@ -18,6 +18,8 @@ using StardewValley.GameData.Shops;
 
 /*
 
+// Better format numbers
+// Better indication of current day 
 
 // Issues
     // TODO: Scrollable has issues
@@ -64,6 +66,7 @@ internal sealed class ModEntry : Mod
     // Pending items to be saved after the game saves
     private List<TrackedItemStack>? _pendingItems;
     private StardewDate? _pendingDate;
+    private Dictionary<StardewDate, (int, int)> goldInOut = new();
     // The Shipping icon in the hud
 
     private IViewDrawable? hud;
@@ -71,8 +74,8 @@ internal sealed class ModEntry : Mod
     private Rectangle hudClickableArea;
 
     // For tracking total gold in and out
-    private int totalGoldIn = 0;
-    private int totalGoldOut = 0;
+    private int todayGoldIn = 0;
+    private int todayGoldOut = 0;
     private int? lastGoldAmount = null;
 
 
@@ -91,7 +94,7 @@ internal sealed class ModEntry : Mod
 
         helper.ConsoleCommands.Add("sstm_current", "Shows the current items in shipping bins for all farmers.", ShowCurrentItems);
         helper.ConsoleCommands.Add("sstm_show", "Shows the tracker display.", ShowStatsMenu);
-        helper.ConsoleCommands.Add("sstm_items", "Shows the tracked data.", ShowTrackedData);
+        helper.ConsoleCommands.Add("sstm_print_data", "Shows the tracked data.", ShowTrackedData);
         helper.ConsoleCommands.Add("sstm_save", "Saves the tracked data.", SaveTrackedData);
         helper.ConsoleCommands.Add("sstm_load", "Loads the tracked data from file.", LoadTrackedData);
 
@@ -114,13 +117,13 @@ internal sealed class ModEntry : Mod
         int goldAdded = currentGold - (int)lastGoldAmount;
         if (goldAdded > 0) 
         {
-            totalGoldIn += goldAdded;
-            Monitor.Log($"Player added gold: {goldAdded}. Current Out: {totalGoldOut}. Current In: {totalGoldIn}.", LogLevel.Trace);
+            todayGoldIn += goldAdded;
+            Monitor.Log($"Player added gold: {goldAdded}. Current Out: {todayGoldOut}. Current In: {todayGoldIn}.", LogLevel.Trace);
 
         } else if (goldAdded < 0) 
         {
-            totalGoldOut += goldAdded;
-            Monitor.Log($"Player lost gold: {goldAdded}. Current Out: {totalGoldOut}. Current In: {totalGoldIn}.", LogLevel.Trace);
+            todayGoldOut += goldAdded;
+            Monitor.Log($"Player lost gold: {goldAdded}. Current Out: {todayGoldOut}. Current In: {todayGoldIn}.", LogLevel.Trace);
 
         }
         lastGoldAmount = currentGold;
@@ -180,21 +183,22 @@ internal sealed class ModEntry : Mod
         _pendingItems = null;
         _pendingDate = null;
         lastGoldAmount = Game1.player.Money;
-        totalGoldOut = 0;
-        totalGoldIn = 0;
+        todayGoldOut = 0;
+        todayGoldIn = 0;
 
         trackedData = new DataFileHandler().LoadTrackedData(
             statsFilePath,
             Game1.player.Name,
             Game1.uniqueIDForThisGame
         );
+
+        trackedData.GoldInOut = goldInOut;
     }
 
     private void OnDayEnding(object? sender, DayEndingEventArgs e)
     {
         _pendingItems = GetCurrentShippedItems();
         _pendingDate = StardewDate.GetStardewDate();
-        lastGoldAmount = null;
         Monitor.Log($"Day ending with {_pendingItems.Count} items queued for save", LogLevel.Trace);
     }
 
@@ -205,6 +209,8 @@ internal sealed class ModEntry : Mod
             Monitor.Log("No items queued for saving", LogLevel.Trace);
             return;
         }
+
+        goldInOut[_pendingDate] = (todayGoldIn, todayGoldOut);
 
         var fileHandler = new DataFileHandler();
         fileHandler.SaveShippedItems(
@@ -283,7 +289,7 @@ internal sealed class ModEntry : Mod
         var mousePos = Helper.Input.GetCursorPosition().GetScaledScreenPixels();
         if (nonScaledHudArea.Contains(mousePos))
         {
-            IClickableMenu.drawHoverText(e.SpriteBatch, "SproutSight Pro(TM)", Game1.smallFont, 0, 0);
+            IClickableMenu.drawHoverText(e.SpriteBatch, "SproutSight Pro", Game1.smallFont, 0, 0);
         }
     }
 
@@ -305,7 +311,7 @@ internal sealed class ModEntry : Mod
         }
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
         PrintShippedItems(shippedItems);
-        Monitor.Log($"Current Gold Totals: Current Out: {totalGoldOut}. Current In: {totalGoldIn}.", LogLevel.Debug);
+        Monitor.Log($"Current Gold Totals: Current Out: {todayGoldOut}. Current In: {todayGoldIn}.", LogLevel.Debug);
     }
 
     private void ShowTrackedData(string command, string[] args)
@@ -426,7 +432,9 @@ internal sealed class ModEntry : Mod
         var context = new SproutSightViewModel()
         {
             CurrentItems = shippedItems,
-            TrackedData = trackedData
+            TrackedData = trackedData,
+            TodayGoldIn = todayGoldIn,
+            TodayGoldOut = todayGoldOut
         };
 
         Game1.activeClickableMenu = stardewUIViewEngine.CreateMenuFromAsset($"{viewAssetPrefix}/SproutSightView", context);
