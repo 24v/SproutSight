@@ -14,6 +14,7 @@ using System.Diagnostics.CodeAnalysis;
 using StardewValley.Menus;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.CompilerServices;
+using StardewValley.GameData.Shops;
 
 /*
 
@@ -29,6 +30,7 @@ using System.Runtime.CompilerServices;
     // TODO: wiki
 
 // Ideas
+    - Format the gold ammounts (e.g. add columns)
     - Make a game element
     - Animate the on hover on hud icon
     - Track gold in wallet per day
@@ -68,12 +70,18 @@ internal sealed class ModEntry : Mod
     // Needed to respond to click / hover events
     private Rectangle hudClickableArea;
 
+    // For tracking total gold in and out
+    private int totalGoldIn = 0;
+    private int totalGoldOut = 0;
+    private int? lastGoldAmount = null;
+
 
     public override void Entry(IModHelper helper)
     {
         statsFilePath = helper.DirectoryPath + Path.DirectorySeparatorChar;
         viewAssetPrefix = $"Mods/{ModManifest.UniqueID}/Views";
 
+        helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
         helper.Events.GameLoop.DayStarted += OnDayStarted;
         helper.Events.GameLoop.DayEnding += OnDayEnding;
@@ -94,6 +102,29 @@ internal sealed class ModEntry : Mod
     // ================================ 
     // Game Events ====================
     // ================================
+
+    private void OnUpdateTicked(object? sender, StardewModdingAPI.Events.UpdateTickedEventArgs e)
+    {
+        // Day hasnt started
+        if (lastGoldAmount == null) 
+        {
+            return;
+        }
+        int currentGold = Game1.player.Money;
+        int goldAdded = currentGold - (int)lastGoldAmount;
+        if (goldAdded > 0) 
+        {
+            totalGoldIn += goldAdded;
+            Monitor.Log($"Player added gold: {goldAdded}. Current Out: {totalGoldOut}. Current In: {totalGoldIn}.", LogLevel.Trace);
+
+        } else if (goldAdded < 0) 
+        {
+            totalGoldOut += goldAdded;
+            Monitor.Log($"Player lost gold: {goldAdded}. Current Out: {totalGoldOut}. Current In: {totalGoldIn}.", LogLevel.Trace);
+
+        }
+        lastGoldAmount = currentGold;
+    }
 
     private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
     {
@@ -148,6 +179,10 @@ internal sealed class ModEntry : Mod
     {
         _pendingItems = null;
         _pendingDate = null;
+        lastGoldAmount = Game1.player.Money;
+        totalGoldOut = 0;
+        totalGoldIn = 0;
+
         trackedData = new DataFileHandler().LoadTrackedData(
             statsFilePath,
             Game1.player.Name,
@@ -159,6 +194,7 @@ internal sealed class ModEntry : Mod
     {
         _pendingItems = GetCurrentShippedItems();
         _pendingDate = StardewDate.GetStardewDate();
+        lastGoldAmount = null;
         Monitor.Log($"Day ending with {_pendingItems.Count} items queued for save", LogLevel.Trace);
     }
 
@@ -269,6 +305,7 @@ internal sealed class ModEntry : Mod
         }
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
         PrintShippedItems(shippedItems);
+        Monitor.Log($"Current Gold Totals: Current Out: {totalGoldOut}. Current In: {totalGoldIn}.", LogLevel.Debug);
     }
 
     private void ShowTrackedData(string command, string[] args)
@@ -411,6 +448,7 @@ internal sealed class ModEntry : Mod
             }
         }
     }
+
 }
 
 public sealed class ModConfig
