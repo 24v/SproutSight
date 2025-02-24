@@ -39,7 +39,7 @@ internal partial class SproutSightViewModel
     }
 
 
-    // Tabs Stuff
+    // Tab Stuff
     public IReadOnlyList<ShipmentTabViewModel> AllTabs { get; } =
         Enum.GetValues<ShipmentTab>()
             .Select(tab => new ShipmentTabViewModel(tab, tab == ShipmentTab.Today))
@@ -358,6 +358,18 @@ internal enum ShipmentTab
     Day,
     CashFlow,
     Totals
+}
+
+internal static class ShipmentTabExtensions
+{
+    public static string Title(this ShipmentTab tab) => tab switch
+    {
+        ShipmentTab.Today => "Today",
+        ShipmentTab.Day => "Shipping",
+        ShipmentTab.CashFlow => "Cash Flow",
+        ShipmentTab.Totals => "Wallet",
+        _ => tab.ToString()
+    };
 }
 
 internal partial class ShipmentTabViewModel : INotifyPropertyChanged
