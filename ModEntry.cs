@@ -20,6 +20,7 @@ using StardewValley.GameData.Shops;
 
 // Better format numbers
 // Better indication of current day 
+// Add Borders to grid
 
 // Issues
     // TODO: Scrollable has issues

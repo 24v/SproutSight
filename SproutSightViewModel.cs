@@ -175,17 +175,33 @@ internal partial class TrackedData
         _totalsGrid = [];
         for (int i = Game1.year; i > 0; i--)
         {
-            
             var yearDisplayElement = new ChartElement(totalByYear[new StardewYear(i)] + "");
             var seasonsForYear = new List<SeasonEntry<ChartElement, ChartElement>>();
-            var yearEntry = new YearEntry<ChartElement,List<SeasonEntry<ChartElement, ChartElement>>>(i, yearDisplayElement, seasonsForYear);
+            var yearEntry = new YearEntry<ChartElement, List<SeasonEntry<ChartElement, ChartElement>>>(i, yearDisplayElement, seasonsForYear);
             foreach (Season season in Enum.GetValues(typeof(Season)))
             {
+                Logging.Monitor.Log($"Processing season: {season}");
                 seasonsForYear.Add(
                     new SeasonEntry<ChartElement, ChartElement>(
                         season, 
                         new ChartElement(season + ""), 
                         new ChartElement(totalBySeason[new StardewYearSeason(i, season)] + "")));
+            }
+            _totalsGrid.Add(yearEntry);
+        }
+
+        // Log the entire structure
+        Logging.Monitor.Log("=== Totals Grid Structure ===", LogLevel.Info);
+        foreach (var yearEntry in _totalsGrid)
+        {
+            Logging.Monitor.Log($"Year {yearEntry.Year}:", LogLevel.Info);
+            Logging.Monitor.Log($"  Display: {yearEntry.Display.Text}", LogLevel.Info);
+            Logging.Monitor.Log($"  Seasons:", LogLevel.Info);
+            foreach (var seasonEntry in yearEntry.Value)
+            {
+                Logging.Monitor.Log($"    {seasonEntry.Season}:", LogLevel.Info);
+                Logging.Monitor.Log($"      Display: {seasonEntry.Display.Text}", LogLevel.Info);
+                Logging.Monitor.Log($"      Value: {seasonEntry.Value.Text}", LogLevel.Info);
             }
         }
 
@@ -230,6 +246,24 @@ internal partial class TrackedData
                 }
             }
         }
+
+        // Log the day grid structure
+        Logging.Monitor.Log("=== Day Grid Structure ===", LogLevel.Info);
+        foreach (var yearEntry in _dayGrid)
+        {
+            Logging.Monitor.Log($"Year {yearEntry.Year}:", LogLevel.Info);
+            Logging.Monitor.Log($"  Display: {yearEntry.Display.Text}", LogLevel.Info);
+            foreach (var seasonEntry in yearEntry.Value)
+            {
+                Logging.Monitor.Log($"  Season {seasonEntry.Season}:", LogLevel.Info);
+                Logging.Monitor.Log($"    Display: {seasonEntry.Display.Text}", LogLevel.Info);
+                Logging.Monitor.Log($"    Days:", LogLevel.Info);
+                foreach (var dayEntry in seasonEntry.Value)
+                {
+                    Logging.Monitor.Log($"      Date: {dayEntry.Date}, Display: Layout={dayEntry.Display.Layout}, Tooltip={dayEntry.Display.Tooltip}", LogLevel.Info);
+                }
+            }
+        }
     }
 
     // Abomination
@@ -242,7 +276,7 @@ internal partial class TrackedData
             {
                 LoadAggregationAndView();
             }
-            return TotalsGrid;
+            return _totalsGrid;
         }
     }
 
@@ -275,7 +309,7 @@ internal partial class TrackedData
     // }
 }
 
-internal record YearEntry<T,V>(int Year, T Display, V Value);
+internal record YearEntry<T,V>(int Year, T Display, V Value) : T;
 internal record SeasonEntry<T,V>(Season Season, T Display, V Value);
 internal record DayEntry<T,V>(StardewDate Date, T Display, V Value);
 internal record InOutEntry(ChartElement In, ChartElement Out);

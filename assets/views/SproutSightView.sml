@@ -74,11 +74,11 @@
             </lane>
 
             <lane *case="Totals" orientation="vertical" >
-               <lane layout="820px 40px" horizontal-content-alignment="end" >
+                <lane layout="820px 40px" horizontal-content-alignment="end">
                     <label text="Current Date: " />
                     <label text={:Date} margin="0,0,0,20"/>
                 </lane>
-                <grid *context={TrackedData} layout="816px content" item-layout="count: 6" item-spacing="8,8" margin="0,10,10,10">
+                <lane>
                     <frame layout="136px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
                         <label text="Year" margin="16"/>
                     </frame>
@@ -100,90 +100,67 @@
                             <image layout="24px" margin="5,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                         </lane>
                     </frame>
-                    <lane *repeat={SeasonGrid} layout="136px 24px"  vertical-content-alignment="middle" horizontal-content-alignment="middle">
-                        <label text={this} />
+                </lane>
+                <lane *context={TrackedData} orientation="vertical">
+                    <lane *repeat={TotalsGrid} >
+                        <!-- Context is a YearElement(int Year, ChartElement Display, List<<SeasonEntry<ChartElement, ChartElement>>>> Value) -->
+                        <lane layout="136px 24px" horizontal-content-alignment="middle">
+                            <label text={Year}/>
+                        </lane>
+                        <lane *repeat={Value} layout="136px 24px" horizontal-content-alignment="middle">
+                            <!-- Context is a SeasonElement(Season Season, ChartElement Display, ChartElement Value) -->
+                            <lane *context={Value}>
+                                <!-- Context is a Chart Element -->
+                                <label text={Text}/>
+                            </lane>
+                        </lane>
+                        <lane *context={Display} layout="136px 24px" horizontal-content-alignment="middle">
+                            <!-- Context is a Chart Element -->
+                            <label text={Text}/>
+                        </lane>
                     </lane>
-                </grid>
+                </lane>
             </lane>
-           <lane *case="Day" layout="820px content" orientation="vertical">
+            <lane *case="Day" layout="820px content" orientation="vertical">
                 <scrollable peeking="128">
                     <lane *context={TrackedData} layout="816px content" orientation="vertical" >
                         <lane *repeat={DayGrid} orientation="vertical" margin="0,0,0,40">
-                            <!-- Each Year -->
-                            <!-- Item1=Year, Item2=List<(Season, List<GridElement>)> -->
+                        <!-- Context is a YearElement(int Year, ChartElement Display, List<<SeasonEntry<ChartElement, List<DayEntry<ChartElement, object?>>>>>> Value) -->
+                            <!-- <label text={Year} /> -->
 
-                            <lane *repeat={Item2} vertical-content-alignment="end" margin="0,0,0,10"> 
-                                <!-- Each season -->
-                                <!-- Item1=Season Item2=List<GridElement>) -->
-
-                                <lane *context={Item1} layout="140px 60px" vertical-content-alignment="end" >
+                            <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
+                            <!-- Context is a SeasonElement(int Season, ChartElement Display, List<DayEntry<ChartElement, object?> Value) -->
+                                <lane *context={Display} layout="140px 60px" vertical-content-alignment="end" >
                                     <image *if={IsSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                     <image *if={IsSummer} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
                                     <image *if={IsFall} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
                                     <image *if={IsWinter} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
                                     <label text={Text} margin="5,0,0,0"/>
                                 </lane>
-                                <image *repeat={Item2} *if={IsSpring} tint="Green" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={IsSummer} tint="Yellow" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={IsFall} tint="Brown" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <image *repeat={Item2} *if={IsWinter} tint="Blue" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                <lane *context={Item1} horizontal-content-alignment="end" layout="stretch content">
-                                    <lane *if={IsWinter} layout="content stretch" vertical-content-alignment="start">
-                                        <label text="Y-" />
-                                        <label text={^^Item1}/>
-                                        <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
-                                        </lane>
+                                <!-- <image tint="Green" fit="Stretch" margin="1,0,0,0" tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} /> -->
+                                <lane *repeat={Value}>
+                                    <lane *context={Display}>
+                                        <image *if={IsSpring} tint="Green" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                        <image *if={IsSummer} tint="Yellow" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                        <image *if={IsFall} tint="Brown" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                        <image *if={IsWinter} tint="Blue" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                    </lane>
                                 </lane>
+                                <!-- <lane *context={Item1} horizontal-content-alignment="end" layout="stretch content"> -->
+                                    <!-- <lane *if={IsWinter} layout="content stretch" vertical-content-alignment="start"> -->
+                                        <!-- <label text="Y-" /> -->
+                                        <!-- <label text={^^Item1}/> -->
+                                        <!-- <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} /> -->
+                                        <!-- </lane> -->
+                                <!-- </lane> -->
                             </lane>
                         </lane>
                     </lane>
                 </scrollable>
-           </lane> 
+           </lane>  
 
-           <lane *case="CashFlow" layout="820px content" orientation="vertical">
-                <scrollable peeking="128">
-                    <lane *context={TrackedData} layout="816px content" orientation="vertical" >
 
-                        <lane *repeat={DayGrid} orientation="vertical" margin="0,0,0,40">
-                            <!-- Each Year -->
-                            <!-- Item1=Year, Item2=List<(Season, List<GridElement>)> -->
-
-                            <lane *repeat={Item2} orientation="vertical"  margin="0,0,0,10"> 
-                                <!-- Each season -->
-                                <!-- Item1=Season Item2=List<GridElement>) -->
-
-                                <lane vertical-content-alignment="end">
-                                    <lane *context={Item1} layout="140px 60px" vertical-content-alignment="end" >
-                                        <image *if={IsSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
-                                        <image *if={IsSummer} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
-                                        <image *if={IsFall} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
-                                        <image *if={IsWinter} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
-                                        <label text={Text} margin="5,0,0,0"/>
-                                    </lane>
-                                    <image *repeat={Item2} *if={IsSpring} tint="Green" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                    <image *repeat={Item2} *if={IsSummer} tint="Yellow" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                    <image *repeat={Item2} *if={IsFall} tint="Brown" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                    <image *repeat={Item2} *if={IsWinter} tint="Blue" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                    <lane *context={Item1} horizontal-content-alignment="end" layout="stretch content">
-                                        <lane *if={isWinter} layout="content stretch" vertical-content-alignment="start">
-                                            <label text="Y-" />
-                                            <label text={^^Item1}/>
-                                            <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
-                                            </lane>
-                                    </lane>
-                                </lane>
-
-                                <lane>
-                                    <lane *context={Item1} layout="140px 0px" vertical-content-alignment="end" > </lane>
-                                    <image *repeat={Item2} tint="Blue" fit="Stretch" margin="1,0,0,0" layout="20px 100px" tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} />
-                                </lane>
-
-                            </lane>
-                        </lane>
-                    </lane>
-                </scrollable>
-           </lane> 
-        </frame>
+       </frame>
     </lane>
 </lane>
 
