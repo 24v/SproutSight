@@ -82,7 +82,7 @@ internal partial class TrackedData
         Dictionary<StardewYearSeason, int> totalBySeason = [];
         Dictionary<StardewDate, int> totalByDate = [];
 
-        Dictionary<StardewDate, CashFlowInOut> cashFlowByDate = [];
+        Dictionary<StardewDate, GoldInOut> cashFlowByDate = [];
         int highestOverallTotal = 1;
         int highestOverallCashFlow = 1;
 
@@ -102,7 +102,8 @@ internal partial class TrackedData
                     // Generate random cash flow data
                     int inFlow = random.Next(1, 100001); // 1 to 100,000
                     int outFlow = -random.Next(1, 100001); // -1 to -100,000
-                    cashFlowByDate[date] = new CashFlowInOut(inFlow, outFlow);
+                    int walletGold = random.Next(1, 100001); // -1 to -100,000
+                    cashFlowByDate[date] = new GoldInOut(inFlow, outFlow, walletGold);
                 }
             }
         }

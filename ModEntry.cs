@@ -71,9 +71,8 @@ internal sealed class ModEntry : Mod
     // Pending items to be saved after the game saves
     private List<TrackedItemStack>? _pendingItems;
     private StardewDate? _pendingDate;
-    private Dictionary<StardewDate, (int, int)> goldInOut = new();
-    // The Shipping icon in the hud
 
+    // The Shipping icon in the hud
     private IViewDrawable? hud;
     // Needed to respond to click / hover events
     private Rectangle hudClickableArea;
@@ -214,8 +213,6 @@ internal sealed class ModEntry : Mod
             Monitor.Log("No items queued for saving", LogLevel.Trace);
             return;
         }
-
-        goldInOut[_pendingDate] = (todayGoldIn, todayGoldOut);
 
         var fileHandler = new DataFileHandler();
         fileHandler.SaveShippedItems(

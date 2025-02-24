@@ -7,7 +7,7 @@ internal partial class TrackedData
     // List of items tracked per date
     public Dictionary<StardewDate, List<TrackedItemStack>> ShippedData { get; set; } = [];
 
-    public Dictionary<StardewDate, CashFlowInOut> GoldInOut { get; set; } = [];
+    public Dictionary<StardewDate, GoldInOut> GoldInOut { get; set; } = [];
 
     internal void PrintTrackedData()
     {
@@ -28,4 +28,4 @@ internal partial class TrackedData
     }
 }
 
-internal record CashFlowInOut(int In, int Out);
+internal record GoldInOut(int In, int Out, int GoldInWallet);

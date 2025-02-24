@@ -11,7 +11,8 @@ namespace SproutSight;
 internal class DataFileHandler
 {
     // Col Format
-    private const String HEADER = "PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,ItemId,ItemName,QualityId,QualityName,Count,Price,CategoryId,CategoryName";
+    private const String SHIPPING_HEADER = "PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,ItemId,ItemName,QualityId,QualityName,Count,Price,CategoryId,CategoryName";
+    private const String GOLD_HEADER = "PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,GoldIn,GoldOut,GoldInWallet";
 
     private string GetStatsFilePath(string statsFolderPath, string playerName, ulong saveId)
     {
@@ -23,16 +24,29 @@ internal class DataFileHandler
         return statsFilePath + ".bak";
     }
 
+    private string GetGoldFilePath(string statsFolderPath, string playerName, ulong saveId)
+    {
+        return Path.Combine(statsFolderPath, $"{playerName}_{saveId}_gold.csv");
+    }
+
+    private string GetBackupGoldFile(string statsFilePath)
+    {
+        return statsFilePath + ".bak";
+    }
+
     public TrackedData LoadTrackedData(string statsFolderPath, string playerName, ulong saveId)
     {
         var data = new TrackedData
         {
-            ShippedData = ReadShippedItems(statsFolderPath, playerName, saveId)
+            ShippedData = ReadShippedItems(statsFolderPath, playerName, saveId),
+            GoldInOut = ReadGoldData(statsFolderPath, playerName, saveId)
         };
 
         // Log summary
         int totalItems = data.ShippedData.Values.Sum(list => list.Count);
-        Logging.Monitor.Log($"Loaded {totalItems} items across {data.ShippedData.Count} days", LogLevel.Trace);
+        Logging.Monitor.Log($"Loaded {totalItems} shipped items across {data.ShippedData.Count} days", LogLevel.Trace);
+        int totalGoldEntries = data.GoldInOut.Keys.Count;
+        Logging.Monitor.Log($"Loaded {totalGoldEntries} gold entries", LogLevel.Trace);
 
         return data;
     }
@@ -63,7 +77,7 @@ internal class DataFileHandler
 
             // Validate header
             var headerFields = lines[0].Split(',');
-            if (!headerFields.SequenceEqual(HEADER.Split(',')))
+            if (!headerFields.SequenceEqual(SHIPPING_HEADER.Split(',')))
             {
                 Logging.Monitor.Log("CSV file has an invalid header format", LogLevel.Error);
                 return result;
@@ -142,42 +156,6 @@ internal class DataFileHandler
         return result;
     }
 
-    private static string[] ParseCsvLine(string line)
-    {
-        var fields = new List<string>();
-        var currentField = new StringBuilder();
-        bool inQuotes = false;
-
-        for (int i = 0; i < line.Length; i++)
-        {
-            char c = line[i];
-            if (c == '"')
-            {
-                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
-                {
-                    // Double quotes inside quotes = escaped quote
-                    currentField.Append('"');
-                    i++;
-                }
-                else
-                {
-                    inQuotes = !inQuotes;
-                }
-            }
-            else if (c == ',' && !inQuotes)
-            {
-                fields.Add(currentField.ToString());
-                currentField.Clear();
-            }
-            else
-            {
-                currentField.Append(c);
-            }
-        }
-
-        fields.Add(currentField.ToString());
-        return fields.ToArray();
-    }
 
     public void SaveShippedItems(
         string statsFolderPath,
@@ -202,7 +180,7 @@ internal class DataFileHandler
             var csv = new StringBuilder();
             if (!File.Exists(statsFilePath))
             {
-                csv.AppendLine(HEADER);
+                csv.AppendLine(SHIPPING_HEADER);
             }
 
             foreach (var item in items)
@@ -240,6 +218,147 @@ internal class DataFileHandler
         }
     }
 
+    public void SaveGoldData(
+        string statsFolderPath,
+        string playerName,
+        string farmName,
+        ulong saveId,
+        StardewDate date,
+        int goldIn,
+        int goldOut,
+        int goldInWallet)
+    {
+        try
+        {
+            string goldFilePath = GetGoldFilePath(statsFolderPath, playerName, saveId);
+
+            // Create backup if file exists
+            if (File.Exists(goldFilePath))
+            {
+                string backupPath = GetBackupGoldFile(goldFilePath);
+                File.Copy(goldFilePath, backupPath, true);
+                Logging.Monitor.Log($"Created gold data backup at {backupPath}", LogLevel.Trace);
+            }
+
+            var csv = new StringBuilder();
+            if (!File.Exists(goldFilePath))
+            {
+                csv.AppendLine(GOLD_HEADER);
+            }
+
+            // Format: PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,GoldIn,GoldOut,GoldInWallet
+            string line = string.Join(",",
+                playerName,
+                farmName,
+                DateTime.Now.ToString("yyyy-MM-dd"),
+                date.Year,
+                (int)date.Season,
+                date.Season.ToString(),
+                date.Day,
+                goldIn,
+                goldOut,
+                goldInWallet
+            );
+
+            csv.AppendLine(line);
+            File.AppendAllText(goldFilePath, csv.ToString());
+            Logging.Monitor.Log($"Saved gold data to {goldFilePath}", LogLevel.Trace);
+        }
+        catch (Exception ex)
+        {
+            Logging.Monitor.Log($"Error saving gold data: {ex.Message}", LogLevel.Error);
+            throw;
+        }
+    }
+
+    public Dictionary<StardewDate, GoldInOut> ReadGoldData(string statsFolderPath, string playerName, ulong saveId)
+    {
+        string goldFilePath = GetGoldFilePath(statsFolderPath, playerName, saveId);
+        var result = new Dictionary<StardewDate, GoldInOut>();
+        
+        Logging.Monitor.Log($"Reading gold data from {goldFilePath}", LogLevel.Trace);
+
+        if (!File.Exists(goldFilePath))
+        {
+            Logging.Monitor.Log("Gold data file not found", LogLevel.Trace);
+            return result;
+        }
+
+        try
+        {
+            string[] lines = File.ReadAllLines(goldFilePath);
+            if (lines.Length == 0)
+            {
+                Logging.Monitor.Log("Gold data file empty", LogLevel.Trace);
+                return result;
+            }
+
+            // Validate header
+            var headerFields = lines[0].Split(',');
+            if (!headerFields.SequenceEqual(GOLD_HEADER.Split(',')))
+            {
+                Logging.Monitor.Log("Gold CSV file has an invalid header format", LogLevel.Error);
+                return result;
+            }
+
+            Logging.Monitor.Log($"Found {lines.Length} lines in gold data file", LogLevel.Trace);
+
+            // Process data rows
+            for (int lineNum = 1; lineNum < lines.Length; lineNum++)
+            {
+                try
+                {
+                    var fields = ParseCsvLine(lines[lineNum]);
+                    if (fields.Length != headerFields.Length)
+                    {
+                        Logging.Monitor.Log($"Line {lineNum + 1}: Invalid number of columns, skipping", LogLevel.Warn);
+                        continue;
+                    }
+
+                    // Parse date fields
+                    if (!int.TryParse(fields[3], out int year) ||
+                        !int.TryParse(fields[4], out int seasonId) ||
+                        !int.TryParse(fields[6], out int day))
+                    {
+                        Logging.Monitor.Log($"Line {lineNum + 1}: Invalid date values, skipping", LogLevel.Warn);
+                        continue;
+                    }
+
+                    // Validate season
+                    if (!Enum.IsDefined(typeof(StardewValley.Season), seasonId))
+                    {
+                        Logging.Monitor.Log($"Line {lineNum + 1}: Invalid season ID: {seasonId}, skipping", LogLevel.Warn);
+                        continue;
+                    }
+
+                    // Parse gold values
+                    if (!int.TryParse(fields[7], out int goldIn) ||
+                        !int.TryParse(fields[8], out int goldOut) ||
+                        !int.TryParse(fields[9], out int goldInWallet))
+                    {
+                        Logging.Monitor.Log($"Line {lineNum + 1}: Invalid gold values, skipping", LogLevel.Warn);
+                        continue;
+                    }
+
+                    var date = new StardewDate(year, (Season)seasonId, day);
+                    result[date] = new GoldInOut(goldIn, goldOut, goldInWallet);
+                    Logging.Monitor.Log($"Added gold data: {date} In:{goldIn} Out:{goldOut} Wallet:{goldInWallet}", LogLevel.Trace);
+                }
+                catch (Exception ex)
+                {
+                    Logging.Monitor.Log($"Line {lineNum + 1}: Failed to parse line: {ex.Message}, skipping", LogLevel.Warn);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logging.Monitor.Log($"Failed to read gold data: {ex.Message}", LogLevel.Error);
+            throw;
+        }
+
+        return result;
+    }
+
     private static string EscapeCsvField(string field)
     {
         if (string.IsNullOrEmpty(field)) return "";
@@ -250,4 +369,40 @@ internal class DataFileHandler
         return field;
     }
 
+    private static string[] ParseCsvLine(string line)
+    {
+        var fields = new List<string>();
+        var currentField = new StringBuilder();
+        bool inQuotes = false;
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    // Double quotes inside quotes = escaped quote
+                    currentField.Append('"');
+                    i++;
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == ',' && !inQuotes)
+            {
+                fields.Add(currentField.ToString());
+                currentField.Clear();
+            }
+            else
+            {
+                currentField.Append(c);
+            }
+        }
+
+        fields.Add(currentField.ToString());
+        return fields.ToArray();
+    }
 }
