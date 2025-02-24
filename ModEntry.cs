@@ -18,9 +18,13 @@ using StardewValley.GameData.Shops;
 
 /*
 
-// Better format numbers
 // Better indication of current day 
 // Add Borders to grid
+// TODO: CashFlow total by year
+// TODO: Format day toolstips numbers total by year
+// TODO: Better tooltip for cashflow
+// TODO: Better colors for cashflow
+// TODO: Better indicator for rows with todays date
 
 // Issues
     // TODO: Scrollable has issues

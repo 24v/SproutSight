@@ -1,14 +1,13 @@
 <lane orientation="vertical" horizontal-content-alignment="middle" >
     <banner text="SproutSight Pro"  background={@Mods/StardewUI/Sprites/BannerBackground} background-border-thickness="48,0" padding="12" /> 
     <lane>
-
         <lane layout="150px content"
               margin="0, 16, 0, 0"
               orientation="vertical"
               horizontal-content-alignment="end"
               z-index="2">
             <frame *repeat={AllTabs}
-                   layout="120px 64px"
+                   layout="125px 64px"
                    margin={Margin}
                    padding="16, 0"
                    horizontal-content-alignment="middle"
@@ -16,7 +15,7 @@
                    background={@Mods/24v.SproutSight/Sprites/MenuTiles:TabButton}
                    focusable="true"
                    click=|^SelectTab(Value)|>
-                <label text={Value} />
+                <label text={Title} />
             </frame>
         </lane>
 
@@ -115,7 +114,7 @@
                 </lane>
             </lane>
 
-            <lane *case="Day" layout="820px content" orientation="vertical">
+            <lane *case="Shipping" layout="820px content" orientation="vertical">
                 <lane *repeat={DayGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
@@ -152,10 +151,10 @@
                         </lane>
                         <lane orientation="vertical">
                             <lane vertical-content-alignment="end">
-                                <image *repeat={Value} tint={InTint} fit="Stretch" margin="1,0,0,0" layout={InLayout} tooltip={InTooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                <image *repeat={Value} tint={:InTint} fit="Stretch" margin="1,0,0,0" layout={InLayout} tooltip={InTooltip} sprite={@Mods/StardewUI/Sprites/White} />
                             </lane>
                             <lane>
-                                <image *repeat={Value} tint={OutTint} fit="Stretch" margin="1,0,0,0" layout={OutLayout} tooltip={OutTooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                <image *repeat={Value} tint={:OutTint} fit="Stretch" margin="1,0,0,0" layout={OutLayout} tooltip={OutTooltip} sprite={@Mods/StardewUI/Sprites/White} />
                             </lane>
                         </lane>
 

@@ -77,11 +77,6 @@ internal partial class TrackedData
         // Stardew UI doesnt allow indexing, so we have to create a hierarchical data model to use.
         // First we do aggregations then we create the view model.
 
-        // TODO: CashFlow total by year
-        // TODO: Format day toolstips numbers total by year
-        // TODO: Better tooltip for cashflow
-        // TODO: Better colors for cashflow
-        // TODO: Better indicator for rows with todays date
 
         Dictionary<StardewYear, int> totalByYear = [];
         Dictionary<StardewYearSeason, int> totalBySeason = [];
@@ -198,8 +193,6 @@ internal partial class TrackedData
                         season + "", null, null, null, season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
                 cashFlowSeasonsPerYear.Add(cashFlowSeasonEntry);
 
-
-
                 for (int day = 1; day <= 28; day++)
                 {
                     var date = new StardewDate(year, season, day);
@@ -209,7 +202,7 @@ internal partial class TrackedData
                             Season.Spring => "Green",
                             Season.Summer => "Yellow",
                             Season.Fall => "Brown",
-                            Season.Winter => "White",
+                            Season.Winter => "Blue",
                             _ => "White"
                         };
                         var highest = highestOverallTotal;
@@ -232,33 +225,21 @@ internal partial class TrackedData
                         var inLayout = $"{rowWidth}px {inRowHeight}px";
                         var inTooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayIn)}";
 
-                        Logging.Monitor.Log($"=== Cash Flow In Calculations for {date} ===", LogLevel.Info);
-                        Logging.Monitor.Log($"Highest Overall: {highest}", LogLevel.Info);
-                        Logging.Monitor.Log($"Day In: {dayIn}", LogLevel.Info);
-                        Logging.Monitor.Log($"In Scale: {inScale}", LogLevel.Info);
-                        Logging.Monitor.Log($"In Row Height: {inRowHeight}", LogLevel.Info);
-                        Logging.Monitor.Log($"In Layout: {inLayout}", LogLevel.Info);
-                        Logging.Monitor.Log($"In Tooltip: {inTooltip}", LogLevel.Info);
-
                         var dayOut = cashFlowByDate[date].Out;
                         var outScale = (float) Math.Abs(dayOut) / highest;
                         var outRowHeight = Math.Max(minRowHeight, outScale * maxRowHeight);
                         var outLayout = $"{rowWidth}px {outRowHeight}px";
                         var outTooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
 
-                        Logging.Monitor.Log($"=== Cash Flow Out Calculations for {date} ===", LogLevel.Info);
-                        Logging.Monitor.Log($"Day Out: {dayOut}", LogLevel.Info);
-                        Logging.Monitor.Log($"Out Scale: {outScale}", LogLevel.Info);
-                        Logging.Monitor.Log($"Out Row Height: {outRowHeight}", LogLevel.Info);
-                        Logging.Monitor.Log($"Out Layout: {outLayout}", LogLevel.Info);
-                        Logging.Monitor.Log($"Out Tooltip: {outTooltip}", LogLevel.Info);
+                        bool positive = dayIn + dayOut >= 0;
+                        var inTint = positive? "#696969" : "#A9A9A9";
+                        var outTint = positive? "#F08080" : "#B22222";
 
-                        string tint = dayIn + dayOut >= 0 ? "Black" : "Red";
-                        string toolTip = $"{season}-{day}:\n" + 
+                        string toolTip = $"{season}-{day}\n" + 
                                 $"Net:{SproutSightViewModel.FormatGoldNumber(dayIn + dayOut)}\n" + 
                                 $"In: {SproutSightViewModel.FormatGoldNumber(dayIn)}\n" + 
                                 $"Out: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
-                        cashFlowDaysPerSeason.Add(new InOutEntry("", inLayout, toolTip, tint, "", outLayout, toolTip, tint));
+                        cashFlowDaysPerSeason.Add(new InOutEntry("", inLayout, toolTip, inTint, "", outLayout, toolTip, outTint));
                     }
                 }
             }
@@ -341,8 +322,6 @@ internal partial class TrackedData
     }
 }
 
-internal record ChartElement(string Text, string Layout, string Tooltip, string Tint);
-// internal record InOutEntry(ChartElement In, ChartElement Out);
 internal record InOutEntry(string InText, string InLayout, string InTooltip, string InTint, string OutText, string OutLayout, string OutTooltip, string OutTint);
 internal record YearEntryElement<T>(int Year, T Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
 internal record SeasonEntryElement<T>(Season Season, T Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null, bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false);
@@ -355,23 +334,10 @@ internal record DayEntryElement(StardewDate Date, string? Text = null, string? L
 internal enum ShipmentTab
 {
     Today,
-    Day,
+    Shipping,
     CashFlow,
     Totals
 }
-
-internal static class ShipmentTabExtensions
-{
-    public static string Title(this ShipmentTab tab) => tab switch
-    {
-        ShipmentTab.Today => "Today",
-        ShipmentTab.Day => "Shipping",
-        ShipmentTab.CashFlow => "Cash Flow",
-        ShipmentTab.Totals => "Wallet",
-        _ => tab.ToString()
-    };
-}
-
 internal partial class ShipmentTabViewModel : INotifyPropertyChanged
 {
     [Notify]
@@ -380,6 +346,20 @@ internal partial class ShipmentTabViewModel : INotifyPropertyChanged
     public Tuple<int, int, int, int> Margin => IsActive ? new(0, 0, -12, 0) : new(0, 0, 0, 0);
 
     public ShipmentTab Value { get; }
+
+    public string Title {
+        get
+        {
+            return Value switch 
+            {
+                ShipmentTab.Today => "Today",
+                ShipmentTab.Shipping => "Shipping",
+                ShipmentTab.CashFlow => "Cash Flow",
+                ShipmentTab.Totals => "Wallet",
+                _ => Value.ToString()
+            };
+        }
+    }
 
     public ShipmentTabViewModel(ShipmentTab value, bool isActive)
     {
