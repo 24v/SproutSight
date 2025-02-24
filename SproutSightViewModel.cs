@@ -18,11 +18,18 @@ internal partial class SproutSightViewModel
     public int TodayGoldIn;
     public int TodayGoldOut;
     public bool ShippedSomething => CurrentItems.Count > 0;
-    public string TotalProceeds => $"Current Shipped: {CurrentItems.Select(item => item.StackCount * item.SalePrice).Sum()}g";
+    public string TotalProceeds => $"Current Shipped: {FormatGoldNumber(CurrentItems.Select(item => item.StackCount * item.SalePrice).Sum())}";
 
 
     // Historical Data
     public TrackedData TrackedData { get; internal set; } = new();
+    public List<YearEntryElement<List<SeasonEntryElement<List<DayEntryElement>>>>>? DayGrid
+    {
+        get
+        {
+            return TrackedData.DayGrid;
+        }
+    }
 
     // Tabs Stuff
     public IReadOnlyList<ShipmentTabViewModel> AllTabs { get; } =
@@ -41,6 +48,12 @@ internal partial class SproutSightViewModel
             tabViewModel.IsActive = tabViewModel.Value == tab;
         }
     }
+
+    public static string FormatGoldNumber(int number)
+    {
+        return $"{number.ToString("N0")}g";
+    }
+
 }
 
 internal partial class TrackedItemStack
@@ -175,17 +188,12 @@ internal partial class TrackedData
         _totalsGrid = [];
         for (int i = Game1.year; i > 0; i--)
         {
-            var yearDisplayElement = new ChartElement(totalByYear[new StardewYear(i)] + "");
-            var seasonsForYear = new List<SeasonEntry<ChartElement, ChartElement>>();
-            var yearEntry = new YearEntry<ChartElement, List<SeasonEntry<ChartElement, ChartElement>>>(i, yearDisplayElement, seasonsForYear);
+            var seasonsForYear = new List<SeasonEntryElement<string>>();
+            var yearEntry = new YearEntryElement<List<SeasonEntryElement<string>>>(i, seasonsForYear, SproutSightViewModel.FormatGoldNumber(totalByYear[new StardewYear(i)]));
             foreach (Season season in Enum.GetValues(typeof(Season)))
             {
                 Logging.Monitor.Log($"Processing season: {season}");
-                seasonsForYear.Add(
-                    new SeasonEntry<ChartElement, ChartElement>(
-                        season, 
-                        new ChartElement(season + ""), 
-                        new ChartElement(totalBySeason[new StardewYearSeason(i, season)] + "")));
+                seasonsForYear.Add(new SeasonEntryElement<string>(season, SproutSightViewModel.FormatGoldNumber(totalBySeason[new StardewYearSeason(i, season)])));
             }
             _totalsGrid.Add(yearEntry);
         }
@@ -195,13 +203,13 @@ internal partial class TrackedData
         foreach (var yearEntry in _totalsGrid)
         {
             Logging.Monitor.Log($"Year {yearEntry.Year}:", LogLevel.Info);
-            Logging.Monitor.Log($"  Display: {yearEntry.Display.Text}", LogLevel.Info);
+            Logging.Monitor.Log($"  Text: {yearEntry.Text}", LogLevel.Info);
             Logging.Monitor.Log($"  Seasons:", LogLevel.Info);
             foreach (var seasonEntry in yearEntry.Value)
             {
                 Logging.Monitor.Log($"    {seasonEntry.Season}:", LogLevel.Info);
-                Logging.Monitor.Log($"      Display: {seasonEntry.Display.Text}", LogLevel.Info);
-                Logging.Monitor.Log($"      Value: {seasonEntry.Value.Text}", LogLevel.Info);
+                Logging.Monitor.Log($"      Text: {seasonEntry.Text}", LogLevel.Info);
+                Logging.Monitor.Log($"      Value: {seasonEntry.Value}", LogLevel.Info);
             }
         }
 
@@ -217,14 +225,16 @@ internal partial class TrackedData
         Array.Reverse(seasons);
         for (int year = Game1.year; year > 0; year--)
         {
-            List<SeasonEntry<ChartElement, List<DayEntry<ChartElement, object?>>>> seasonsPerYear = [];
-            _dayGrid.Add(new YearEntry<ChartElement,List<SeasonEntry<ChartElement, List<DayEntry<ChartElement, object?>>>>>(year, new ChartElement(year + ""), seasonsPerYear));
+            List<SeasonEntryElement<List<DayEntryElement>>> seasonsPerYear = [];
+            _dayGrid.Add(new YearEntryElement<List<SeasonEntryElement<List<DayEntryElement>>>>(
+                    year, seasonsPerYear, $"Year Total: {SproutSightViewModel.FormatGoldNumber(totalByYear[new StardewYear(year)])}"));
             foreach (Season season in seasons)
             {
-                List<DayEntry<ChartElement, object?>> daysPerSeason = [];
-                ChartElement seasonElement = new(season.ToString(), "", "",
-                    season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
-                var seasonEntry = new SeasonEntry<ChartElement, List<DayEntry<ChartElement, object?>>>(season, seasonElement, daysPerSeason);
+                List<DayEntryElement> daysPerSeason = [];
+                var seasonEntry = new SeasonEntryElement<List<DayEntryElement>>(
+                        season, daysPerSeason, 
+                        season + "", null, null, null, season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
+
                 seasonsPerYear.Add(seasonEntry);
                 for (int day = 1; day <= 28; day++)
                 {
@@ -239,10 +249,20 @@ internal partial class TrackedData
                     }
                     string layout = $"{rowWidth}px {rowHeight}px";
                     string tooltip = $"{season}-{day}: {dayTotal}g";
-                    ChartElement dayGridElement = new("", layout, tooltip,
-                        season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
 
-                    daysPerSeason.Add(new DayEntry<ChartElement, object?>(date, dayGridElement, null));
+                    string tint = season switch
+                    {
+                        Season.Spring => "Green",
+                        Season.Summer => "Yellow",
+                        Season.Fall => "Brown",
+                        Season.Winter => "White",
+                        _ => "White"
+                    };
+
+                    // ChartElement dayGridElement = new("", layout, tooltip,
+                        // season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
+
+                    daysPerSeason.Add(new DayEntryElement(date, "", layout, tooltip, tint));
                 }
             }
         }
@@ -252,23 +272,22 @@ internal partial class TrackedData
         foreach (var yearEntry in _dayGrid)
         {
             Logging.Monitor.Log($"Year {yearEntry.Year}:", LogLevel.Info);
-            Logging.Monitor.Log($"  Display: {yearEntry.Display.Text}", LogLevel.Info);
+            Logging.Monitor.Log($"  Text: {yearEntry.Text}", LogLevel.Info);
             foreach (var seasonEntry in yearEntry.Value)
             {
                 Logging.Monitor.Log($"  Season {seasonEntry.Season}:", LogLevel.Info);
-                Logging.Monitor.Log($"    Display: {seasonEntry.Display.Text}", LogLevel.Info);
+                Logging.Monitor.Log($"    Text: {seasonEntry.Text}", LogLevel.Info);
                 Logging.Monitor.Log($"    Days:", LogLevel.Info);
                 foreach (var dayEntry in seasonEntry.Value)
                 {
-                    Logging.Monitor.Log($"      Date: {dayEntry.Date}, Display: Layout={dayEntry.Display.Layout}, Tooltip={dayEntry.Display.Tooltip}", LogLevel.Info);
+                    Logging.Monitor.Log($"      Date: {dayEntry.Date}, Display: Layout={dayEntry.Layout}, Tooltip={dayEntry.Tooltip}, Tint={dayEntry.Tint}", LogLevel.Info);
                 }
             }
         }
     }
 
-    // Abomination
-    private List<YearEntry<ChartElement, List<SeasonEntry<ChartElement, ChartElement>>>>? _totalsGrid;
-    public List<YearEntry<ChartElement, List<SeasonEntry<ChartElement, ChartElement>>>>? TotalsGrid
+    private List<YearEntryElement<List<SeasonEntryElement<string>>>>? _totalsGrid;
+    public List<YearEntryElement<List<SeasonEntryElement<string>>>> TotalsGrid
     {
         get
         {
@@ -276,13 +295,12 @@ internal partial class TrackedData
             {
                 LoadAggregationAndView();
             }
-            return _totalsGrid;
+            return _totalsGrid!;
         }
     }
 
-    // Abomination
-    private List<YearEntry<ChartElement,List<SeasonEntry<ChartElement, List<DayEntry<ChartElement, object?>>>>>>? _dayGrid;
-    public List<YearEntry<ChartElement,List<SeasonEntry<ChartElement, List<DayEntry<ChartElement, object?>>>>>>? DayGrid
+    private List<YearEntryElement<List<SeasonEntryElement<List<DayEntryElement>>>>>? _dayGrid;
+    public List<YearEntryElement<List<SeasonEntryElement<List<DayEntryElement>>>>> DayGrid
     {
         get
         {
@@ -290,7 +308,7 @@ internal partial class TrackedData
             {
                 LoadAggregationAndView();
             }
-            return _dayGrid;
+            return _dayGrid!;
         }
     }
 
@@ -307,23 +325,33 @@ internal partial class TrackedData
     //         return _cashFlowGrid;
     //     }
     // }
+
+
 }
 
-internal record YearEntry<T,V>(int Year, T Display, V Value) : T;
-internal record SeasonEntry<T,V>(Season Season, T Display, V Value);
-internal record DayEntry<T,V>(StardewDate Date, T Display, V Value);
-internal record InOutEntry(ChartElement In, ChartElement Out);
 
-// internal record YearToSeasons(int Year, List<SeasonToDays> Seasons);
-// internal record SeasonToDays(ChartElement Season, List<ChartElement> Days);
+// internal record YearEntry<T>(int Year, T Value);
+// internal record SeasonEntry<T>(Season Season, T Value);
+// internal record DayEntry<T>(StardewDate Date, T Value);
+internal record InOutEntry(ChartElement In, ChartElement Out);
+internal record YearEntryElement<T>(int Year, T Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
+internal record SeasonEntryElement<T>(Season Season, T Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null, bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false);
+internal record DayEntryElement(StardewDate Date, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
+
+// internal record SeasonChartElement(
+//         string? Text = "", 
+//         string? Layout = "", 
+//         string? Tooltip = "", 
+//         string? Tint = "",
+//         bool IsSpring = false, 
+//         bool IsSummer = false, 
+//         bool IsFall = false, 
+//         bool IsWinter = false);
 internal record ChartElement(
-        string Text = "", 
-        string Layout = "", 
-        string Tooltip = "", 
-        bool IsSpring = false, 
-        bool IsSummer = false, 
-        bool IsFall = false, 
-        bool IsWinter = false);
+        string? Text = "", 
+        string? Layout = "", 
+        string? Tooltip = "", 
+        string? Tint = "");
 
 // ================================ 
 // Tabs Stuff =====================

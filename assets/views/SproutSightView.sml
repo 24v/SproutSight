@@ -26,13 +26,14 @@
                padding="32, 24"
                background={@Mods/StardewUI/Sprites/ControlBorder}>
 
+            <scrollable peeking="128" layout="stretch">
             <lane *case="Today">
                 <scrollable peeking="128">
                     <lane>
                         <lane orientation="vertical">
                             <lane>
                                 <label text={TotalProceeds}/>
-                                <image layout="24px" margin="5,0,0,10" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
+                                <image layout="24px" margin="5,0,0,20" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                             </lane>
                             <label *!if={ShippedSomething} margin="0,20,0,0" text="You have not shipped anything today." />
                             <lane *repeat={CurrentItems} tooltip={Name} vertical-content-alignment="middle">
@@ -46,24 +47,22 @@
                                         <digits layout="content" scale="3.0" number={StackCount} />
                                     </lane>
                                 </panel>
-                                <lane vertical-content-alignment="middle">
-                                    <label text={TotalSalePrice} margin="10,0,5,0"/>
-                                    <image layout="24px" margin="0,0,10,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
-                                    <label text={FormattedSale}/>
-                                </lane>
+                                <label text={TotalSalePrice} margin="10,0,5,0"/>
+                                <image layout="24px" margin="0,0,10,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
+                                <label text={FormattedSale}/>
                             </lane>
                         </lane>
-                        <lane orientation="vertical" margin="100,0,0,0">
+                        <lane orientation="vertical" margin="120,0,0,0">
                             <lane>
                                 <label text="Other Spending"/>
                                 <image layout="24px" margin="5,0,0,10" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                             </lane>
-                            <lane layout="content 64px">
+                            <lane layout="stretch 64px" horizontal-content-alignment="end">
                                 <label text="In:" margin="10,20,0,0"/>
                                 <label text={TodayGoldIn} margin="10,20,0,0"/>
                                 <label text="g" margin="0,20,0,0"/>
                             </lane>
-                            <lane>
+                            <lane layout="stretch 64px" horizontal-content-alignment="end">
                                 <label text="Out:" margin="10,20,0,0"/>
                                 <label text={TodayGoldOut} color="Red" margin="10,20,0,0"/>
                                 <label text="g" margin="0,20,0,10"/>
@@ -73,94 +72,95 @@
                 </scrollable>
             </lane>
 
-            <lane *case="Totals" orientation="vertical" >
+            <lane *case="Totals" *context={TrackedData}  orientation="vertical" >
                 <lane layout="820px 40px" horizontal-content-alignment="end">
                     <label text="Current Date: " />
-                    <label text={:Date} margin="0,0,0,20"/>
+                    <label text={:^Date} margin="0,0,0,20"/>
                 </lane>
                 <lane>
-                    <frame layout="136px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
-                        <label text="Year" margin="16"/>
+                    <frame layout="36px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
+                        <label text="Y" margin="16"/>
                     </frame>
-                    <frame layout="136px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
+                    <frame layout="156px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
                         <label text="Spring" margin="16"/>
                     </frame>
-                    <frame layout="136px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
+                    <frame layout="156px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
                         <label text="Summer" margin="16"/>
                     </frame>
-                    <frame layout="136px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
+                    <frame layout="156px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
                         <label text="Fall" margin="16"/>
                     </frame>
-                    <frame layout="136px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
+                    <frame layout="156px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
                         <label text="Winter" margin="16"/>
                     </frame>
-                    <frame layout="136px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
+                    <frame layout="156px 64px" background={@Mods/StardewUI/Sprites/ButtonLight} vertical-content-alignment="middle" horizontal-content-alignment="middle">
                         <lane vertical-content-alignment="middle" horizontal-content-alignment="middle">
                             <label text="Total" />
                             <image layout="24px" margin="5,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                         </lane>
                     </frame>
                 </lane>
-                <lane *context={TrackedData} orientation="vertical">
-                    <lane *repeat={TotalsGrid} >
-                        <!-- Context is a YearElement(int Year, ChartElement Display, List<<SeasonEntry<ChartElement, ChartElement>>>> Value) -->
-                        <lane layout="136px 24px" horizontal-content-alignment="middle">
-                            <label text={Year}/>
-                        </lane>
-                        <lane *repeat={Value} layout="136px 24px" horizontal-content-alignment="middle">
-                            <!-- Context is a SeasonElement(Season Season, ChartElement Display, ChartElement Value) -->
-                            <lane *context={Value}>
-                                <!-- Context is a Chart Element -->
-                                <label text={Text}/>
-                            </lane>
-                        </lane>
-                        <lane *context={Display} layout="136px 24px" horizontal-content-alignment="middle">
-                            <!-- Context is a Chart Element -->
-                            <label text={Text}/>
-                        </lane>
+                <lane *repeat={TotalsGrid} margin="0,0,0,10">
+                <!-- Context is a YearEntryElement(int Year, List<SeasonEntry<int>>> Value, string Text,...) -->
+                    <lane layout="36px 24px" horizontal-content-alignment="middle">
+                        <label text={Year}/>
+                    </lane>
+                    <lane *repeat={Value} layout="156px 24px" horizontal-content-alignment="end">
+                        <!-- Context is a SeasonEntryElement(Season Season, int Value) -->
+                        <label text={Value}/>
+                    </lane>
+                    <lane layout="156px 24px" horizontal-content-alignment="end">
+                        <label text={Text}/>
                     </lane>
                 </lane>
             </lane>
-            <lane *case="Day" layout="820px content" orientation="vertical">
-                <scrollable peeking="128">
-                    <lane *context={TrackedData} layout="816px content" orientation="vertical" >
-                        <lane *repeat={DayGrid} orientation="vertical" margin="0,0,0,40">
-                        <!-- Context is a YearElement(int Year, ChartElement Display, List<<SeasonEntry<ChartElement, List<DayEntry<ChartElement, object?>>>>>> Value) -->
-                            <!-- <label text={Year} /> -->
 
-                            <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
-                            <!-- Context is a SeasonElement(int Season, ChartElement Display, List<DayEntry<ChartElement, object?> Value) -->
-                                <lane *context={Display} layout="140px 60px" vertical-content-alignment="end" >
-                                    <image *if={IsSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
-                                    <image *if={IsSummer} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
-                                    <image *if={IsFall} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
-                                    <image *if={IsWinter} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
-                                    <label text={Text} margin="5,0,0,0"/>
-                                </lane>
-                                <!-- <image tint="Green" fit="Stretch" margin="1,0,0,0" tooltip={Tooltip} sprite={@Mods/24v.SproutSight/Sprites/Cursors:Bar} /> -->
-                                <lane *repeat={Value}>
-                                    <lane *context={Display}>
-                                        <image *if={IsSpring} tint="Green" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                                        <image *if={IsSummer} tint="Yellow" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                                        <image *if={IsFall} tint="Brown" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                                        <image *if={IsWinter} tint="Blue" fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                                    </lane>
-                                </lane>
-                                <!-- <lane *context={Item1} horizontal-content-alignment="end" layout="stretch content"> -->
-                                    <!-- <lane *if={IsWinter} layout="content stretch" vertical-content-alignment="start"> -->
-                                        <!-- <label text="Y-" /> -->
-                                        <!-- <label text={^^Item1}/> -->
-                                        <!-- <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} /> -->
-                                        <!-- </lane> -->
-                                <!-- </lane> -->
-                            </lane>
+            <lane *case="Day" layout="820px content" orientation="vertical">
+                <lane *repeat={DayGrid} orientation="vertical" margin="0,0,0,40">
+                <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                    <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
+                    <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
+                        <lane layout="140px 60px" vertical-content-alignment="end" >
+                            <image *if={IsSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
+                            <image *if={IsSummer} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
+                            <image *if={IsFall} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
+                            <image *if={IsWinter} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
+                            <label text={Text} margin="5,0,0,0"/>
+                        </lane>
+                        <image *repeat={Value} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Text}>
+                            <label text="Y-"/>
+                            <label text={^Year} />
+                            <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                         </lane>
                     </lane>
-                </scrollable>
-           </lane>  
+                </lane>
+            </lane>   
 
 
-       </frame>
+            <lane *case="CashFlow" layout="820px content" orientation="vertical">
+                <lane *repeat={DayGrid} orientation="vertical" margin="0,0,0,40">
+                <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                    <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
+                    <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
+                        <lane layout="140px 60px" vertical-content-alignment="end" >
+                            <image *if={IsSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
+                            <image *if={IsSummer} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
+                            <image *if={IsFall} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
+                            <image *if={IsWinter} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
+                            <label text={Text} margin="5,0,0,0"/>
+                        </lane>
+                        <image *repeat={Value} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Text}>
+                            <label text="Y-"/>
+                            <label text={^Year} />
+                            <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
+                        </lane>
+                    </lane>
+                </lane>
+            </lane>  
+            </scrollable>
+        </frame>
     </lane>
 </lane>
 
