@@ -192,7 +192,7 @@ internal sealed class ModEntry : Mod
             Game1.uniqueIDForThisGame
         );
 
-        trackedData.GoldInOut = goldInOut;
+        // trackedData.GoldInOut = new CashFlowInOut(todayGoldIn, todayGoldOut);;
     }
 
     private void OnDayEnding(object? sender, DayEndingEventArgs e)

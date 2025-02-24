@@ -1,5 +1,3 @@
-using StardewValley;
-
 namespace SproutSight;
 internal class StardewDate
 {
@@ -39,4 +37,8 @@ internal class StardewDate
     {
         return $"{Year}-{Season}-{Day}";
     }
+
 }
+
+internal record StardewYear(int Year);
+internal record StardewYearSeason(int Year, Season Season);
