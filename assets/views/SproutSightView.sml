@@ -139,19 +139,27 @@
 
 
             <lane *case="CashFlow" layout="820px content" orientation="vertical">
-                <lane *repeat={DayGrid} orientation="vertical" margin="0,0,0,40">
+                <lane *repeat={CashFlowGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
-                    <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
-                        <lane layout="140px 60px" vertical-content-alignment="end" >
-                            <image *if={IsSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
-                            <image *if={IsSummer} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
-                            <image *if={IsFall} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
-                            <image *if={IsWinter} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
+                    <!-- Context is a SeasonEntryElement<List<InOutEntry>> -->
+                        <lane layout="140px stretch" vertical-content-alignment="middle" >
+                            <image *if={IsSpring} layout="24px 16px" margin="0,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
+                            <image *if={IsSummer} layout="24px 16px" margin="0,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
+                            <image *if={IsFall} layout="24px 16px" margin="0,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
+                            <image *if={IsWinter} layout="24px 16px" margin="0,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
                             <label text={Text} margin="5,0,0,0"/>
                         </lane>
-                        <image *repeat={Value} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                        <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Text}>
+                        <lane orientation="vertical">
+                            <lane vertical-content-alignment="end">
+                                <image *repeat={Value} tint={InTint} fit="Stretch" margin="1,0,0,0" layout={InLayout} tooltip={InTooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                            </lane>
+                            <lane>
+                                <image *repeat={Value} tint={OutTint} fit="Stretch" margin="1,0,0,0" layout={OutLayout} tooltip={OutTooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                            </lane>
+                        </lane>
+
+                        <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Text} layout="stretch">
                             <label text="Y-"/>
                             <label text={^Year} />
                             <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />

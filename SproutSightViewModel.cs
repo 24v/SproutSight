@@ -30,6 +30,14 @@ internal partial class SproutSightViewModel
             return TrackedData.DayGrid;
         }
     }
+    public List<YearEntryElement<List<SeasonEntryElement<List<InOutEntry>>>>>? CashFlowGrid
+    {
+        get
+        {
+            return TrackedData.CashFlowGrid;
+        }
+    }
+
 
     // Tabs Stuff
     public IReadOnlyList<ShipmentTabViewModel> AllTabs { get; } =
@@ -64,101 +72,26 @@ internal partial class TrackedItemStack
 
 internal partial class TrackedData
 {
-    // private void LoadAll()
-    // {
-
-    //     Dictionary<int, int> yearTotals = [];
-    //     Dictionary<(int, Season), int> seasonTotals = [];
-    //     Dictionary<StardewDate, int> dayTotals = [];
-    //     Dictionary<(int, Season), int> highestTotalPerSeason = [];
-    //     int highestOverallTotal = 1;
-    //     // Make sure we have data for every grid cell, even if no entries in file
-    //     for (int year = 1; year <= Game1.year; year++)
-    //     {
-    //         yearTotals[year] = 0;
-    //         foreach (Season season in Enum.GetValues(typeof(Season)))
-    //         {
-    //             seasonTotals[(year, season)] = 0;
-    //             highestTotalPerSeason[(year, season)] = 0;
-    //             for (int day = 1; day <= 28; day++)
-    //             {
-    //                 dayTotals[new StardewDate(year, season, day)] = 0;
-    //             }
-    //         }
-    //     }
-
-    //     // Run the aggregations
-    //     foreach (StardewDate date in ShippedData.Keys)
-    //     {
-    //         int total = ShippedData[date].Sum(d => d.TotalSalePrice);
-    //         yearTotals[date.Year] += total;
-    //         seasonTotals[(date.Year, date.Season)] += total;
-    //         dayTotals[date] += total;
-    //         if (total > highestTotalPerSeason[(date.Year, date.Season)])
-    //         {
-    //             highestTotalPerSeason[(date.Year, date.Season)] = total;
-    //         }
-    //         highestOverallTotal = Math.Max(highestOverallTotal, total);
-    //     }
-
-    //     _seasonGrid = new();
-    //     for (int i = Game1.year; i > 0; i--)
-    //     {
-    //         _seasonGrid.Add(i + "");
-    //         foreach (Season season in Enum.GetValues(typeof(Season)))
-    //         {
-    //             _seasonGrid.Add(seasonTotals[(i, season)] + "");
-    //         }
-    //         _seasonGrid.Add(yearTotals[i] + "");
-    //     }
-
-    //     _dayGrid = new();
-    //     var maxRowHeight = 128;
-    //     var minRowHeight = 1;
-    //     var rowWidth = 20;
-    //     Season[] seasons = (Season[])Enum.GetValues(typeof(Season));
-    //     Array.Reverse(seasons);
-    //     for (int year = Game1.year; year > 0; year--)
-    //     {
-    //         List<(ChartElement, List<ChartElement>)> seasonsPerYear = new();
-    //         _dayGrid.Add((year, seasonsPerYear));
-    //         foreach (Season season in seasons)
-    //         {
-    //             List<ChartElement> daysPerSeason = new();
-    //             ChartElement seasonElement = new(season.ToString(), "", "",
-    //                 season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
-
-    //             seasonsPerYear.Add((seasonElement, daysPerSeason));
-    //             for (int day = 1; day <= 28; day++)
-    //             {
-    //                 var highest = Math.Max(1, highestOverallTotal);
-    //                 var dayTotal = dayTotals[new StardewDate(year, season, day)];
-    //                 var rowHeight = 1.0;
-    //                 if (dayTotal > 0)
-    //                 {
-    //                     var scale = (float)dayTotal / highest;
-    //                     rowHeight = Math.Max(minRowHeight, scale * maxRowHeight);
-    //                 }
-    //                 string layout = $"{rowWidth}px {rowHeight}px";
-    //                 string tooltip = $"{season}-{day}: {dayTotal}g";
-    //                 ChartElement dayGridElement = new("", layout, tooltip,
-    //                     season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
-
-    //                 daysPerSeason.Add(dayGridElement);
-    //             }
-    //         }
-    //     }
-    // }
     private void LoadAggregationAndView()
     {
         // Stardew UI doesnt allow indexing, so we have to create a hierarchical data model to use.
         // First we do aggregations then we create the view model.
-        // Make types work for you!
+
+        // TODO: CashFlow total by year
+        // TODO: Format day toolstips numbers total by year
+        // TODO: Better tooltip for cashflow
+        // TODO: Better colors for cashflow
+        // TODO: Better indicator for rows with todays date
 
         Dictionary<StardewYear, int> totalByYear = [];
         Dictionary<StardewYearSeason, int> totalBySeason = [];
         Dictionary<StardewDate, int> totalByDate = [];
+
+        Dictionary<StardewDate, CashFlowInOut> cashFlowByDate = [];
         int highestOverallTotal = 1;
+        int highestOverallCashFlow = 1;
+
+        Random random = new Random(42); // Fixed seed for consistent test data
 
         // Make sure we have data for every grid cell, even if no entries in file
         for (int year = 1; year <= Game1.year; year++)
@@ -169,7 +102,12 @@ internal partial class TrackedData
                 totalBySeason[new StardewYearSeason(year, season)] = 0;
                 for (int day = 1; day <= 28; day++)
                 {
-                    totalByDate[new StardewDate(year, season, day)] = 0;
+                    var date = new StardewDate(year, season, day);
+                    totalByDate[date] = 0;
+                    // Generate random cash flow data
+                    int inFlow = random.Next(1, 100001); // 1 to 100,000
+                    int outFlow = -random.Next(1, 100001); // -1 to -100,000
+                    cashFlowByDate[date] = new CashFlowInOut(inFlow, outFlow);
                 }
             }
         }
@@ -183,6 +121,19 @@ internal partial class TrackedData
             totalByDate[date] += total;
             highestOverallTotal = Math.Max(highestOverallTotal, total);
         }
+
+        // Remove after getting rid of test data
+        foreach(StardewDate date in cashFlowByDate.Keys)
+        {
+            highestOverallCashFlow = Math.Max(highestOverallCashFlow, Math.Max(cashFlowByDate[date].In, Math.Abs(cashFlowByDate[date].Out)));
+        }
+
+        // Use this after we get rid of test data
+        // foreach(StardewDate date in GoldInOut.Keys)
+        // {
+        //     cashFlowByDate[date] = GoldInOut[date];
+        //     highestOverallCashFlow = Math.Max(highestOverallCashFlow, Math.Max(cashFlowByDate[date].In, Math.Abs(cashFlowByDate[date].Out)));
+        // }
 
         // Construct grid for Totals View
         _totalsGrid = [];
@@ -213,9 +164,9 @@ internal partial class TrackedData
             }
         }
 
-        // Construct grid for day view
+        // Construct grid for day view & cashflow view
         _dayGrid = [];
-        // _cashFlowGrid = [];
+        _cashFlowGrid = [];
         var maxRowHeight = 128;
         var minRowHeight = 1;
         var rowWidth = 20;
@@ -228,41 +179,87 @@ internal partial class TrackedData
             List<SeasonEntryElement<List<DayEntryElement>>> seasonsPerYear = [];
             _dayGrid.Add(new YearEntryElement<List<SeasonEntryElement<List<DayEntryElement>>>>(
                     year, seasonsPerYear, $"Year Total: {SproutSightViewModel.FormatGoldNumber(totalByYear[new StardewYear(year)])}"));
+
+            List<SeasonEntryElement<List<InOutEntry>>> cashFlowSeasonsPerYear = [];
+            _cashFlowGrid.Add(new YearEntryElement<List<SeasonEntryElement<List<InOutEntry>>>>(
+                    year, cashFlowSeasonsPerYear, $"Year Total: {SproutSightViewModel.FormatGoldNumber(totalByYear[new StardewYear(year)])}"));
+
             foreach (Season season in seasons)
             {
                 List<DayEntryElement> daysPerSeason = [];
                 var seasonEntry = new SeasonEntryElement<List<DayEntryElement>>(
                         season, daysPerSeason, 
                         season + "", null, null, null, season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
-
                 seasonsPerYear.Add(seasonEntry);
+
+                List<InOutEntry> cashFlowDaysPerSeason = [];
+                var cashFlowSeasonEntry = new SeasonEntryElement<List<InOutEntry>>(
+                        season, cashFlowDaysPerSeason, 
+                        season + "", null, null, null, season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
+                cashFlowSeasonsPerYear.Add(cashFlowSeasonEntry);
+
+
+
                 for (int day = 1; day <= 28; day++)
                 {
                     var date = new StardewDate(year, season, day);
-                    var highest = Math.Max(1, highestOverallTotal);
-                    var dayTotal = totalByDate[date];
-                    var rowHeight = 1.0;
-                    if (dayTotal > 0)
                     {
-                        var scale = (float)dayTotal / highest;
-                        rowHeight = Math.Max(minRowHeight, scale * maxRowHeight);
+                        string tint = season switch
+                        {
+                            Season.Spring => "Green",
+                            Season.Summer => "Yellow",
+                            Season.Fall => "Brown",
+                            Season.Winter => "White",
+                            _ => "White"
+                        };
+                        var highest = highestOverallTotal;
+                        var dayTotal = totalByDate[date];
+                        var rowHeight = 1.0;
+                        if (dayTotal > 0)
+                        {
+                            var scale = (float)dayTotal / highest;
+                            rowHeight = Math.Max(minRowHeight, scale * maxRowHeight);
+                        }
+                        string layout = $"{rowWidth}px {rowHeight}px";
+                        string tooltip = $"{season}-{day}: {dayTotal}g";
+                        daysPerSeason.Add(new DayEntryElement(date, "", layout, tooltip, tint));
                     }
-                    string layout = $"{rowWidth}px {rowHeight}px";
-                    string tooltip = $"{season}-{day}: {dayTotal}g";
-
-                    string tint = season switch
                     {
-                        Season.Spring => "Green",
-                        Season.Summer => "Yellow",
-                        Season.Fall => "Brown",
-                        Season.Winter => "White",
-                        _ => "White"
-                    };
+                        var highest = highestOverallCashFlow;
+                        var dayIn = cashFlowByDate[date].In;
+                        var inScale = (float) dayIn / highest;
+                        var inRowHeight = Math.Max(minRowHeight, inScale * maxRowHeight);
+                        var inLayout = $"{rowWidth}px {inRowHeight}px";
+                        var inTooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayIn)}";
 
-                    // ChartElement dayGridElement = new("", layout, tooltip,
-                        // season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
+                        Logging.Monitor.Log($"=== Cash Flow In Calculations for {date} ===", LogLevel.Info);
+                        Logging.Monitor.Log($"Highest Overall: {highest}", LogLevel.Info);
+                        Logging.Monitor.Log($"Day In: {dayIn}", LogLevel.Info);
+                        Logging.Monitor.Log($"In Scale: {inScale}", LogLevel.Info);
+                        Logging.Monitor.Log($"In Row Height: {inRowHeight}", LogLevel.Info);
+                        Logging.Monitor.Log($"In Layout: {inLayout}", LogLevel.Info);
+                        Logging.Monitor.Log($"In Tooltip: {inTooltip}", LogLevel.Info);
 
-                    daysPerSeason.Add(new DayEntryElement(date, "", layout, tooltip, tint));
+                        var dayOut = cashFlowByDate[date].Out;
+                        var outScale = (float) Math.Abs(dayOut) / highest;
+                        var outRowHeight = Math.Max(minRowHeight, outScale * maxRowHeight);
+                        var outLayout = $"{rowWidth}px {outRowHeight}px";
+                        var outTooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
+
+                        Logging.Monitor.Log($"=== Cash Flow Out Calculations for {date} ===", LogLevel.Info);
+                        Logging.Monitor.Log($"Day Out: {dayOut}", LogLevel.Info);
+                        Logging.Monitor.Log($"Out Scale: {outScale}", LogLevel.Info);
+                        Logging.Monitor.Log($"Out Row Height: {outRowHeight}", LogLevel.Info);
+                        Logging.Monitor.Log($"Out Layout: {outLayout}", LogLevel.Info);
+                        Logging.Monitor.Log($"Out Tooltip: {outTooltip}", LogLevel.Info);
+
+                        string tint = dayIn + dayOut >= 0 ? "Black" : "Red";
+                        string toolTip = $"{season}-{day}:\n" + 
+                                $"Net:{SproutSightViewModel.FormatGoldNumber(dayIn + dayOut)}\n" + 
+                                $"In: {SproutSightViewModel.FormatGoldNumber(dayIn)}\n" + 
+                                $"Out: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
+                        cashFlowDaysPerSeason.Add(new InOutEntry("", inLayout, toolTip, tint, "", outLayout, toolTip, tint));
+                    }
                 }
             }
         }
@@ -281,6 +278,24 @@ internal partial class TrackedData
                 foreach (var dayEntry in seasonEntry.Value)
                 {
                     Logging.Monitor.Log($"      Date: {dayEntry.Date}, Display: Layout={dayEntry.Layout}, Tooltip={dayEntry.Tooltip}, Tint={dayEntry.Tint}", LogLevel.Info);
+                }
+            }
+        }
+
+        Logging.Monitor.Log("=== Cash Flow Grid Structure ===", LogLevel.Info);
+        foreach (var yearEntry in _cashFlowGrid)
+        {
+            Logging.Monitor.Log($"Year {yearEntry.Year}:", LogLevel.Info);
+            Logging.Monitor.Log($"  Text: {yearEntry.Text}", LogLevel.Info);
+            foreach (var seasonEntry in yearEntry.Value)
+            {
+                Logging.Monitor.Log($"  Season {seasonEntry.Season}:", LogLevel.Info);
+                Logging.Monitor.Log($"    Text: {seasonEntry.Text}", LogLevel.Info);
+                Logging.Monitor.Log($"    Days:", LogLevel.Info);
+                foreach (var dayEntry in seasonEntry.Value)
+                {
+                    Logging.Monitor.Log($"      In: Layout={dayEntry.InLayout}, Tooltip={dayEntry.InTooltip}", LogLevel.Info);
+                    Logging.Monitor.Log($"      Out: Layout={dayEntry.OutLayout}, Tooltip={dayEntry.OutTooltip}", LogLevel.Info);
                 }
             }
         }
@@ -312,46 +327,26 @@ internal partial class TrackedData
         }
     }
 
-    // Abomination
-    // private List<YearEntry<SeasonEntry<DayEntry<InOutEntry>>>>? _cashFlowGrid;
-    // public List<YearEntry<SeasonEntry<DayEntry<InOutEntry>>>>? CashFlowGrid
-    // {
-    //     get
-    //     {
-    //         if (_cashFlowGrid == null)
-    //         {
-    //             LoadAggregationAndView();
-    //         }
-    //         return _cashFlowGrid;
-    //     }
-    // }
-
-
+    private List<YearEntryElement<List<SeasonEntryElement<List<InOutEntry>>>>>? _cashFlowGrid;
+    public List<YearEntryElement<List<SeasonEntryElement<List<InOutEntry>>>>> CashFlowGrid
+    {
+        get
+        {
+            if (_cashFlowGrid == null)
+            {
+                LoadAggregationAndView();
+            }
+            return _cashFlowGrid!;
+        }
+    }
 }
 
-
-// internal record YearEntry<T>(int Year, T Value);
-// internal record SeasonEntry<T>(Season Season, T Value);
-// internal record DayEntry<T>(StardewDate Date, T Value);
-internal record InOutEntry(ChartElement In, ChartElement Out);
+internal record ChartElement(string Text, string Layout, string Tooltip, string Tint);
+// internal record InOutEntry(ChartElement In, ChartElement Out);
+internal record InOutEntry(string InText, string InLayout, string InTooltip, string InTint, string OutText, string OutLayout, string OutTooltip, string OutTint);
 internal record YearEntryElement<T>(int Year, T Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
 internal record SeasonEntryElement<T>(Season Season, T Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null, bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false);
 internal record DayEntryElement(StardewDate Date, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
-
-// internal record SeasonChartElement(
-//         string? Text = "", 
-//         string? Layout = "", 
-//         string? Tooltip = "", 
-//         string? Tint = "",
-//         bool IsSpring = false, 
-//         bool IsSummer = false, 
-//         bool IsFall = false, 
-//         bool IsWinter = false);
-internal record ChartElement(
-        string? Text = "", 
-        string? Layout = "", 
-        string? Tooltip = "", 
-        string? Tint = "");
 
 // ================================ 
 // Tabs Stuff =====================
