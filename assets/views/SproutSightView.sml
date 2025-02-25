@@ -53,16 +53,16 @@
                         </lane>
                         <lane orientation="vertical" margin="120,0,0,0">
                             <lane>
-                                <label text="Other Spending"/>
+                                <label text="Other Sales"/>
                                 <image layout="24px" margin="5,0,0,10" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                             </lane>
-                            <lane layout="stretch 64px" horizontal-content-alignment="end">
-                                <label text="In:" margin="10,20,0,0"/>
+                            <lane layout="content 64px" horizontal-content-alignment="end">
+                                <label text="Received:" margin="10,20,0,0"/>
                                 <label text={TodayGoldIn} margin="10,20,0,0"/>
                                 <label text="g" margin="0,20,0,0"/>
                             </lane>
                             <lane layout="stretch 64px" horizontal-content-alignment="end">
-                                <label text="Out:" margin="10,20,0,0"/>
+                                <label text="Spent:" margin="10,20,0,0"/>
                                 <label text={TodayGoldOut} color="Red" margin="10,20,0,0"/>
                                 <label text="g" margin="0,20,0,10"/>
                             </lane>
@@ -119,7 +119,7 @@
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
-                        <lane layout="140px 60px" vertical-content-alignment="end" >
+                        <lane layout="140px 40px" vertical-content-alignment="end" >
                             <image *if={IsSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                             <image *if={IsSummer} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
                             <image *if={IsFall} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
@@ -142,7 +142,7 @@
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement<List<InOutEntry>> -->
-                        <lane layout="140px stretch" vertical-content-alignment="middle" >
+                        <lane layout="140px 40px" vertical-content-alignment="middle" >
                             <image *if={IsSpring} layout="24px 16px" margin="0,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                             <image *if={IsSummer} layout="24px 16px" margin="0,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
                             <image *if={IsFall} layout="24px 16px" margin="0,0,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />

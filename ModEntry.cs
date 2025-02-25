@@ -96,7 +96,7 @@ internal sealed class ModEntry : Mod
         helper.Events.Input.ButtonPressed += OnButtonPressed;
         helper.Events.Display.RenderedHud += OnRenderedHud;
 
-        helper.ConsoleCommands.Add("ssp_print_current", "Print data from today.", PrintShippingBins);
+        helper.ConsoleCommands.Add("ssp_print_current", "Print data from today.", PrintCurrent);
         helper.ConsoleCommands.Add("ssp_print_historical", "Shows all historical data.", PrintHistoricalData);
         helper.ConsoleCommands.Add("ssp_show", "Shows the UI display.", ShowStatsMenu);
         helper.ConsoleCommands.Add("ssp_save", "Saves current data to files.", SaveCurrentData);
@@ -309,7 +309,7 @@ internal sealed class ModEntry : Mod
         ShowStatsMenu();
     }
 
-    private void PrintShippingBins(string command, string[] args)
+    private void PrintCurrent(string command, string[] args)
     {
         if (!Context.IsWorldReady)
         {
@@ -318,7 +318,7 @@ internal sealed class ModEntry : Mod
         }
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
         PrintShippedItems(shippedItems);
-        Monitor.Log($"Current Gold Totals: Current Out: {todayGoldOut}. Current In: {todayGoldIn}.", LogLevel.Debug);
+        Monitor.Log($"Current Gold Totals: Current Out: {todayGoldOut}. Current In: {todayGoldIn}. Wallet{Game1.player.Money}", LogLevel.Debug);
     }
 
     private void PrintHistoricalData(string command, string[] args)

@@ -100,10 +100,10 @@ internal partial class TrackedData
                     var date = new StardewDate(year, season, day);
                     totalByDate[date] = 0;
                     // Generate random cash flow data
-                    int inFlow = random.Next(1, 100001); // 1 to 100,000
-                    int outFlow = -random.Next(1, 100001); // -1 to -100,000
-                    int walletGold = random.Next(1, 100001); // -1 to -100,000
-                    cashFlowByDate[date] = new GoldInOut(inFlow, outFlow, walletGold);
+                    // int inFlow = random.Next(1, 100001); // 1 to 100,000
+                    // int outFlow = -random.Next(1, 100001); // -1 to -100,000
+                    // int walletGold = random.Next(1, 100001); // -1 to -100,000
+                    cashFlowByDate[date] = new GoldInOut(0, 0, 0);
                 }
             }
         }
@@ -119,17 +119,17 @@ internal partial class TrackedData
         }
 
         // Remove after getting rid of test data
-        foreach(StardewDate date in cashFlowByDate.Keys)
-        {
-            highestOverallCashFlow = Math.Max(highestOverallCashFlow, Math.Max(cashFlowByDate[date].In, Math.Abs(cashFlowByDate[date].Out)));
-        }
-
-        // Use this after we get rid of test data
-        // foreach(StardewDate date in GoldInOut.Keys)
+        // foreach(StardewDate date in cashFlowByDate.Keys)
         // {
-        //     cashFlowByDate[date] = GoldInOut[date];
         //     highestOverallCashFlow = Math.Max(highestOverallCashFlow, Math.Max(cashFlowByDate[date].In, Math.Abs(cashFlowByDate[date].Out)));
         // }
+
+        // Use this after we get rid of test data
+        foreach(StardewDate date in GoldInOut.Keys)
+        {
+            cashFlowByDate[date] = GoldInOut[date];
+            highestOverallCashFlow = Math.Max(highestOverallCashFlow, Math.Max(cashFlowByDate[date].In, Math.Abs(cashFlowByDate[date].Out)));
+        }
 
         // Construct grid for Totals View
         _totalsGrid = [];
@@ -215,7 +215,7 @@ internal partial class TrackedData
                             rowHeight = Math.Max(minRowHeight, scale * maxRowHeight);
                         }
                         string layout = $"{rowWidth}px {rowHeight}px";
-                        string tooltip = $"{season}-{day}: {dayTotal}g";
+                        string tooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayTotal)}g";
                         daysPerSeason.Add(new DayEntryElement(date, "", layout, tooltip, tint));
                     }
                     {
@@ -237,7 +237,7 @@ internal partial class TrackedData
                         var outTint = positive? "#F08080" : "#B22222";
 
                         string toolTip = $"{season}-{day}\n" + 
-                                $"Net:{SproutSightViewModel.FormatGoldNumber(dayIn + dayOut)}\n" + 
+                                $"Net: {SproutSightViewModel.FormatGoldNumber(dayIn + dayOut)}\n" + 
                                 $"In: {SproutSightViewModel.FormatGoldNumber(dayIn)}\n" + 
                                 $"Out: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
                         cashFlowDaysPerSeason.Add(new InOutEntry("", inLayout, toolTip, inTint, "", outLayout, toolTip, outTint));
