@@ -222,6 +222,8 @@ internal sealed class ModEntry : Mod
             Game1.uniqueIDForThisGame
         );
 
+
+        // todayGoldIn and todayGoldOut will be updated by the UpdateTicked before save
         handler.SaveGoldData(
             statsFolderPath, 
             Game1.player.Name, 
@@ -351,26 +353,6 @@ internal sealed class ModEntry : Mod
     private void HandleHudClick(object? sender, ButtonPressedEventArgs e)
     {
 
-        // In case I have to debug this stuff again
-        // Monitor.Log("---Handle Hud Click---", LogLevel.Info);
-        // Monitor.Log($"Margin Right: {marginRight}", LogLevel.Info);
-        // Monitor.Log($"Margin Top: {marginTop}", LogLevel.Info);
-        // Monitor.Log($"Draw Coords {x},{y}", LogLevel.Info);
-        // Monitor.Log($"Hud Rect: {hudClickableArea}", LogLevel.Info);
-        // Monitor.Log($"UI Viewport: {Game1.uiViewport}", LogLevel.Info);
-        // Monitor.Log($"Viewport: {Game1.viewport}", LogLevel.Info);
-        // Monitor.Log($"UI Scale: {Game1.options.uiScale}", LogLevel.Info);
-        // Monitor.Log($"Base UI Scale: {Game1.options.baseUIScale}", LogLevel.Info);
-        // Monitor.Log($"Zoom: {Game1.options.zoomLevel}", LogLevel.Info);
-        // Monitor.Log($"Base Zoom: {Game1.options.baseZoomLevel}", LogLevel.Info);
-        // Monitor.Log($"Click ScreenPixels: {e.Cursor.ScreenPixels.ToPoint()}", LogLevel.Info);
-        // Monitor.Log($"Click GetScaledScreenPixels: {e.Cursor.GetScaledScreenPixels().ToPoint()}", LogLevel.Info);
-        // Monitor.Log($"Click AbsolutePixels: {e.Cursor.AbsolutePixels.ToPoint()}", LogLevel.Info);
-        // Monitor.Log($"Click GetScaledAbsolutePixels: {e.Cursor.GetScaledAbsolutePixels().ToPoint()}", LogLevel.Info);
-        // Monitor.Log($"Scale Factor: {scaleFactor}", LogLevel.Info);
-        // Monitor.Log($"Scaled Rectangle: {scaledRectangle}", LogLevel.Info);
-        // Monitor.Log($"Click Position: {clickPosition.ToPoint()}", LogLevel.Info);
-
         var clickPosition = e.Cursor.GetScaledScreenPixels().ToPoint();
         if (hudClickableArea.Contains(clickPosition))
         {
@@ -407,7 +389,7 @@ internal sealed class ModEntry : Mod
 
         currentShippedItems.Sort();
         stopwatch.Stop();
-        Monitor.Log($"[DEBUG] CollectShippedItems executed in {stopwatch.ElapsedMilliseconds} ms", LogLevel.Trace);
+        Monitor.Log($"CollectShippedItems executed in {stopwatch.ElapsedMilliseconds} ms", LogLevel.Trace);
         return currentShippedItems;
     }
 

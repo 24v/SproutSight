@@ -61,7 +61,7 @@
                                 <label text={TodayGoldIn} margin="10,20,0,0"/>
                                 <label text="g" margin="0,20,0,0"/>
                             </lane>
-                            <lane layout="stretch 64px" horizontal-content-alignment="end">
+                            <lane layout="content 64px" horizontal-content-alignment="end">
                                 <label text="Spent:" margin="10,20,0,0"/>
                                 <label text={TodayGoldOut} color="Red" margin="10,20,0,0"/>
                                 <label text="g" margin="0,20,0,10"/>

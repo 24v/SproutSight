@@ -164,7 +164,7 @@ internal partial class TrackedData
         _dayGrid = [];
         _cashFlowGrid = [];
         var maxRowHeight = 128;
-        var minRowHeight = 1;
+        var minRowHeight = 2;
         var rowWidth = 20;
 
         // Want to display in reverse order
@@ -215,9 +215,10 @@ internal partial class TrackedData
                             rowHeight = Math.Max(minRowHeight, scale * maxRowHeight);
                         }
                         string layout = $"{rowWidth}px {rowHeight}px";
-                        string tooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayTotal)}g";
+                        string tooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayTotal)}";
                         daysPerSeason.Add(new DayEntryElement(date, "", layout, tooltip, tint));
                     }
+
                     {
                         var highest = highestOverallCashFlow;
                         var dayIn = cashFlowByDate[date].In;
