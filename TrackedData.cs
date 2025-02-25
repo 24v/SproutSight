@@ -4,9 +4,7 @@ using StardewModdingAPI;
 namespace SproutSight;
 internal partial class TrackedData
 {
-    // List of items tracked per date
     public Dictionary<StardewDate, List<TrackedItemStack>> ShippedData { get; set; } = [];
-
     public Dictionary<StardewDate, GoldInOut> GoldInOut { get; set; } = [];
 
     internal void PrintTrackedData()
