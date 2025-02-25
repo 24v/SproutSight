@@ -58,7 +58,7 @@ using StardewValley.GameData.Shops;
 namespace SproutSight;
 internal sealed class ModEntry : Mod
 {
-    private string statsFilePath = "";
+    private string statsFolderPath = "";
     private string viewAssetPrefix = "";
 
     private IViewEngine? stardewUIViewEngine;
@@ -85,7 +85,7 @@ internal sealed class ModEntry : Mod
 
     public override void Entry(IModHelper helper)
     {
-        statsFilePath = helper.DirectoryPath + Path.DirectorySeparatorChar;
+        statsFolderPath = helper.DirectoryPath + Path.DirectorySeparatorChar;
         viewAssetPrefix = $"Mods/{ModManifest.UniqueID}/Views";
 
         helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
@@ -96,11 +96,11 @@ internal sealed class ModEntry : Mod
         helper.Events.Input.ButtonPressed += OnButtonPressed;
         helper.Events.Display.RenderedHud += OnRenderedHud;
 
-        helper.ConsoleCommands.Add("sstm_current", "Shows the current items in shipping bins for all farmers.", ShowCurrentItems);
-        helper.ConsoleCommands.Add("sstm_show", "Shows the tracker display.", ShowStatsMenu);
-        helper.ConsoleCommands.Add("sstm_print_data", "Shows the tracked data.", ShowTrackedData);
-        helper.ConsoleCommands.Add("sstm_save", "Saves the tracked data.", SaveTrackedData);
-        helper.ConsoleCommands.Add("sstm_load", "Loads the tracked data from file.", LoadTrackedData);
+        helper.ConsoleCommands.Add("ssp_print_current", "Print data from today.", PrintShippingBins);
+        helper.ConsoleCommands.Add("ssp_print_historical", "Shows all historical data.", PrintHistoricalData);
+        helper.ConsoleCommands.Add("ssp_show", "Shows the UI display.", ShowStatsMenu);
+        helper.ConsoleCommands.Add("ssp_save", "Saves current data to files.", SaveCurrentData);
+        helper.ConsoleCommands.Add("ssp_load", "Loads historical data from files.", LoadHistoricalData);
 
         Logging.Monitor = Monitor;
         Monitor.Log("SproutSight => Initialized!", LogLevel.Info);
@@ -191,12 +191,10 @@ internal sealed class ModEntry : Mod
         todayGoldIn = 0;
 
         trackedData = new DataFileHandler().LoadTrackedData(
-            statsFilePath,
+            statsFolderPath,
             Game1.player.Name,
             Game1.uniqueIDForThisGame
         );
-
-        // trackedData.GoldInOut = new CashFlowInOut(todayGoldIn, todayGoldOut);;
     }
 
     private void OnDayEnding(object? sender, DayEndingEventArgs e)
@@ -214,9 +212,9 @@ internal sealed class ModEntry : Mod
             return;
         }
 
-        var fileHandler = new DataFileHandler();
-        fileHandler.SaveShippedItems(
-            statsFilePath,
+        var handler = new DataFileHandler();
+        handler.SaveShippedItems(
+            statsFolderPath,
             Game1.player.Name,
             Game1.player.farmName.Value,
             _pendingItems,
@@ -224,8 +222,15 @@ internal sealed class ModEntry : Mod
             Game1.uniqueIDForThisGame
         );
 
-        _pendingItems = null;
-        _pendingDate = null;
+        handler.SaveGoldData(
+            statsFolderPath, 
+            Game1.player.Name, 
+            Game1.player.farmName.Value, 
+            Game1.uniqueIDForThisGame, 
+            _pendingDate, 
+            todayGoldIn, 
+            todayGoldOut, 
+            Game1.player.Money);
     }
 
     private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
@@ -304,7 +309,7 @@ internal sealed class ModEntry : Mod
         ShowStatsMenu();
     }
 
-    private void ShowCurrentItems(string command, string[] args)
+    private void PrintShippingBins(string command, string[] args)
     {
         if (!Context.IsWorldReady)
         {
@@ -316,19 +321,19 @@ internal sealed class ModEntry : Mod
         Monitor.Log($"Current Gold Totals: Current Out: {todayGoldOut}. Current In: {todayGoldIn}.", LogLevel.Debug);
     }
 
-    private void ShowTrackedData(string command, string[] args)
+    private void PrintHistoricalData(string command, string[] args)
     {
         Monitor.Log("Showing tracked data", LogLevel.Info);
         trackedData.PrintTrackedData();
     }
 
-    private void SaveTrackedData(string command, string[] args)
+    private void SaveCurrentData(string command, string[] args)
     {
         SaveStats();
         Monitor.Log("Saved tracked data", LogLevel.Info);
     }
 
-    private void LoadTrackedData(string command, string[] args)
+    private void LoadHistoricalData(string command, string[] args)
     {
         if (!Context.IsWorldReady)
         {
@@ -336,7 +341,7 @@ internal sealed class ModEntry : Mod
             return;
         }
         trackedData = new DataFileHandler().LoadTrackedData(
-            statsFilePath,
+            statsFolderPath,
             Game1.player.Name,
             Game1.uniqueIDForThisGame
         );
@@ -410,16 +415,27 @@ internal sealed class ModEntry : Mod
     {
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
         var date = StardewDate.GetStardewDate();
-        new DataFileHandler().SaveShippedItems(
-            statsFilePath,
+        DataFileHandler handler = new DataFileHandler();
+        handler.SaveShippedItems(
+            statsFolderPath,
             Game1.player.Name,
             Game1.player.farmName.Value,
             shippedItems,
             date,
             Game1.uniqueIDForThisGame
         );
+        handler.SaveGoldData(
+            statsFolderPath, 
+            Game1.player.Name, 
+            Game1.player.farmName.Value, 
+            Game1.uniqueIDForThisGame, 
+            date, 
+            todayGoldIn, 
+            todayGoldOut, 
+            Game1.player.Money);
 
         Monitor.Log($"Saved shipping stats for {shippedItems.Count} items", LogLevel.Info);
+        Monitor.Log($"Saved gold stats: {todayGoldIn} {todayGoldOut} {Game1.player.Money}", LogLevel.Info);
         PrintShippedItems(shippedItems);
     }
 
