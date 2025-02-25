@@ -25,6 +25,7 @@ using StardewValley.GameData.Shops;
 // TODO: Better tooltip for cashflow
 // TODO: Better colors for cashflow
 // TODO: Better indicator for rows with todays date
+// TODO: Templates? Since I have 3 of the same tables?
 
 // Issues
     // TODO: Scrollable has issues

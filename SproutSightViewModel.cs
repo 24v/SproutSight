@@ -81,12 +81,13 @@ internal partial class TrackedData
         Dictionary<StardewYear, int> totalByYear = [];
         Dictionary<StardewYearSeason, int> totalBySeason = [];
         Dictionary<StardewDate, int> totalByDate = [];
+        int highestOverallTotal = 1;
 
         Dictionary<StardewDate, GoldInOut> cashFlowByDate = [];
-        int highestOverallTotal = 1;
         int highestOverallCashFlow = 1;
 
-        Random random = new Random(42); // Fixed seed for consistent test data
+        Dictionary<StardewDate, int> walletGoldByDate = [];
+        int highestOverallWalletGold = 1;
 
         // Make sure we have data for every grid cell, even if no entries in file
         for (int year = 1; year <= Game1.year; year++)
@@ -99,11 +100,8 @@ internal partial class TrackedData
                 {
                     var date = new StardewDate(year, season, day);
                     totalByDate[date] = 0;
-                    // Generate random cash flow data
-                    // int inFlow = random.Next(1, 100001); // 1 to 100,000
-                    // int outFlow = -random.Next(1, 100001); // -1 to -100,000
-                    // int walletGold = random.Next(1, 100001); // -1 to -100,000
                     cashFlowByDate[date] = new GoldInOut(0, 0, 0);
+                    walletGoldByDate[date] = 0;
                 }
             }
         }
@@ -118,51 +116,19 @@ internal partial class TrackedData
             highestOverallTotal = Math.Max(highestOverallTotal, total);
         }
 
-        // Remove after getting rid of test data
-        // foreach(StardewDate date in cashFlowByDate.Keys)
-        // {
-        //     highestOverallCashFlow = Math.Max(highestOverallCashFlow, Math.Max(cashFlowByDate[date].In, Math.Abs(cashFlowByDate[date].Out)));
-        // }
-
         // Use this after we get rid of test data
         foreach(StardewDate date in GoldInOut.Keys)
         {
             cashFlowByDate[date] = GoldInOut[date];
             highestOverallCashFlow = Math.Max(highestOverallCashFlow, Math.Max(cashFlowByDate[date].In, Math.Abs(cashFlowByDate[date].Out)));
-        }
-
-        // Construct grid for Totals View
-        _totalsGrid = [];
-        for (int i = Game1.year; i > 0; i--)
-        {
-            var seasonsForYear = new List<SeasonEntryElement<string>>();
-            var yearEntry = new YearEntryElement<List<SeasonEntryElement<string>>>(i, seasonsForYear, SproutSightViewModel.FormatGoldNumber(totalByYear[new StardewYear(i)]));
-            foreach (Season season in Enum.GetValues(typeof(Season)))
-            {
-                Logging.Monitor.Log($"Processing season: {season}");
-                seasonsForYear.Add(new SeasonEntryElement<string>(season, SproutSightViewModel.FormatGoldNumber(totalBySeason[new StardewYearSeason(i, season)])));
-            }
-            _totalsGrid.Add(yearEntry);
-        }
-
-        // Log the entire structure
-        Logging.Monitor.Log("=== Totals Grid Structure ===", LogLevel.Info);
-        foreach (var yearEntry in _totalsGrid)
-        {
-            Logging.Monitor.Log($"Year {yearEntry.Year}:", LogLevel.Info);
-            Logging.Monitor.Log($"  Text: {yearEntry.Text}", LogLevel.Info);
-            Logging.Monitor.Log($"  Seasons:", LogLevel.Info);
-            foreach (var seasonEntry in yearEntry.Value)
-            {
-                Logging.Monitor.Log($"    {seasonEntry.Season}:", LogLevel.Info);
-                Logging.Monitor.Log($"      Text: {seasonEntry.Text}", LogLevel.Info);
-                Logging.Monitor.Log($"      Value: {seasonEntry.Value}", LogLevel.Info);
-            }
+            walletGoldByDate[date] = GoldInOut[date].GoldInWallet;
+            highestOverallWalletGold = Math.Max(highestOverallWalletGold, walletGoldByDate[date]);
         }
 
         // Construct grid for day view & cashflow view
         _dayGrid = [];
         _cashFlowGrid = [];
+        _walletGrid = [];
         var maxRowHeight = 128;
         var minRowHeight = 2;
         var rowWidth = 20;
@@ -178,7 +144,11 @@ internal partial class TrackedData
 
             List<SeasonEntryElement<List<InOutEntry>>> cashFlowSeasonsPerYear = [];
             _cashFlowGrid.Add(new YearEntryElement<List<SeasonEntryElement<List<InOutEntry>>>>(
-                    year, cashFlowSeasonsPerYear, $"Year Total: {SproutSightViewModel.FormatGoldNumber(totalByYear[new StardewYear(year)])}"));
+                    year, cashFlowSeasonsPerYear, $"TODO"));
+
+            List<SeasonEntryElement<List<DayEntryElement>>> walletSeasonsPerYear = [];
+            _walletGrid.Add(new YearEntryElement<List<SeasonEntryElement<List<DayEntryElement>>>>(
+                    year, walletSeasonsPerYear, $"TODO"));
 
             foreach (Season season in seasons)
             {
@@ -188,6 +158,12 @@ internal partial class TrackedData
                         season + "", null, null, null, season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
                 seasonsPerYear.Add(seasonEntry);
 
+                List<DayEntryElement> walletGoldPerSeason = [];
+                var walletGoldSeasonEntry = new SeasonEntryElement<List<DayEntryElement>>(
+                        season, walletGoldPerSeason, 
+                        season + "", null, null, null, season == Season.Spring, season == Season.Summer, season == Season.Fall, season == Season.Winter);
+                walletSeasonsPerYear.Add(walletGoldSeasonEntry);
+
                 List<InOutEntry> cashFlowDaysPerSeason = [];
                 var cashFlowSeasonEntry = new SeasonEntryElement<List<InOutEntry>>(
                         season, cashFlowDaysPerSeason, 
@@ -196,16 +172,17 @@ internal partial class TrackedData
 
                 for (int day = 1; day <= 28; day++)
                 {
-                    var date = new StardewDate(year, season, day);
+                    string tint = season switch
                     {
-                        string tint = season switch
-                        {
-                            Season.Spring => "Green",
-                            Season.Summer => "Yellow",
-                            Season.Fall => "Brown",
-                            Season.Winter => "Blue",
-                            _ => "White"
-                        };
+                        Season.Spring => "Green",
+                        Season.Summer => "Yellow",
+                        Season.Fall => "Brown",
+                        Season.Winter => "Blue",
+                        _ => "White"
+                    };
+                    var date = new StardewDate(year, season, day);
+
+                    {
                         var highest = highestOverallTotal;
                         var dayTotal = totalByDate[date];
                         var rowHeight = 1.0;
@@ -217,6 +194,20 @@ internal partial class TrackedData
                         string layout = $"{rowWidth}px {rowHeight}px";
                         string tooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayTotal)}";
                         daysPerSeason.Add(new DayEntryElement(date, "", layout, tooltip, tint));
+                    }
+
+                    {
+                        var highest = highestOverallWalletGold;
+                        var dayWalletGold = walletGoldByDate[date];
+                        var rowHeight = 1.0;
+                        if (dayWalletGold > 0)
+                        {
+                            var scale = (float)dayWalletGold / highest;
+                            rowHeight = Math.Max(minRowHeight, scale * maxRowHeight);
+                        }
+                        string layout = $"{rowWidth}px {rowHeight}px";
+                        string tooltip = $"{season}-{day}: {SproutSightViewModel.FormatGoldNumber(dayWalletGold)}";
+                        walletGoldPerSeason.Add(new DayEntryElement(date, "", layout, tooltip, tint));
                     }
 
                     {
@@ -265,6 +256,25 @@ internal partial class TrackedData
             }
         }
 
+        Logging.Monitor.Log("=== Wallet Grid Structure ===", LogLevel.Info);
+        foreach (var yearEntry in _walletGrid)
+        {
+            Logging.Monitor.Log($"Year {yearEntry.Year}:", LogLevel.Info);
+            Logging.Monitor.Log($"  Text: {yearEntry.Text}", LogLevel.Info);
+            foreach (var seasonEntry in yearEntry.Value)
+            {
+                Logging.Monitor.Log($"  Season {seasonEntry.Season}:", LogLevel.Info);
+                Logging.Monitor.Log($"    Text: {seasonEntry.Text}", LogLevel.Info);
+                Logging.Monitor.Log($"    Days:", LogLevel.Info);
+                foreach (var dayEntry in seasonEntry.Value)
+                {
+                    Logging.Monitor.Log($"      Date: {dayEntry.Date}, Display: Layout={dayEntry.Layout}, Tooltip={dayEntry.Tooltip}, Tint={dayEntry.Tint}", LogLevel.Info);
+                }
+            }
+        }
+
+
+
         Logging.Monitor.Log("=== Cash Flow Grid Structure ===", LogLevel.Info);
         foreach (var yearEntry in _cashFlowGrid)
         {
@@ -283,17 +293,16 @@ internal partial class TrackedData
             }
         }
     }
-
-    private List<YearEntryElement<List<SeasonEntryElement<string>>>>? _totalsGrid;
-    public List<YearEntryElement<List<SeasonEntryElement<string>>>> TotalsGrid
+    private List<YearEntryElement<List<SeasonEntryElement<List<DayEntryElement>>>>>? _walletGrid;
+    public List<YearEntryElement<List<SeasonEntryElement<List<DayEntryElement>>>>> WalletGrid
     {
         get
         {
-            if (_totalsGrid == null)
+            if (_walletGrid == null)
             {
                 LoadAggregationAndView();
             }
-            return _totalsGrid!;
+            return _walletGrid!;
         }
     }
 
@@ -338,7 +347,7 @@ internal enum ShipmentTab
     Today,
     Shipping,
     CashFlow,
-    Totals
+    Wallet
 }
 internal partial class ShipmentTabViewModel : INotifyPropertyChanged
 {
@@ -357,7 +366,7 @@ internal partial class ShipmentTabViewModel : INotifyPropertyChanged
                 ShipmentTab.Today => "Today",
                 ShipmentTab.Shipping => "Shipping",
                 ShipmentTab.CashFlow => "Cash Flow",
-                ShipmentTab.Totals => "Wallet",
+                ShipmentTab.Wallet => "Wallet",
                 _ => Value.ToString()
             };
         }
