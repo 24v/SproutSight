@@ -18,43 +18,27 @@ using StardewValley.GameData.Shops;
 
 /*
 
-// Better indication of current day 
-// Add Borders to grid
-// TODO: CashFlow total by year
-// TODO: Format day toolstips numbers total by year
-// TODO: Better tooltip for cashflow
-// TODO: Better colors for cashflow
-// TODO: Better indicator for rows with todays date
-// TODO: Templates? Since I have 3 of the same tables?
-
-// Issues
-    // TODO: Scrollable has issues
-    // TODO: Those binding warnings in log (use ':')
-
-// Adv
-    // TODO: MultiPlayers multiFarms
-    // TODO: Create a custom converter
-    // TODO: I think i can do some nested repeats instead of what I currently have?
-    // TODO: wiki
-    // TODO: Value of all assets
-
-// Ideas
-    - Format the gold ammounts (e.g. add columns)
-    - Make a game element
+- Todo
+    - Better indication of current day 
+    - Add Borders to grid
+    - Those binding warnings in log (use ':')
+    - MultiPlayers multiFarms
+    - Wiki
     - Animate the on hover on hud icon
-    - Track gold in wallet per day
-    - Track expenses
-        Gold in wallet per Day
+
+- Ideas
+    - Value of all assets
+    - Make this a in-game element
+    - Track All Expenses
         Purchases
         Sales
         Ships
-        Harvests
-        Expenses in vs out
-    - Track item shipments 
+        Building
+        Shipping
     - UI Updates
         - Show where items are being shipped from
-        - Use some season sprites
     - Full Olap Cube and SQL support
+
 */
 
 namespace SproutSight;

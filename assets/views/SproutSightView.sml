@@ -122,10 +122,10 @@
             </lane>
 
             <lane *case="Wallet" *context={TrackedDataAggregator}  orientation="vertical" >
-                <label text="Daily Gold In Wallet" margin="0,0,0,10"/>
+                <label text={WalletText} tooltip={WalletTooltip} margin="0,0,0,10"/>
                 <lane *repeat={WalletGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                    <lane *repeat={Value} vertical-content-alignment="end" margin="0,0,0,10"> 
+                    <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
                         <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip} >
                             <image *if={IsSpring} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
@@ -134,7 +134,7 @@
                             <image *if={IsWinter} layout="24px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
                             <label text={Season} margin="5,0,0,0"/>
                         </lane>
-                        <image *repeat={Value} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <image *repeat={DayElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                         <lane *if={IsWinter} margin="10,0,0,0" tooltip={^Tooltip}>
                             <label text="Y-"/>
                             <label text={^Year} />
