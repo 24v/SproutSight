@@ -36,6 +36,7 @@ using StardewValley.GameData.Shops;
     // TODO: Create a custom converter
     // TODO: I think i can do some nested repeats instead of what I currently have?
     // TODO: wiki
+    // TODO: Value of all assets
 
 // Ideas
     - Format the gold ammounts (e.g. add columns)
@@ -430,10 +431,9 @@ internal sealed class ModEntry : Mod
         }
 
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
-        var context = new SproutSightViewModel()
+        var context = new SproutSightViewModel(trackedData)
         {
             CurrentItems = shippedItems,
-            TrackedData = trackedData,
             TodayGoldIn = todayGoldIn,
             TodayGoldOut = todayGoldOut
         };
