@@ -84,14 +84,6 @@ internal partial class TrackedItemStack
     public string FormattedSale => $"({StackCount}x{SalePrice}g)";
 }
 
-interface IDateVisitor<YearType, SeasonType> {
-    // public RootEntryElement<List<YearType>> Visit(RootNode root);
-    public (YearElement<YearType>, int) Visit(YearNode year);
-    public (SeasonElement<SeasonType>, int) Visit(SeasonNode season);
-    // public (DayEntryElement, int) Visit(DayNode day);
-}
-
-
 internal class TrackedDataAggregator(TrackedData TrackedData)
 {
     public List<YearElement<List<SeasonElement<List<DayElement>>>>> WalletGrid { get; set; } = [];
@@ -107,10 +99,9 @@ internal class TrackedDataAggregator(TrackedData TrackedData)
 
     public void LoadAggregationAndViewVisitor()
     {
-        // Create the date structure and some required calculations ahead of time
+        // Create the year data structure
         List<YearNode> yearNodes = [];
         RootNode rootNode = new(yearNodes);
-        int highestWalletGold = 0;
         for (int year = 1; year <= Game1.year; year++)
         {
             List<SeasonNode> seasonNodes = [];
@@ -123,17 +114,11 @@ internal class TrackedDataAggregator(TrackedData TrackedData)
                 {
                     var date = new StardewDate(year, season, day);
                     dayNodes.Add(new DayNode(date));
-                    var daysWalledGold = TrackedData.GoldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0;
-                    highestWalletGold = Math.Max(highestWalletGold, daysWalledGold);
                 }
             }
         }
 
-        var walletGoldVisitor = new WalletGoldVisitor()
-        {
-            GoldInOut = TrackedData.GoldInOut,
-            HighestOverallWalletGold = highestWalletGold
-        };
+        var walletGoldVisitor = new WalletGoldVisitor(TrackedData.GoldInOut);
         var walletRoot = walletGoldVisitor.Visit(rootNode);
         WalletGrid = walletRoot.Value;
 
@@ -169,11 +154,24 @@ internal class TrackedDataAggregator(TrackedData TrackedData)
     }
 }
 
-
 internal class WalletGoldVisitor : IDateVisitor<List<SeasonElement<List<DayElement>>>, List<DayElement>>
 {
     public Dictionary<StardewDate, GoldInOut> GoldInOut { get; set; } = [];
     public int HighestOverallWalletGold = 0;
+
+    public WalletGoldVisitor()
+    {
+        foreach (var date in GoldInOut.Keys) 
+        {
+            var daysWalledGold = GoldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0;
+            HighestOverallWalletGold = Math.Max(HighestOverallWalletGold, daysWalledGold);
+        }
+    }
+
+    public WalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut)
+    {
+        GoldInOut = goldInOut;
+    }
 
     public RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>> Visit(RootNode root)
     {
@@ -386,6 +384,19 @@ internal class CashFlowVisitor : IDateVisitor<List<SeasonElement<List<InOutEleme
     }
 }
 
+// If we moved the visitor to being traversed by accept instead, we could avoid multiple traversals...
+// Nodes are the year traversal structure
+interface IDateVisitor<YearType, SeasonType> {
+//     public RootEntryElement<List<YearType>> Visit(RootNode root);
+//     public (YearElement<YearType>, int) Visit(YearNode year);
+//     public (SeasonElement<SeasonType>, int) Visit(SeasonNode season);
+//     public (DayEntryElement, int) Visit(DayNode day);
+}
+internal record YearNode(int Year, List<SeasonNode> Seasons);
+internal record SeasonNode(Season Season, List<DayNode> Days);
+internal record DayNode(StardewDate Date);
+internal record RootNode(List<YearNode> Years);
+
 // Elements are the structure used in the view for display
 internal record YearElement<T>(int Year, T Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
 internal record RootElement<T>(T Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
@@ -393,43 +404,6 @@ internal record SeasonElement<T>(Season Season, T Value, string? Text = null, st
 internal record DayElement(StardewDate Date, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
 internal record InOutElement(string InText, string InLayout, string InTooltip, string InTint, string OutText, string OutLayout, string OutTooltip, string OutTint);
 
-// Nodes are the year traversal structure
-internal record YearNode(int Year, List<SeasonNode> Seasons)
-{
-    // public void Accept<T,V>(IDateVisitor<T,V> visitor) 
-    // {
-    //     foreach (SeasonNode season in Seasons)
-    //     {
-    //         season.Accept(visitor);
-    //     }
-    //     visitor.Visit(this);
-    // }
-}
-
-internal record SeasonNode(Season Season, List<DayNode> Days)
-{
-    // public void Accept<T,V>(IDateVisitor<T,V> visitor) 
-    // {
-    //     visitor.Visit(this);
-    // }
-
-}
-
-internal record DayNode(StardewDate Date)
-{
-    // public void Accept<T,V>(IDateVisitor<T,V> visitor) 
-    // {
-    //     visitor.Visit(this);
-    // }
-}
-
-internal record RootNode(List<YearNode> Years)
-{
-    // public void Accept<T,V>(IDateVisitor<T,V> visitor) 
-    // {
-    //     visitor.Visit(this);
-    // }
-}
 
 // ================================ 
 // Tabs Stuff =====================
