@@ -71,9 +71,13 @@
                 </scrollable>
             </lane>
 
-            <lane *case="Shipping" *context={TrackedDataAggregator} layout="820px content" orientation="vertical">
-                <label text={ShippedTooltip} tooltip={ShippedTooltip} margin="0,0,0,10"/>
-                <lane *repeat={ShippedGrid} orientation="vertical" margin="0,0,0,40">
+            <lane *case="Shipping" *switch={SelectedPeriod} *context={TrackedDataAggregator} layout="820px content" orientation="vertical">
+                <lane>
+                    <label text={ShippedTooltip} tooltip={ShippedTooltip} margin="0,0,10,10" layout="stretch"/>
+                    <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
+                    <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
+                </lane>
+                <lane *case="Day" *repeat={ShippedGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
@@ -92,6 +96,10 @@
                         </lane>
                     </lane>
                 </lane>
+                <lane *case="Day" *repeat={ShippedGrid} *case="Year" orientation="vertical" margin="0,0,0,40">
+                    <label text="Y-"/>
+               </lane>
+
             </lane>  
 
             <lane *case="CashFlow" *context={TrackedDataAggregator} layout="820px content" orientation="vertical">

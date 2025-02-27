@@ -24,13 +24,15 @@ namespace SproutSight;
     // Time (Day, Season, Year)
     // Function (min, max, sum, average)
 // Update docs in sml
+// Two scrollables in sml??
+// Constants not used everyhwere (what is teh convention?)
 
 internal partial class SproutSightViewModel
 {
+    public const int RowWidth = 20;
     public const int MaxRowHeight = 128;
     public const int MinRowHeight = 2;
-    public const int ZeroRowHeight = 1;
-    public const int RowWidth = 20;
+    public const int ZeroDataRowHeight = 1;
 
 
     // Showing Today's Info
@@ -41,13 +43,34 @@ internal partial class SproutSightViewModel
     public bool ShippedSomething => CurrentItems.Count > 0;
     public string TotalProceeds => $"Current Shipped: {FormatGoldNumber(CurrentItems.Select(item => item.StackCount * item.SalePrice).Sum())}";
 
-    public TrackedDataAggregator TrackedDataAggregator {get; set; }
+    private TrackedData trackedData;
+
+    [Notify]
+    private TrackedDataAggregator _trackedDataAggregator;
 
     public SproutSightViewModel(TrackedData trackedData) {
-        TrackedDataAggregator = new(trackedData);
-        TrackedDataAggregator.LoadAggregationAndViewVisitor();
+        this.trackedData = trackedData;
+        _trackedDataAggregator = new(trackedData, Operation.Average);
+        _trackedDataAggregator.LoadAggregationAndViewVisitor();
+    }
+
+    // ================================ 
+    // UI Controls ====================
+    // ================================
+
+    public Operation[] Operations { get; } = Enum.GetValues<Operation>();
+    [Notify] 
+    private Operation _selectedOperation = Operation.Sum;
+    private void OnSelectedOperationChanged(Operation oldValue, Operation newValue)
+    {
+        var newAggregator = new TrackedDataAggregator(trackedData, newValue);
+        newAggregator.LoadAggregationAndViewVisitor();
+        TrackedDataAggregator = newAggregator;
     }
     
+    [Notify] private Period selectedPeriod = Period.Day;
+    public Period[] Periods { get; } = Enum.GetValues<Period>();
+
     // ================================ 
     // Tabs Stuff =====================
     // ================================
@@ -81,7 +104,7 @@ internal partial class TrackedItemStack
     public string FormattedSale => $"({StackCount}x{SalePrice}g)";
 }
 
-internal class TrackedDataAggregator(TrackedData TrackedData)
+internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operation)
 {
     // We decompose the Elements here to make it easier to bind in the sml since dot operations are not allowed.
 
@@ -120,20 +143,20 @@ internal class TrackedDataAggregator(TrackedData TrackedData)
             }
         }
 
-        var walletGoldVisitor = new WalletGoldVisitor(TrackedData.GoldInOut, Operation.Average);
+        var walletGoldVisitor = new WalletGoldVisitor(TrackedData.GoldInOut, Operation);
         var walletRoot = walletGoldVisitor.Visit(rootNode);
         WalletGrid = walletRoot.YearElements;
         WalletText = walletRoot.Text;
         WalletTooltip = walletRoot.Tooltip;
 
-        var shippedVisitor = new ShippedVisitor(TrackedData.ShippedData, Operation.Sum);
+        var shippedVisitor = new ShippedVisitor(TrackedData.ShippedData, Operation);
         var shippedRoot = shippedVisitor.Visit(rootNode);
         ShippedGrid = shippedRoot.YearElements;
         ShippedTotal = shippedRoot.Value;
         ShippedText = shippedRoot.Text;
         ShippedTooltip = shippedRoot.Tooltip;
 
-        var cashFlowVisitor = new CashFlowVisitor(TrackedData.GoldInOut, Operation.Sum);
+        var cashFlowVisitor = new CashFlowVisitor(TrackedData.GoldInOut, Operation);
         var cashFlowRoot = cashFlowVisitor.Visit(rootNode);
         CashFlowGrid = cashFlowRoot.YearElements;
         CashFlowNetTotal = cashFlowRoot.Value;
@@ -172,6 +195,13 @@ internal enum Operation
     Average,
 }
 
+internal enum Period
+{
+    Day,
+    Season,
+    Year,
+}
+
 internal abstract class BaseVisitor
 {
     public Operation Operation;
@@ -203,7 +233,7 @@ internal abstract class BaseVisitor
     // Helper methods for scale calculations
     protected static int CalculateRowHeight(int value, int highest)
     {
-        var rowHeight = SproutSightViewModel.ZeroRowHeight;
+        var rowHeight = SproutSightViewModel.ZeroDataRowHeight;
         if (value > 0)
         {
             var scale = (float)value / highest;
