@@ -72,9 +72,9 @@
             </lane>
 
             <lane *case="Shipping" *context={TrackedDataAggregator} layout="820px content" orientation="vertical">
+                <label text={ShippedTooltip} tooltip={ShippedTooltip} margin="0,0,0,10"/>
                 <lane *repeat={ShippedGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                    <label text="Total Shipped" margin="0,0,0,10"/>
                     <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
                         <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
@@ -95,7 +95,7 @@
             </lane>  
 
             <lane *case="CashFlow" *context={TrackedDataAggregator} layout="820px content" orientation="vertical">
-                <label text="Daily Cash Flow" margin="0,0,0,10"/>
+                <label text={CashFlowText} tooltip={CashFlowTooltip} margin="0,0,0,10"/>
                 <lane *repeat={CashFlowGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<InOutEntry>>> Value) -->
                     <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
