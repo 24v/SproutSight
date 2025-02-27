@@ -25,6 +25,7 @@ using StardewValley.GameData.Shops;
     - MultiPlayers multiFarms
     - Wiki
     - Animate the on hover on hud icon
+    - Log level based on json config entry
 
 - Ideas
     - Value of all assets
