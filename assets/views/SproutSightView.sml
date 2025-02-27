@@ -108,7 +108,7 @@
                             <label text={Season} margin="5,0,0,0"/>
                         </lane>
                         <lane *repeat={Value} orientation="vertical" margin="1,0,0,0">
-                            <!-- Context is an InOutEntry -->
+                        <!-- Context is an InOutEntry -->
                             <image tint={InTint} fit="Stretch" layout={InLayout} tooltip={InTooltip} sprite={@Mods/StardewUI/Sprites/White} />
                             <image tint={OutTint} fit="Stretch" layout={OutLayout} tooltip={OutTooltip} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
