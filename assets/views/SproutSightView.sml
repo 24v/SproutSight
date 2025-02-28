@@ -96,9 +96,10 @@
                         </lane>
                     </lane>
                 </lane>
-                <lane *case="Day" *repeat={ShippedGrid} *case="Year" orientation="vertical" margin="0,0,0,40">
-                    <label text="Y-"/>
-               </lane>
+                <lane *case="Year"margin="0,0,0,40" vertical-content-alignment="end">
+                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                    <image *repeat={ShippedGrid}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                </lane>
 
             </lane>  
 
