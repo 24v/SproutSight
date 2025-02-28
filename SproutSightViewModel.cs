@@ -26,6 +26,8 @@ namespace SproutSight;
 // Update docs in sml
 // Two scrollables in sml??
 // Constants not used everyhwere (what is teh convention?)
+// Only load for current page?
+// TODO: fix tense in FirstPass
 
 internal partial class SproutSightViewModel
 {
@@ -143,25 +145,31 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
             }
         }
 
-        var walletGoldVisitor = new WalletGoldVisitor(TrackedData.GoldInOut, Operation);
-        var walletRoot = walletGoldVisitor.Visit(rootNode);
-        WalletGrid = walletRoot.YearElements;
-        WalletText = walletRoot.Text;
-        WalletTooltip = walletRoot.Tooltip;
+        // var walletGoldVisitor = new WalletGoldVisitor(TrackedData.GoldInOut, Operation);
+        // var walletRoot = walletGoldVisitor.Visit(rootNode);
+        // WalletGrid = walletRoot.YearElements;
+        // WalletText = walletRoot.Text;
+        // WalletTooltip = walletRoot.Tooltip;
 
-        var shippedVisitor = new ShippedVisitor(TrackedData.ShippedData, Operation);
+        var shippedFirstPassVisitor = new FirstPassVisitor(TrackedData.ShippedData, Operation);
+        var shippedVisitor = new ShippedVisitor(
+                TrackedData.ShippedData, 
+                Operation, 
+                shippedFirstPassVisitor.DayAggregated, 
+                shippedFirstPassVisitor.SeasonAggregated, 
+                shippedFirstPassVisitor.YearAggregated);
         var shippedRoot = shippedVisitor.Visit(rootNode);
         ShippedGrid = shippedRoot.YearElements;
         ShippedTotal = shippedRoot.Value;
         ShippedText = shippedRoot.Text;
         ShippedTooltip = shippedRoot.Tooltip;
 
-        var cashFlowVisitor = new CashFlowVisitor(TrackedData.GoldInOut, Operation);
-        var cashFlowRoot = cashFlowVisitor.Visit(rootNode);
-        CashFlowGrid = cashFlowRoot.YearElements;
-        CashFlowNetTotal = cashFlowRoot.Value;
-        CashFlowText = cashFlowRoot.Text;
-        CashFlowTooltip = cashFlowRoot.Tooltip;
+        // var cashFlowVisitor = new CashFlowVisitor(TrackedData.GoldInOut, Operation);
+        // var cashFlowRoot = cashFlowVisitor.Visit(rootNode);
+        // CashFlowGrid = cashFlowRoot.YearElements;
+        // CashFlowNetTotal = cashFlowRoot.Value;
+        // CashFlowText = cashFlowRoot.Text;
+        // CashFlowTooltip = cashFlowRoot.Tooltip;
 
         LogGridStructures();
     }
@@ -248,6 +256,75 @@ internal abstract class BaseVisitor
     }
 }
 
+
+internal class FirstPassVisitor(Dictionary<StardewDate, List<TrackedItemStack>> ShippedData, Operation Operation) 
+{
+    public int DayAggregated { get; private set; } = 0;
+    private int dayAggregatedCount = 0;
+    public int SeasonAggregated { get; private set; } = 0;
+    private int seasonAggregatedCount = 0;
+    public int YearAggregated { get; private set; } = 0;
+    private int yearAggregatedCount = 0;
+
+    public void Vist(RootNode root)
+    {
+        int currentYearAggreation = DoOperation(root.Years.Select(Visit).ToList());
+        YearAggregated = DoMergeOperation(YearAggregated, currentYearAggreation, yearAggregatedCount, root.Years.Count);
+        yearAggregatedCount += root.Years.Count;
+    }
+
+    public int Visit(YearNode year)
+    {
+        int currentSeasonAggregation = DoOperation(year.Seasons.Select(Visit).ToList());
+        SeasonAggregated = DoMergeOperation(SeasonAggregated, SeasonAggregated, seasonAggregatedCount, year.Seasons.Count);
+        seasonAggregatedCount += year.Seasons.Count;
+        return currentSeasonAggregation;
+    }
+
+    public int Visit(SeasonNode season)
+    {
+        int currentDayAggregation = DoOperation(season.Days.Select(Visit).ToList());
+        DayAggregated = DoMergeOperation(DayAggregated, currentDayAggregation, dayAggregatedCount, season.Days.Count);
+        dayAggregatedCount += season.Days.Count;
+        return currentDayAggregation;
+    }
+
+    public int Visit(DayNode day)
+    {
+        if (ShippedData.TryGetValue(day.Date, out var items))
+        {
+            return items.Select(item => item.TotalSalePrice).Sum();
+        }
+        return 0;
+    }
+
+    public int DoOperation(List<int> entries)
+    {
+        return Operation switch
+        {
+            Operation.Min => entries.Min(),
+            Operation.Max => entries.Max(),
+            Operation.Sum => entries.Sum(),
+            Operation.Average => (int)Math.Round(entries.Sum() / (float)entries.Count),
+            _ => 0
+        };
+    }
+
+    // Handle average of averages correctly
+    public int DoMergeOperation(int item1, int item2, int count1, int count2)
+    {
+        return Operation switch
+        {
+            Operation.Min => Math.Min(item1, item2),
+            Operation.Max => Math.Max(item1, item2),
+            Operation.Sum => item1 + item2,
+            Operation.Average => (int)Math.Round((item1 * count1 + item2 * count2) / (float)(count1 + count2)),
+            _ => 0
+        };
+
+    }
+}
+
 internal class WalletGoldVisitor : BaseVisitor
 {
     public Dictionary<StardewDate, GoldInOut> GoldInOut { get; set; } = [];
@@ -312,25 +389,34 @@ internal class WalletGoldVisitor : BaseVisitor
     }
 }
 
+
 internal class ShippedVisitor : BaseVisitor
 {
     public Dictionary<StardewDate, List<TrackedItemStack>> ShippedData { get; set; } = [];
     public Dictionary<StardewDate, int> TotalShippedGoldByDate { get; } = [];
-    public int HighestOverallTotal { get; private set; } = 1;
+    
+    public int HighestOverallDayTotal { get; private set; }
+    public int HighestOverallSeasonTotal { get; private set; }
+    public int HighestOverallYearTotal { get; private set; }
+    public Operation Operation { get; private set; }
 
     public ShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation)
     {
         Operation = operation;
         ShippedData = shippedData;
-        foreach (StardewDate date in shippedData.Keys)
-        {
-            if (shippedData.TryGetValue(date, out var items))
-            {
-                int total = items.Sum(d => d.TotalSalePrice);
-                TotalShippedGoldByDate[date] = total;
-                HighestOverallTotal = Math.Max(HighestOverallTotal, total);
-            }
-        }
+        HighestOverallDayTotal = 1;
+        HighestOverallSeasonTotal = 1;
+        HighestOverallYearTotal = 1;
+    }
+    
+    public ShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation, 
+                          int highestDay, int highestSeason, int highestYear)
+    {
+        Operation = operation;
+        ShippedData = shippedData;
+        HighestOverallDayTotal = Math.Max(1, highestDay);
+        HighestOverallSeasonTotal = Math.Max(1, highestSeason);
+        HighestOverallYearTotal = Math.Max(1, highestYear);
     }
 
     public RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>> Visit(RootNode root)
@@ -375,7 +461,7 @@ internal class ShippedVisitor : BaseVisitor
     
     public DayElement Visit(DayNode day)
     {
-        var highest = HighestOverallTotal;
+        var highest = HighestOverallDayTotal;
         var dayShippedGold = TotalShippedGoldByDate.GetValueOrDefault(day.Date);
         int rowHeight = CalculateRowHeight(dayShippedGold, highest);
         string layout = FormatLayout(rowHeight);
