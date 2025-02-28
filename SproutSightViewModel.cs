@@ -378,9 +378,12 @@ internal class ShippedVisitor : BaseVisitor
         var shippedGolds = entries.Select(entry => entry.Value).ToList();
         int aggregated = DoOperation(shippedGolds);
         string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        var highest = HighestOverallSeasonTotal;
+        int rowHeight = CalculateRowHeight(aggregated, highest);
+        string layout = FormatLayout(rowHeight);
         var shippedGoldSeasonEntry = new SeasonElement<List<DayElement>>(
                 season.Season, aggregated, entries,
-                season + "", null, tooltip, null, 
+                season + "", layout, tooltip, GetTint(season.Season), 
                 season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
         return shippedGoldSeasonEntry;
     }
