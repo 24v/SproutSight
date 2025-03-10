@@ -450,10 +450,10 @@ internal abstract class BaseVisitor(Operation operation)
     {
         return season switch
         {
-            Season.Spring => "#9FFD9D",
+            Season.Spring => "#2CA014",
             Season.Summer => "#FEFF17",
-            Season.Fall => "#F9810B",
-            Season.Winter => "#67B7FF",
+            Season.Fall => "#D13400",
+            Season.Winter => "#A9F0FF",
             _ => "White"
         };
     }
