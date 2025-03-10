@@ -39,6 +39,7 @@ namespace SproutSight;
 // TODO: Use lambad instead of inherited classes
 // TODO: Why does it not use the more specific icon?
 // TODO: fix BaseFirstPassVisitor ai trash
+// TODO: Memoize
 
 internal partial class SproutSightViewModel
 {
@@ -88,7 +89,6 @@ internal partial class SproutSightViewModel
     [Notify] private Period selectedPeriod = Period.All;
     public Period[] Periods { get; } = Enum.GetValues<Period>();
 
-
     // ================================ 
     // Tabs Stuff =====================
     // ================================
@@ -99,7 +99,7 @@ internal partial class SproutSightViewModel
             .ToArray();
 
     [Notify]
-    private ShipmentTab selectedTab;
+    private ShipmentTab _selectedTab;
 
     public void SelectTab(ShipmentTab tab)
     {
@@ -108,6 +108,22 @@ internal partial class SproutSightViewModel
         {
             tabViewModel.IsActive = tabViewModel.Value == tab;
         }
+    }
+
+    private void OnSelectedTabChanged(ShipmentTab oldValue, ShipmentTab newValue)
+    {
+        // Set appropriate default operation based on tab
+        if (newValue == ShipmentTab.Wallet)
+        {
+            SelectedOperation = Operation.End;
+        }
+        else
+        {
+            SelectedOperation = Operation.Sum;
+        }
+        
+        // Refresh data with the new operation
+        OnSelectedOperationChanged(SelectedOperation, SelectedOperation);
     }
 
 }
@@ -245,6 +261,7 @@ internal enum Operation
     Max,
     Sum,
     Average,
+    End  // New operation to get the last value in a period
 }
 
 internal enum Period
@@ -298,6 +315,7 @@ internal class BaseFirstPassVisitor(Operation Operation, Func<StardewDate, int> 
             Operation.Max => entries.Max(),
             Operation.Sum => entries.Sum(),
             Operation.Average => (int)Math.Round(entries.Sum() / (float)entries.Count),
+            Operation.End => entries.Last(),
             _ => 0
         };
     }
@@ -411,15 +429,10 @@ internal class CashFlowFirstPassVisitor : BaseFirstPassVisitor
     }
 }
 
-internal abstract class VisitorBase
+internal abstract class VisitorBase(Operation operation)
 {
-    public Operation Operation { get; }
-    
-    protected VisitorBase(Operation operation)
-    {
-        Operation = operation;
-    }
-    
+    public Operation Operation { get; } = operation;
+
     public int DoOperation(List<int> entries)
     {
         return Operation switch
@@ -428,6 +441,7 @@ internal abstract class VisitorBase
             Operation.Max => entries.Max(),
             Operation.Sum => entries.Sum(),
             Operation.Average => (int)Math.Round(entries.Sum() / (float)entries.Count),
+            Operation.End => entries.Last(),
             _ => 0
         };
     }
