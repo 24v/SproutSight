@@ -21,16 +21,16 @@
       "SourceRect": "331, 308, 2, 2"
     },
     "Spring": {
-      "SourceRect": "406, 442, 12, 8"
+      "SourceRect": "404, 441, 14, 8"
     },
     "Summer": {
-      "SourceRect": "406, 450, 12, 8"
+      "SourceRect": "404, 449, 14, 8"
     },
     "Fall": {
-      "SourceRect": "406, 458, 12, 8"
+      "SourceRect": "404, 457, 14, 8"
     },
     "Winter": {
-      "SourceRect": "406, 466, 12, 8"
+      "SourceRect": "404, 465, 14, 8"
     }
   }
 }
