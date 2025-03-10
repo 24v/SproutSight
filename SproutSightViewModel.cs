@@ -72,10 +72,6 @@ internal partial class SproutSightViewModel
         return $"{number.ToString("N0")}g";
     }
 
-    // ================================ 
-    // UI Controls ====================
-    // ================================
-
     [Notify]
     public Operation[] _operations = Enum.GetValues<Operation>();
     [Notify] 
