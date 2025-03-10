@@ -728,39 +728,3 @@ internal record InOutElement(string InText, string InLayout, string InTooltip, s
 // Tabs Stuff =====================
 // ================================
 
-internal enum ShipmentTab
-{
-    Today,
-    Shipping,
-    Wallet,
-    CashFlow
-}
-internal partial class ShipmentTabViewModel : INotifyPropertyChanged
-{
-    [Notify]
-    private bool _isActive;
-
-    public Tuple<int, int, int, int> Margin => IsActive ? new(0, 0, -12, 0) : new(0, 0, 0, 0);
-
-    public ShipmentTab Value { get; }
-
-    public string Title {
-        get
-        {
-            return Value switch 
-            {
-                ShipmentTab.Today => "Today",
-                ShipmentTab.Shipping => "Shipping",
-                ShipmentTab.CashFlow => "Cash Flow",
-                ShipmentTab.Wallet => "Wallet",
-                _ => Value.ToString()
-            };
-        }
-    }
-
-    public ShipmentTabViewModel(ShipmentTab value, bool isActive)
-    {
-        Value = value;
-        _isActive = isActive;
-    }
-}
