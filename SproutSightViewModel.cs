@@ -85,7 +85,7 @@ internal partial class SproutSightViewModel
         TrackedDataAggregator = newAggregator;
     }
     
-    [Notify] private Period selectedPeriod = Period.Day;
+    [Notify] private Period selectedPeriod = Period.All;
     public Period[] Periods { get; } = Enum.GetValues<Period>();
 
 
@@ -249,7 +249,7 @@ internal enum Operation
 
 internal enum Period
 {
-    Day,
+    All,
     Season,
     Year,
 }
@@ -581,8 +581,10 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         
         // Determine colors based on net value
         bool positive = dayIn + dayOut >= 0;
-        var inTint = positive ? "#696969" : "#A9A9A9";  // Dark gray / Light gray
-        var outTint = positive ? "#F08080" : "#B22222";  // Light red / Dark red
+        var inTint = "#696969"; 
+        var outTint = "#B22222"; 
+        // var inTint = positive ? "#696969" : "#A9A9A9";  // Dark gray / Light gray
+        // var outTint = positive ? "#F08080" : "#B22222";  // Light red / Dark red
         
         // Create tooltip with all information
         string tooltip = $"{day.Date.Season}-{day.Date.Day}\n" + 

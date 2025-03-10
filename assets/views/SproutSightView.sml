@@ -77,7 +77,7 @@
                     <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                     <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                 </lane>
-                <lane *case="Day" *repeat={ShippedGrid} orientation="vertical" margin="0,0,0,40">
+                <lane *case="All" *repeat={ShippedGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
@@ -138,9 +138,13 @@
                 </lane>
             </lane>
 
-            <lane *case="Wallet" *context={TrackedDataAggregator}  orientation="vertical" >
-                <label text={WalletText} tooltip={WalletTooltip} margin="0,0,0,10"/>
-                <lane *repeat={WalletGrid} orientation="vertical" margin="0,0,0,40">
+            <lane *case="Wallet" *context={TrackedDataAggregator} *switch={SelectedPeriod} orientation="vertical" >
+                <lane>
+                    <label text={WalletText} tooltip={WalletTooltip} margin="0,0,10,10" layout="stretch"/>
+                    <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
+                    <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
+                </lane>
+                <lane *case="All" *repeat={WalletGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
@@ -157,6 +161,17 @@
                             <label text={^Year} />
                             <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                         </lane>
+                    </lane>
+                </lane>
+                <lane *case="Year"margin="0,0,0,40" vertical-content-alignment="end">
+                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                    <image *repeat={ShippedGrid}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                </lane>
+
+                <lane vertical-content-alignment="end" margin="40,40,0,0">
+                    <lane *case="Season" *repeat={ShippedGrid} margin="0,0,0,40" vertical-content-alignment="end">
+                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                        <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>
                 </lane>
             </lane>
