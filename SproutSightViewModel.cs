@@ -34,6 +34,9 @@ namespace SproutSight;
 // TODO: Min per day / max per day / hover
 // TODO: Log Levels
 // TODO: Autoformat linter
+// TODO: Better colors
+// TODO: Fix cursor colors
+// TODO: Use lambad instead of inherited classes
 
 internal partial class SproutSightViewModel
 {
@@ -360,63 +363,64 @@ internal abstract class BaseVisitor(Operation operation, int highestOverallDayTo
     public virtual DayElement Visit(DayNode day)
     {
         var highest = HighestOverallDayTotal;
-        var dayShippedGold = GetDayValue(day.Date);
-        int rowHeight = CalculateRowHeight(dayShippedGold, highest);
+        var dayGold = GetDayValue(day.Date);
+        int rowHeight = CalculateRowHeight(dayGold, highest);
         string layout = FormatLayout(rowHeight);
-        Logging.Monitor.Log($"Visit: {day.Date}, highest={highest}, dayShippedGold={dayShippedGold}, rowHeight={rowHeight}", LogLevel.Debug);
-        string tooltip = $"{day.Date.Season}-{day.Date.Day}: {SproutSightViewModel.FormatGoldNumber(dayShippedGold)}";
-        return new DayElement(day.Date, dayShippedGold, "", layout, tooltip, GetTint(day.Date.Season));
+        Logging.Monitor.Log($"Visit: {day.Date}, highest={highest}, dayGold={dayGold}, rowHeight={rowHeight}", LogLevel.Debug);
+        string tooltip = $"{day.Date.Season}-{day.Date.Day}: {SproutSightViewModel.FormatGoldNumber(dayGold)}";
+        return new DayElement(day.Date, dayGold, "", layout, tooltip, GetTint(day.Date.Season));
+    }
+
+    public virtual SeasonElement<List<DayElement>> Visit(SeasonNode season)
+    {
+        var entries = season.Days.Select(Visit).ToList();
+        var golds = entries.Select(entry => entry.Value).ToList();
+        int aggregated = DoOperation(golds);
+        string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        var highest = HighestOverallSeasonTotal;
+        int rowHeight = CalculateRowHeight(aggregated, highest);
+        string layout = FormatLayout(rowHeight);
+        var seasonEntry = new SeasonElement<List<DayElement>>(
+                season.Season, aggregated, entries,
+                season + "", layout, tooltip, GetTint(season.Season), 
+                season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
+        return seasonEntry;
+    }
+
+    public virtual YearElement<List<SeasonElement<List<DayElement>>>> Visit(YearNode year)
+    {
+        var entries = year.Seasons.Select(Visit).ToList();
+        entries.Reverse();
+        var golds = entries.Select(entry => entry.Value).ToList();
+        int aggregated = DoOperation(golds);
+        string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        var highest = HighestOverallYearTotal;
+        int rowHeight = CalculateRowHeight(aggregated, highest);
+        string layout = FormatLayout(rowHeight);
+        var yearEntry = new YearElement<List<SeasonElement<List<DayElement>>>>(
+                    year.Year, aggregated, entries, year + "", layout, tooltip);
+        return yearEntry;
+    }
+
+    public virtual RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>> Visit(RootNode root)
+    {
+        var entries = root.Years.Select(Visit).ToList();
+        entries.Reverse();
+        var golds = entries.Select(entry => entry.Value).ToList();
+        int aggregated = DoOperation(golds);
+        string tooltip = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        string text = tooltip;
+        var element = new RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>>(
+                aggregated, entries, $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);
+
+        return element;
     }
 }
 
 internal class ShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> ShippedData, Operation operation, int highestDay, int highestSeason, int highestYear) : 
         BaseVisitor(operation, highestDay, highestSeason, highestYear)
 {
-    public RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>> Visit(RootNode root)
-    {
-        var entries = root.Years.Select(Visit).ToList();
-        entries.Reverse();
-        var shippedGolds = entries.Select(entry => entry.Value).ToList();
-        int aggregated = DoOperation(shippedGolds);
-        string tooltip = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
-        string text = tooltip;
-        var element = new RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>>(
-                aggregated, entries, $"Overall {Operation} Shipped Gold: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);
 
-        return element;
-    }
-    
-    public YearElement<List<SeasonElement<List<DayElement>>>> Visit(YearNode year)
-    {
-        var entries = year.Seasons.Select(Visit).ToList();
-        entries.Reverse();
-        var shippedGolds = entries.Select(entry => entry.Value).ToList();
-        int aggregated = DoOperation(shippedGolds);
-        string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
-        var highest = HighestOverallYearTotal;
-        int rowHeight = CalculateRowHeight(aggregated, highest);
-        string layout = FormatLayout(rowHeight);
-        var shippedGoldYearEntry = new YearElement<List<SeasonElement<List<DayElement>>>>(
-                    year.Year, aggregated, entries, year + "", layout, tooltip);
-        return shippedGoldYearEntry;
-    }
-    
-    public SeasonElement<List<DayElement>> Visit(SeasonNode season)
-    {
-        var entries = season.Days.Select(Visit).ToList();
-        var shippedGolds = entries.Select(entry => entry.Value).ToList();
-        int aggregated = DoOperation(shippedGolds);
-        string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
-        var highest = HighestOverallSeasonTotal;
-        int rowHeight = CalculateRowHeight(aggregated, highest);
-        string layout = FormatLayout(rowHeight);
-        var shippedGoldSeasonEntry = new SeasonElement<List<DayElement>>(
-                season.Season, aggregated, entries,
-                season + "", layout, tooltip, GetTint(season.Season), 
-                season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
-        return shippedGoldSeasonEntry;
-    }
-    
     public override int GetDayValue(StardewDate date)
     {
         if (ShippedData.TryGetValue(date, out var items))
@@ -431,43 +435,6 @@ internal class ShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> Sh
 internal class WalletGoldVisitor(Dictionary<StardewDate, GoldInOut> GoldInOut, Operation operation, int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal) : 
         BaseVisitor(operation, highestOverallDayTotal, highestOverallSeasonTotal, highestOverallYearTotal)
 {
-    public RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>> Visit(RootNode root)
-    {
-        var entries = root.Years.Select(Visit).ToList();
-        entries.Reverse();
-        var walletGolds = entries.Select(entry => entry.Value).ToList();
-        int aggregated = DoOperation(walletGolds);
-        string tooltip = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
-        string text = $"Wallet {Operation}";
-        var element = new RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>>(
-                aggregated, entries, $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);
-
-        return element;
-    }
-    public YearElement<List<SeasonElement<List<DayElement>>>> Visit(YearNode year)
-    {
-        var entries = year.Seasons.Select(Visit).ToList();
-        entries.Reverse();
-        var walletGolds = entries.Select(entry => entry.Value).ToList();
-        int aggregated = DoOperation(walletGolds);
-        string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
-        var walletGoldYearEntry = new YearElement<List<SeasonElement<List<DayElement>>>>(
-                    year.Year, aggregated, entries, year + "", null, tooltip);
-        return walletGoldYearEntry;
-
-    }
-    public SeasonElement<List<DayElement>> Visit(SeasonNode season)
-    {
-        var entries = season.Days.Select(Visit).ToList();
-        var walletGolds = entries.Select(entry => entry.Value).ToList();
-        int aggregated = DoOperation(walletGolds);
-        string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
-        var walletGoldSeasonEntry = new SeasonElement<List<DayElement>>(
-                season.Season, aggregated, entries,
-                season + "", null, tooltip, null, 
-                season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
-        return walletGoldSeasonEntry;
-    }
 
     public override int GetDayValue(StardewDate date)
     {
