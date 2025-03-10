@@ -97,4 +97,6 @@ internal partial class TrackedItemStack : IComparable<TrackedItemStack>
         return $"{Name} (Id: {Id}, Stack: {StackCount}, Price: {SalePrice}g, Quality: {QualityName}, Category: {CategoryName})";
     }
 
+    public string FormattedSale => $"({StackCount}x{SalePrice}g)";
+
 }
