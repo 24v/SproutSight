@@ -429,7 +429,7 @@ internal class CashFlowFirstPassVisitor : BaseFirstPassVisitor
     }
 }
 
-internal abstract class VisitorBase(Operation operation)
+internal abstract class BaseVisitor(Operation operation)
 {
     public Operation Operation { get; } = operation;
 
@@ -450,10 +450,10 @@ internal abstract class VisitorBase(Operation operation)
     {
         return season switch
         {
-            Season.Spring => "Green",
-            Season.Summer => "Yellow",
-            Season.Fall => "Brown",
-            Season.Winter => "Blue",
+            Season.Spring => "9FFD9D",
+            Season.Summer => "FEFF17",
+            Season.Fall => "F9810B",
+            Season.Winter => "67B7FF",
             _ => "White"
         };
     }
@@ -476,14 +476,14 @@ internal abstract class VisitorBase(Operation operation)
     }
 }
 
-internal class BaseVisitor : VisitorBase
+internal class SingleValueVisitor : BaseVisitor
 {
     public int HighestOverallDayTotal { get; protected set; }
     public int HighestOverallSeasonTotal { get; protected set; }
     public int HighestOverallYearTotal { get; protected set; }
     private readonly Func<StardewDate, int> _getDayValue;
 
-    public BaseVisitor(Operation operation, int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal, Func<StardewDate, int> getDayValue)
+    public SingleValueVisitor(Operation operation, int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal, Func<StardewDate, int> getDayValue)
         : base(operation)
     {
         HighestOverallDayTotal = Math.Max(1, highestOverallDayTotal);
@@ -554,7 +554,7 @@ internal class BaseVisitor : VisitorBase
 internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation,
                       int highestDay, int highestSeason, int highestYear,
                       int highestDayIn, int highestSeasonIn, int highestYearIn,
-                      int highestDayOut, int highestSeasonOut, int highestYearOut) : VisitorBase(operation)
+                      int highestDayOut, int highestSeasonOut, int highestYearOut) : BaseVisitor(operation)
 {
     public Dictionary<StardewDate, GoldInOut> CashFlowByDate { get; } = goldInOut;
 
@@ -681,10 +681,10 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
 
 internal static class Visitors
 {
-    public static BaseVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation, 
+    public static SingleValueVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation, 
                                                   int highestDay, int highestSeason, int highestYear)
     {
-        return new BaseVisitor(operation, highestDay, highestSeason, highestYear, date => 
+        return new SingleValueVisitor(operation, highestDay, highestSeason, highestYear, date => 
         {
             if (shippedData.TryGetValue(date, out var items))
             {
@@ -694,10 +694,10 @@ internal static class Visitors
         });
     }
 
-    public static BaseVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation, 
+    public static SingleValueVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation, 
                                                     int highestDay, int highestSeason, int highestYear)
     {
-        return new BaseVisitor(operation, highestDay, highestSeason, highestYear, 
+        return new SingleValueVisitor(operation, highestDay, highestSeason, highestYear, 
                               date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0);
     }
 
