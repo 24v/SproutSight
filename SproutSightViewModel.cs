@@ -417,19 +417,6 @@ internal class ShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> Sh
         return shippedGoldSeasonEntry;
     }
     
-    public override DayElement Visit(DayNode day)
-    {
-        DayElement baseElement = base.Visit(day);
-        // var highest = HighestOverallDayTotal;
-        // var dayShippedGold = GetDayValue(day.Date);
-        // int rowHeight = CalculateRowHeight(dayShippedGold, highest);
-        // string layout = FormatLayout(rowHeight);
-        // Logging.Monitor.Log($"Visit: {day.Date}, highest={highest}, dayShippedGold={dayShippedGold}, rowHeight={rowHeight}", LogLevel.Debug);
-        string tooltip = $"{day.Date.Season}-{day.Date.Day}: {SproutSightViewModel.FormatGoldNumber(GetDayValue(day.Date))}";
-        DayElement updated = baseElement with { Tooltip = tooltip};
-        return updated;
-    }
-
     public override int GetDayValue(StardewDate date)
     {
         if (ShippedData.TryGetValue(date, out var items))
@@ -480,15 +467,6 @@ internal class WalletGoldVisitor(Dictionary<StardewDate, GoldInOut> GoldInOut, O
                 season + "", null, tooltip, null, 
                 season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
         return walletGoldSeasonEntry;
-    }
-    public DayElement Visit(DayNode day)
-    {
-        var highest = HighestOverallDayTotal;
-        var dayWalletGold = GetDayValue(day.Date);
-        int rowHeight = CalculateRowHeight(dayWalletGold, highest);
-        string layout = FormatLayout(rowHeight);
-        string tooltip = $"{day.Date.Season}-{day.Date.Day}: {SproutSightViewModel.FormatGoldNumber(dayWalletGold)}";
-        return new DayElement(day.Date, dayWalletGold, "", layout, tooltip, GetTint(day.Date.Season));
     }
 
     public override int GetDayValue(StardewDate date)

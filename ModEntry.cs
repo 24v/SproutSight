@@ -39,6 +39,9 @@ using StardewValley.GameData.Shops;
     - UI Updates
         - Show where items are being shipped from
     - Full Olap Cube and SQL support
+
+- Testing Script
+
 */
 
 namespace SproutSight;
