@@ -37,6 +37,7 @@ namespace SproutSight;
 // TODO: Better colors
 // TODO: Fix cursor colors
 // TODO: Use lambad instead of inherited classes
+// TODO: Why does it not use the more specific icon?
 
 internal partial class SproutSightViewModel
 {
@@ -64,6 +65,10 @@ internal partial class SproutSightViewModel
         _trackedDataAggregator = new(trackedData, SelectedOperation);
         _trackedDataAggregator.LoadAggregationAndViewVisitor();
     }
+    public static string FormatGoldNumber(int number)
+    {
+        return $"{number.ToString("N0")}g";
+    }
 
     // ================================ 
     // UI Controls ====================
@@ -81,6 +86,7 @@ internal partial class SproutSightViewModel
     
     [Notify] private Period selectedPeriod = Period.Day;
     public Period[] Periods { get; } = Enum.GetValues<Period>();
+
 
     // ================================ 
     // Tabs Stuff =====================
@@ -101,11 +107,6 @@ internal partial class SproutSightViewModel
         {
             tabViewModel.IsActive = tabViewModel.Value == tab;
         }
-    }
-
-    public static string FormatGoldNumber(int number)
-    {
-        return $"{number.ToString("N0")}g";
     }
 
 }
@@ -179,12 +180,13 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         var walletGoldFirstPassVisitor = FirstPassVisitors.CreateWalletGoldVisitor(
                 TrackedData.GoldInOut, 
                 Operation);
+        walletGoldFirstPassVisitor.Visit(rootNode);
         var walletGoldVisitor = Visitors.CreateWalletGoldVisitor(
                 TrackedData.GoldInOut, 
                 Operation,
-                shippedFirstPassVisitor.HighestDayValue, 
-                shippedFirstPassVisitor.HighestSeasonValue, 
-                shippedFirstPassVisitor.HighestYearValue);
+                walletGoldFirstPassVisitor.HighestDayValue, 
+                walletGoldFirstPassVisitor.HighestSeasonValue, 
+                walletGoldFirstPassVisitor.HighestYearValue);
         var walletRoot = walletGoldVisitor.Visit(rootNode);
         WalletGrid = walletRoot.YearElements;
         WalletText = walletRoot.Text;
@@ -561,14 +563,7 @@ internal static class Visitors
 //     }
 // }
 
-// If we moved the visitor to being traversed by accept instead, we could avoid multiple traversals...
-// Nodes are the year traversal structure
-// interface IDateVisitor<YearType, SeasonType> {
-//     public RootEntryElement<List<YearType>> Visit(RootNode root);
-//     public (YearElement<YearType>, int) Visit(YearNode year);
-//     public (SeasonElement<SeasonType>, int) Visit(SeasonNode season);
-//     public (DayEntryElement, int) Visit(DayNode day);
-// }
+// The tree that we will visit
 internal record YearNode(int Year, List<SeasonNode> Seasons);
 internal record SeasonNode(Season Season, List<DayNode> Days);
 internal record DayNode(StardewDate Date);
@@ -590,8 +585,8 @@ internal enum ShipmentTab
 {
     Today,
     Shipping,
-    CashFlow,
-    Wallet
+    Wallet,
+    CashFlow
 }
 internal partial class ShipmentTabViewModel : INotifyPropertyChanged
 {
