@@ -90,10 +90,6 @@ internal partial class SproutSightViewModel
     [Notify] private Period selectedPeriod = Period.All;
     public Period[] Periods { get; } = Enum.GetValues<Period>();
 
-    // ================================ 
-    // Tabs Stuff =====================
-    // ================================
-
     public IReadOnlyList<ShipmentTabViewModel> AllTabs { get; } =
         Enum.GetValues<ShipmentTab>()
             .Select(tab => new ShipmentTabViewModel(tab, tab == ShipmentTab.Today))
@@ -109,12 +105,7 @@ internal partial class SproutSightViewModel
         {
             tabViewModel.IsActive = tabViewModel.Value == tab;
         }
-    }
-
-    private void OnSelectedTabChanged(ShipmentTab oldValue, ShipmentTab newValue)
-    {
-        // Set appropriate default operation based on tab
-        if (newValue == ShipmentTab.Wallet)
+        if (SelectedTab == ShipmentTab.Wallet)
         {
             SelectedOperation = Operation.End;
         }
