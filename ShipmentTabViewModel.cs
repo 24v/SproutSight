@@ -34,4 +34,3 @@ internal partial class ShipmentTabViewModel(ShipmentTab value, bool isActive) : 
         }
     }
 }
-

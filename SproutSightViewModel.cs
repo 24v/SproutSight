@@ -48,7 +48,6 @@ internal partial class SproutSightViewModel
     public const int MinRowHeight = 2;
     public const int ZeroDataRowHeight = 1;
 
-
     // Showing Today's Info
     public StardewDate Date = StardewDate.GetStardewDate();
     public List<TrackedItemStack> CurrentItems { get; internal set; } = new();
@@ -57,7 +56,7 @@ internal partial class SproutSightViewModel
     public bool ShippedSomething => CurrentItems.Count > 0;
     public string TotalProceeds => $"Current Shipped: {FormatGoldNumber(CurrentItems.Select(item => item.StackCount * item.SalePrice).Sum())}";
 
-    private TrackedData trackedData;
+    private readonly TrackedData trackedData;
 
     [Notify]
     private TrackedDataAggregator _trackedDataAggregator;
@@ -125,5 +124,4 @@ internal partial class SproutSightViewModel
         // Refresh data with the new operation
         OnSelectedOperationChanged(SelectedOperation, SelectedOperation);
     }
-
 }
