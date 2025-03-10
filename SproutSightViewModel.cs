@@ -65,6 +65,7 @@ internal partial class SproutSightViewModel
         this.trackedData = trackedData;
         _trackedDataAggregator = new(trackedData, SelectedOperation);
         _trackedDataAggregator.LoadAggregationAndViewVisitor();
+        _operations = GetAvailableOperations();
     }
     public static string FormatGoldNumber(int number)
     {
@@ -75,7 +76,8 @@ internal partial class SproutSightViewModel
     // UI Controls ====================
     // ================================
 
-    public Operation[] Operations { get; } = Enum.GetValues<Operation>();
+    [Notify]
+    public Operation[] _operations = Enum.GetValues<Operation>();
     [Notify] 
     private Operation _selectedOperation = Operation.Sum;
     private void OnSelectedOperationChanged(Operation oldValue, Operation newValue)
@@ -123,5 +125,19 @@ internal partial class SproutSightViewModel
         
         // Refresh data with the new operation
         OnSelectedOperationChanged(SelectedOperation, SelectedOperation);
+        Operations = GetAvailableOperations();
+    }
+
+    public Operation[] GetAvailableOperations()
+    {
+        var allOperations = Enum.GetValues(typeof(Operation)).Cast<Operation>().ToArray();
+        
+        return SelectedTab switch
+        {
+            ShipmentTab.Shipping => allOperations.Where(op => op != Operation.End).ToArray(),
+            ShipmentTab.Wallet => allOperations.Where(op => op != Operation.Sum).ToArray(),
+            ShipmentTab.CashFlow => allOperations,
+            _ => allOperations
+        };
     }
 }
