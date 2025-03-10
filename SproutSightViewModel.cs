@@ -148,6 +148,8 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
             }
         }
 
+        var test = Game1.smallFont;
+
         // var walletGoldVisitor = new WalletGoldVisitor(TrackedData.GoldInOut, Operation);
         // var walletRoot = walletGoldVisitor.Visit(rootNode);
         // WalletGrid = walletRoot.YearElements;
@@ -349,7 +351,7 @@ internal class ShippedVisitor : BaseVisitor
         entries.Reverse();
         var shippedGolds = entries.Select(entry => entry.Value).ToList();
         int aggregated = DoOperation(shippedGolds);
-        string tooltip = $"Shipped Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        string tooltip = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         string text = tooltip;
         var element = new RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>>(
                 aggregated, entries, $"Overall {Operation} Shipped Gold: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);
