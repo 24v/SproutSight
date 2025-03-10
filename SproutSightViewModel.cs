@@ -156,13 +156,13 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
             }
         }
 
-        var shippedFirstPassVisitor = new ShippedFirstPassVisitor(
+        var shippedFirstPassVisitor = FirstPassVisitors.CreateShippedVisitor(
                 TrackedData.ShippedData, 
                 Operation);
         Logging.Monitor.Log($"Starting FirstPassVisitor with operation: {Operation}, ShippedData count: {TrackedData.ShippedData.Count}", LogLevel.Debug);
         shippedFirstPassVisitor.Visit(rootNode);
         Logging.Monitor.Log($"FirstPassVisitor results - Day: {shippedFirstPassVisitor.HighestDayValue}, Season: {shippedFirstPassVisitor.HighestSeasonValue}, Year: {shippedFirstPassVisitor.HighestYearValue}", LogLevel.Debug);
-        var shippedVisitor = new ShippedVisitor(
+        var shippedVisitor = Visitors.CreateShippedVisitor(
                 TrackedData.ShippedData, 
                 Operation, 
                 shippedFirstPassVisitor.HighestDayValue, 
@@ -176,10 +176,10 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         ShippedTooltip = shippedRoot.Tooltip;
         Logging.Monitor.Log($"ShippedVisitor results - Total: {ShippedTotal}, Text: {ShippedText}", LogLevel.Debug);
 
-        var walletGoldFirstPassVisitor = new WalledGoldFirstPassVisitor(
+        var walletGoldFirstPassVisitor = FirstPassVisitors.CreateWalletGoldVisitor(
                 TrackedData.GoldInOut, 
                 Operation);
-        var walletGoldVisitor = new WalletGoldVisitor(
+        var walletGoldVisitor = Visitors.CreateWalletGoldVisitor(
                 TrackedData.GoldInOut, 
                 Operation,
                 shippedFirstPassVisitor.HighestDayValue, 
@@ -240,7 +240,7 @@ internal enum Period
 /// For getting the highest values which will be used in the second pass for creating bar scales
 /// </summary>
 /// <param name="Operation">Which operation to perform</param>
-internal abstract class BaseFirstPassVisitor(Operation Operation) 
+internal class BaseFirstPassVisitor(Operation Operation, Func<StardewDate, int> getDayValue) 
 {
     public int HighestDayValue { get; private set; } = 0;
     public int HighestSeasonValue { get; private set; } = 0;
@@ -267,13 +267,10 @@ internal abstract class BaseFirstPassVisitor(Operation Operation)
 
     public int Visit(DayNode day)
     {
-
-        var dayValue = GetDayValue(day.Date);
+        var dayValue = getDayValue(day.Date);
         HighestDayValue = Math.Max(HighestDayValue, dayValue);
         return dayValue;
     }
-
-    public abstract int GetDayValue(StardewDate date);
 
     public int DoOperation(List<int> entries)
     {
@@ -288,30 +285,27 @@ internal abstract class BaseFirstPassVisitor(Operation Operation)
     }
 }
 
-internal class ShippedFirstPassVisitor(Dictionary<StardewDate, List<TrackedItemStack>> ShippedData, Operation Operation) 
-        : BaseFirstPassVisitor(Operation)
+internal static class FirstPassVisitors
 {
-    public override int GetDayValue(StardewDate date)
+    public static BaseFirstPassVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation)
     {
-        if (ShippedData.TryGetValue(date, out var items))
+        return new BaseFirstPassVisitor(operation, date => 
         {
-            var summed = items.Select(item => item.TotalSalePrice).Sum();
-            return summed;
-        }
-        return 0;
+            if (shippedData.TryGetValue(date, out var items))
+            {
+                return items.Select(item => item.TotalSalePrice).Sum();
+            }
+            return 0;
+        });
     }
-}
 
-internal class WalledGoldFirstPassVisitor(Dictionary<StardewDate, GoldInOut> GoldInOut, Operation Operation) 
-        : BaseFirstPassVisitor(Operation)
-{
-    public override int GetDayValue(StardewDate date)
+    public static BaseFirstPassVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation)
     {
-        return GoldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0;
+        return new BaseFirstPassVisitor(operation, date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0);
     }
 }
 
-internal abstract class BaseVisitor(Operation operation, int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal)
+internal class BaseVisitor(Operation operation, int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal, Func<StardewDate, int> getDayValue)
 {
     public Operation Operation = operation;
     public int HighestOverallDayTotal { get; protected set; } = Math.Max(1, highestOverallDayTotal);
@@ -358,7 +352,8 @@ internal abstract class BaseVisitor(Operation operation, int highestOverallDayTo
     {
         return $"{SproutSightViewModel.RowWidth}px {rowHeight}px";
     }
-    public abstract int GetDayValue(StardewDate date);
+    
+    public int GetDayValue(StardewDate date) => getDayValue(date);
 
     public virtual DayElement Visit(DayNode day)
     {
@@ -417,32 +412,28 @@ internal abstract class BaseVisitor(Operation operation, int highestOverallDayTo
     }
 }
 
-internal class ShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> ShippedData, Operation operation, int highestDay, int highestSeason, int highestYear) : 
-        BaseVisitor(operation, highestDay, highestSeason, highestYear)
+internal static class Visitors
 {
-
-    public override int GetDayValue(StardewDate date)
+    public static BaseVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation, 
+                                                  int highestDay, int highestSeason, int highestYear)
     {
-        if (ShippedData.TryGetValue(date, out var items))
+        return new BaseVisitor(operation, highestDay, highestSeason, highestYear, date => 
         {
-            var summed = items.Select(item => item.TotalSalePrice).Sum();
-            return summed;
-        }
-        return 0;
+            if (shippedData.TryGetValue(date, out var items))
+            {
+                return items.Select(item => item.TotalSalePrice).Sum();
+            }
+            return 0;
+        });
     }
-}
 
-internal class WalletGoldVisitor(Dictionary<StardewDate, GoldInOut> GoldInOut, Operation operation, int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal) : 
-        BaseVisitor(operation, highestOverallDayTotal, highestOverallSeasonTotal, highestOverallYearTotal)
-{
-
-    public override int GetDayValue(StardewDate date)
+    public static BaseVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation,
+                                                     int highestDay, int highestSeason, int highestYear)
     {
-        return GoldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0;
+        return new BaseVisitor(operation, highestDay, highestSeason, highestYear, 
+                              date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0);
     }
 }
-
-
 
 // internal class CashFlowVisitor : BaseVisitor
 // {
