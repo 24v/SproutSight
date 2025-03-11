@@ -271,7 +271,7 @@ internal class SingleValueVisitor : BaseVisitor
         reversedElements.Reverse();
         var golds = elements.Select(element => element.Value).ToList();
         int aggregated = DoOperation(golds);
-        string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        string tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         var highest = HighestOverallSeasonTotal;
         int rowHeight = CalculateRowHeight(aggregated, highest);
         string layout = FormatLayout(rowHeight);
@@ -289,12 +289,12 @@ internal class SingleValueVisitor : BaseVisitor
         reversedElements.Reverse();
         var golds = elements.Select(element => element.Value).ToList();
         int aggregated = DoOperation(golds);
-        string tooltip = $"{Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        string tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         var highest = HighestOverallYearTotal;
         int rowHeight = CalculateRowHeight(aggregated, highest);
         string layout = FormatLayout(rowHeight);
         var yearElement = new YearElement<List<SeasonElement<List<DayElement>>>>(
-                    year.Year, aggregated, reversedElements, elements, year + "", layout, tooltip);
+                    year.Year, aggregated, elements, reversedElements, year + "", layout, tooltip);
         return yearElement;
     }
     
@@ -305,11 +305,10 @@ internal class SingleValueVisitor : BaseVisitor
         reversedElements.Reverse();
         var golds = elements.Select(element => element.Value).ToList();
         int aggregated = DoOperation(golds);
-        elements.Reverse();
         string tooltip = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         string text = tooltip;
         var element = new RootElement<List<YearElement<List<SeasonElement<List<DayElement>>>>>>(
-                aggregated, reversedElements, elements, $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);
+                aggregated, elements, reversedElements, $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);
 
         return element;
     }

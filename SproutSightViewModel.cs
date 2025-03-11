@@ -41,6 +41,9 @@ namespace SproutSight;
 // TODO: fix BaseFirstPassVisitor ai trash
 // TODO: Memoize
 // TODO: Should averages include the full year, or only up to certain date?
+    // TODO: Better highlighting of todays date.
+// TOOD: Change name of "Grid"
+
 
 internal partial class SproutSightViewModel
 {

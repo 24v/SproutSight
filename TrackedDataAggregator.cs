@@ -5,15 +5,18 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
     // We decompose the Elements here to make it easier to bind in the sml since dot operations are not allowed.
 
     public List<YearElement<List<SeasonElement<List<DayElement>>>>> WalletGrid { get; set; } = [];
+    public List<YearElement<List<SeasonElement<List<DayElement>>>>> WalletGridReversed { get; set; } = [];
     public string? WalletText { get; private set; } = "";
     public string? WalletTooltip { get; private set; } = "";
 
     public List<YearElement<List<SeasonElement<List<DayElement>>>>> ShippedGrid { get; set; } = [];
+    public List<YearElement<List<SeasonElement<List<DayElement>>>>> ShippedGridReversed { get; set; } = [];
     public int ShippedTotal { get; private set; } = 0;
     public string? ShippedText { get; private set; } = "";
     public string? ShippedTooltip { get; private set; } = "";
 
     public List<YearElement<List<SeasonElement<List<InOutElement>>>>> CashFlowGrid { get; set; } = [];
+    public List<YearElement<List<SeasonElement<List<InOutElement>>>>> CashFlowSorted { get; set; } = [];
     public int CashFlowNetTotal { get; private set; } = 0;
     public string? CashFlowText { get; private set; } = "";
     public string? CashFlowTooltip { get; private set; } = "";
@@ -32,7 +35,7 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
             foreach (Season season in Enum.GetValues(typeof(Season)))
             {
                 List<DayNode> dayNodes = [];
-                seasonNodes.Add(new SeasonNode(season, dayNodes));
+                seasonNodes.Add(new SeasonNode(season, year, dayNodes));
                 for (int day = 1; day <= 28; day++)
                 {
                     var date = new StardewDate(year, season, day);
@@ -56,6 +59,7 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         var shippedRoot = shippedVisitor.Visit(rootNode);
         Logging.Monitor.Log($"ShippedVisitor.Visit returned root with value={shippedRoot.Value}, entries count={shippedRoot.YearElements.Count}", LogLevel.Debug);
         ShippedGrid = shippedRoot.YearElements;
+        ShippedGridReversed = shippedRoot.YearElementsReversed;
         ShippedTotal = shippedRoot.Value;
         ShippedText = shippedRoot.Text;
         ShippedTooltip = shippedRoot.Tooltip;
@@ -73,6 +77,7 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
                 walletGoldFirstPassVisitor.HighestYearValue);
         var walletRoot = walletGoldVisitor.Visit(rootNode);
         WalletGrid = walletRoot.YearElements;
+        WalletGridReversed = walletRoot.YearElementsReversed;
         WalletText = walletRoot.Text;
         WalletTooltip = walletRoot.Tooltip;
 
@@ -140,14 +145,14 @@ internal enum Period
 
 // The tree that we will visit
 internal record YearNode(int Year, List<SeasonNode> Seasons);
-internal record SeasonNode(Season Season, List<DayNode> Days);
+internal record SeasonNode(Season Season, int Year, List<DayNode> Days);
 internal record DayNode(StardewDate Date);
 internal record RootNode(List<YearNode> Years);
 
 // Elements are the structure used in the view for display
-internal record YearElement<T>(int Year, int Value, T SeasonElements, T? SeasonElementsSorted, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
-internal record RootElement<T>(int Value, T YearElements, T? YearElementsSorted, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
-internal record SeasonElement<T>(Season Season, int Value, T DayElements, T? DayElementsSorted, string? Text = null, string? Layout = null, 
+internal record YearElement<T>(int Year, int Value, T SeasonElements, T SeasonElementsReversed, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
+internal record RootElement<T>(int Value, T YearElements, T YearElementsReversed, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
+internal record SeasonElement<T>(Season Season, int Value, T DayElements, T DayElementsReversed, string? Text = null, string? Layout = null, 
     string? Tooltip = null, string? Tint = null, bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false);
 internal record DayElement(StardewDate Date, int Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
 internal record InOutElement(string InText, string InLayout, string InTooltip, string InTint, string OutText, string OutLayout, string OutTooltip, string OutTint);

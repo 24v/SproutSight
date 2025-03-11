@@ -77,9 +77,9 @@
                     <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                     <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                 </lane>
-                <lane *case="All" *repeat={ShippedGrid} orientation="vertical" margin="0,0,0,40">
+                <lane *case="All" *repeat={ShippedGridReversed} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                    <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
+                    <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
                         <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
                             <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
@@ -104,7 +104,7 @@
                 <lane vertical-content-alignment="end" margin="40,40,0,0">
                 <lane *case="Season" *repeat={ShippedGrid} margin="0,0,0,40" vertical-content-alignment="end">
                     <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                    <image *repeat={SeasonElementsSorted} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                    <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                 </lane>
                 </lane>
 
@@ -118,9 +118,9 @@
                     <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                     <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                 </lane>
-                <lane *case="All" *repeat={WalletGrid} orientation="vertical" margin="0,0,0,40">
+                <lane *case="All" *repeat={WalletGridReversed} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                    <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
+                    <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
                     <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
                         <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip} >
                             <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
@@ -145,7 +145,7 @@
                 <lane vertical-content-alignment="end" margin="40,40,0,0">
                     <lane *case="Season" *repeat={ShippedGrid} margin="0,0,0,40" vertical-content-alignment="end">
                     <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                        <image *repeat={SeasonElementsSorted} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>
                 </lane>
             </lane>
