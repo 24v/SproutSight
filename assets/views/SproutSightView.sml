@@ -152,7 +152,12 @@
 
 
             <lane *case="CashFlow" *context={TrackedDataAggregator} layout="820px content" orientation="vertical">
-                <label text={CashFlowText} tooltip={CashFlowTooltip} margin="0,0,0,10"/>
+                <!-- <label text={CashFlowText} tooltip={CashFlowTooltip} margin="0,0,0,10"/> -->
+                <lane>
+                    <label text={CashFlowText} tooltip={CashFlowTooltip} margin="0,0,10,10" layout="stretch"/>
+                    <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
+                    <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
+                </lane>
                 <lane *repeat={CashFlowGrid} orientation="vertical" margin="0,0,0,40">
                 <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<InOutEntry>>> Value) -->
                     <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 

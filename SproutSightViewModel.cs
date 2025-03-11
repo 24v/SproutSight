@@ -127,7 +127,7 @@ internal partial class SproutSightViewModel
         {
             ShipmentTab.Shipping => allOperations.Where(op => op != Operation.End).ToArray(),
             ShipmentTab.Wallet => allOperations.Where(op => op != Operation.Sum).ToArray(),
-            ShipmentTab.CashFlow => allOperations,
+            ShipmentTab.CashFlow => allOperations.Where(op => op != Operation.End).ToArray(),
             _ => allOperations
         };
     }

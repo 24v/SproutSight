@@ -16,7 +16,7 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
     public string? ShippedTooltip { get; private set; } = "";
 
     public List<YearElement<List<SeasonElement<List<InOutElement>>>>> CashFlowGrid { get; set; } = [];
-    public List<YearElement<List<SeasonElement<List<InOutElement>>>>> CashFlowSorted { get; set; } = [];
+    public List<YearElement<List<SeasonElement<List<InOutElement>>>>> CashFlowGridReversed { get; set; } = [];
     public int CashFlowNetTotal { get; private set; } = 0;
     public string? CashFlowText { get; private set; } = "";
     public string? CashFlowTooltip { get; private set; } = "";
@@ -99,6 +99,7 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
                 cashFlowFirstPassVisitor.HighestYearOutValue);
         var cashFlowRoot = cashFlowVisitor.VisitCashFlow(rootNode);
         CashFlowGrid = cashFlowRoot.YearElements;
+        CashFlowGridReversed = cashFlowRoot.YearElementsReversed;
         CashFlowNetTotal = cashFlowRoot.Value;
         CashFlowText = cashFlowRoot.Text;
         CashFlowTooltip = cashFlowRoot.Tooltip;
