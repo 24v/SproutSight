@@ -383,12 +383,22 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
         int netValue = aggregatedIn + aggregatedOut;
-        
-        string tooltip = $"{Operation}:\n" + 
-                         $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" + 
-                         $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" + 
-                         $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
-        
+        string tooltip;
+        if (Operation == Operation.Min || Operation == Operation.Max)
+        {
+            tooltip = $"{Operation}:\n" +
+                             $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
+                             $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+        }
+        else 
+        {
+
+            tooltip = $"{Operation}:\n" +
+                             $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" +
+                             $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
+                             $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+        }
+
         var cashFlowSeasonEntry = new SeasonElement<List<InOutElement>>(
                 season.Season, netValue, entries, null, 
                 season + "", null, tooltip, GetTint(season.Season), 
@@ -407,11 +417,20 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
         int netValue = aggregatedIn + aggregatedOut;
-        
-        string tooltip = $"{Operation}:\n" + 
-                         $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" + 
-                         $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" + 
-                         $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+        string tooltip;
+        if (Operation == Operation.Min || Operation == Operation.Max)
+        {
+            tooltip = $"{Operation}:\n" +
+                             $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
+                             $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+        }
+        else 
+        {
+            tooltip = $"{Operation}:\n" +
+                             $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" +
+                             $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
+                             $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+        }
         
         var cashFlowYearEntry = new YearElement<List<SeasonElement<List<InOutElement>>>>(
                     year.Year, netValue, entries, null, year + "", null, tooltip);
