@@ -375,10 +375,12 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
 
     public (SeasonElement<List<InOutElement>>, (int, int)) VisitCashFlow(SeasonNode season)
     {
-        var entriesWithValues = season.Days.Select(VisitCashFlow).ToList();
-        var entries = entriesWithValues.Select(e => e.Item1).ToList();
-        var cashFlowInValues = entriesWithValues.Select(e => e.Item2.Item1).ToList();
-        var cashFlowOutValues = entriesWithValues.Select(e => e.Item2.Item2).ToList();
+        var elementsWithValues = season.Days.Select(VisitCashFlow).ToList();
+        var elements = elementsWithValues.Select(e => e.Item1).ToList();
+        var reversedElements = elements.ToList();
+        reversedElements.Reverse();
+        var cashFlowInValues = elementsWithValues.Select(e => e.Item2.Item1).ToList();
+        var cashFlowOutValues = elementsWithValues.Select(e => e.Item2.Item2).ToList();
         
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
@@ -400,7 +402,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         }
 
         var cashFlowSeasonEntry = new SeasonElement<List<InOutElement>>(
-                season.Season, netValue, entries, null, 
+                season.Season, netValue, elements, reversedElements, 
                 season + "", null, tooltip, GetTint(season.Season), 
                 season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
         return (cashFlowSeasonEntry, (aggregatedIn, aggregatedOut));
@@ -408,11 +410,12 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
     
     public (YearElement<List<SeasonElement<List<InOutElement>>>>, (int, int)) VisitCashFlow(YearNode year)
     {
-        var entriesWithValues = year.Seasons.Select(VisitCashFlow).ToList();
-        var entries = entriesWithValues.Select(e => e.Item1).ToList();
-        entries.Reverse();
-        var cashFlowInValues = entriesWithValues.Select(e => e.Item2.Item1).ToList();
-        var cashFlowOutValues = entriesWithValues.Select(e => e.Item2.Item2).ToList();
+        var elementsWithValues = year.Seasons.Select(VisitCashFlow).ToList();
+        var elements = elementsWithValues.Select(e => e.Item1).ToList();
+        var reversedElements = elements.ToList();
+        reversedElements.Reverse();
+        var cashFlowInValues = elementsWithValues.Select(e => e.Item2.Item1).ToList();
+        var cashFlowOutValues = elementsWithValues.Select(e => e.Item2.Item2).ToList();
         
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
@@ -433,17 +436,18 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         }
         
         var cashFlowYearEntry = new YearElement<List<SeasonElement<List<InOutElement>>>>(
-                    year.Year, netValue, entries, null, year + "", null, tooltip);
+                    year.Year, netValue, elements, reversedElements, year + "", null, tooltip);
         return (cashFlowYearEntry, (aggregatedIn, aggregatedOut));
     }
     
     public RootElement<List<YearElement<List<SeasonElement<List<InOutElement>>>>>> VisitCashFlow(RootNode root)
     {
-        var entriesWithValues = root.Years.Select(VisitCashFlow).ToList();
-        var entries = entriesWithValues.Select(e => e.Item1).ToList();
-        entries.Reverse();
-        var cashFlowInValues = entriesWithValues.Select(e => e.Item2.Item1).ToList();
-        var cashFlowOutValues = entriesWithValues.Select(e => e.Item2.Item2).ToList();
+        var elementsWithValues = root.Years.Select(VisitCashFlow).ToList();
+        var elements = elementsWithValues.Select(e => e.Item1).ToList();
+        var reversedElements = elements.ToList();
+        reversedElements.Reverse();
+        var cashFlowInValues = elementsWithValues.Select(e => e.Item2.Item1).ToList();
+        var cashFlowOutValues = elementsWithValues.Select(e => e.Item2.Item2).ToList();
         
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
@@ -456,7 +460,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         
         string text = $"Cash Flow {Operation}";
         var element = new RootElement<List<YearElement<List<SeasonElement<List<InOutElement>>>>>>(
-                netValue, entries, null, $"Overall {Operation} Cash Flow", null, tooltip);
+                netValue, elements, reversedElements, $"Overall {Operation} Cash Flow", null, tooltip);
 
         return element;
     }
