@@ -158,9 +158,9 @@
                         <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                         <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
-                    <lane *case="All" *repeat={CashFlowGrid} orientation="vertical" margin="0,0,0,40">
+                    <lane *case="All" *repeat={CashFlowGridReversed} orientation="vertical" margin="0,0,0,40">
                     <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<InOutEntry>>> Value) -->
-                        <lane *repeat={SeasonElements} vertical-content-alignment="end" margin="0,0,0,10"> 
+                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
                         <!-- Context is a SeasonEntryElement(Season Season, List<InOutEntry> Value, string text, ...) -->
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
@@ -171,8 +171,8 @@
                             </lane>
                             <lane *repeat={DayElements} orientation="vertical" margin="1,0,0,0">
                             <!-- Context is an InOutEntry -->
-                                <image tint={InTint} fit="stretch" layout={InLayout} tooltip={InTooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                                <image tint={OutTint} fit="stretch" layout={OutLayout} tooltip={OutTooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
                             </lane>
                             <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Tooltip}>
                                 <label text="Y-"/>
@@ -182,10 +182,12 @@
                         </lane>
                     </lane>
                     <lane *case="Year" margin="0,0,0,40" vertical-content-alignment="end">
+                        <lane *repeat={CashFlowGrid} orientation="vertical" margin="1,0,0,0">
                         <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                        <lane *repeat={CashFlowGrid} orientation="vertical" margin="0,0,0,10"> 
-                            <image tint={InTint} fit="stretch" layout={InLayout} tooltip={InTooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                            <image tint={OutTint} fit="stretch" layout={OutLayout} tooltip={OutTooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                            <label text={Text}/>
+                            <!-- Context is an InOutEntry -->
+                            <!-- <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} /> -->
+                            <!-- <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} /> -->
                         </lane>
                     </lane>
                 </lane>

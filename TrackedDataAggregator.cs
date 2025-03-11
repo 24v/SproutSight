@@ -4,19 +4,19 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
 {
     // We decompose the Elements here to make it easier to bind in the sml since dot operations are not allowed.
 
-    public List<YearElement<List<SeasonElement<List<DayElement>>>>> WalletGrid { get; set; } = [];
-    public List<YearElement<List<SeasonElement<List<DayElement>>>>> WalletGridReversed { get; set; } = [];
+    public List<YearElement> WalletGrid { get; set; } = [];
+    public List<YearElement> WalletGridReversed { get; set; } = [];
     public string? WalletText { get; private set; } = "";
     public string? WalletTooltip { get; private set; } = "";
 
-    public List<YearElement<List<SeasonElement<List<DayElement>>>>> ShippedGrid { get; set; } = [];
-    public List<YearElement<List<SeasonElement<List<DayElement>>>>> ShippedGridReversed { get; set; } = [];
+    public List<YearElement> ShippedGrid { get; set; } = [];
+    public List<YearElement> ShippedGridReversed { get; set; } = [];
     public int ShippedTotal { get; private set; } = 0;
     public string? ShippedText { get; private set; } = "";
     public string? ShippedTooltip { get; private set; } = "";
 
-    public List<YearElement<List<SeasonElement<List<InOutElement>>>>> CashFlowGrid { get; set; } = [];
-    public List<YearElement<List<SeasonElement<List<InOutElement>>>>> CashFlowGridReversed { get; set; } = [];
+    public List<YearElement> CashFlowGrid { get; set; } = [];
+    public List<YearElement> CashFlowGridReversed { get; set; } = [];
     public int CashFlowNetTotal { get; private set; } = 0;
     public string? CashFlowText { get; private set; } = "";
     public string? CashFlowTooltip { get; private set; } = "";
@@ -149,11 +149,23 @@ internal record YearNode(int Year, List<SeasonNode> Seasons);
 internal record SeasonNode(Season Season, int Year, List<DayNode> Days);
 internal record DayNode(StardewDate Date);
 internal record RootNode(List<YearNode> Years);
+internal record RootElement(int Value, List<YearElement> YearElements, List<YearElement> YearElementsReversed, 
+    string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,
+    string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
+);
+internal record YearElement(int Year, int Value, List<SeasonElement> SeasonElements, List<SeasonElement> SeasonElementsReversed, 
+    string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,
+    string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
+);
 
-// Elements are the structure used in the view for display
-internal record YearElement<T>(int Year, int Value, T SeasonElements, T SeasonElementsReversed, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
-internal record RootElement<T>(int Value, T YearElements, T YearElementsReversed, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
-internal record SeasonElement<T>(Season Season, int Value, T DayElements, T DayElementsReversed, string? Text = null, string? Layout = null, 
-    string? Tooltip = null, string? Tint = null, bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false);
-internal record DayElement(StardewDate Date, int Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
-internal record InOutElement(string InText, string InLayout, string InTooltip, string InTint, string OutText, string OutLayout, string OutTooltip, string OutTint);
+// TODO: Fix this trash
+internal record SeasonElement(Season Season, int Value, List<DayElement> DayElements, List<DayElement> DayElementsReversed, 
+    string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null, 
+    bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false,
+    string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
+);
+internal record DayElement(StardewDate Date, int Value, 
+        string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,
+        string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
+
+);
