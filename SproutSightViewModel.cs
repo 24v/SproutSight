@@ -40,6 +40,7 @@ namespace SproutSight;
 // TODO: Why does it not use the more specific icon?
 // TODO: fix BaseFirstPassVisitor ai trash
 // TODO: Memoize
+// TODO: Should averages include the full year, or only up to certain date?
 
 internal partial class SproutSightViewModel
 {

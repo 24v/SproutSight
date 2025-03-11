@@ -145,9 +145,9 @@ internal record DayNode(StardewDate Date);
 internal record RootNode(List<YearNode> Years);
 
 // Elements are the structure used in the view for display
-internal record YearElement<T>(int Year, int Value, T SeasonElements, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
-internal record RootElement<T>(int Value, T YearElements, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
-internal record SeasonElement<T>(Season Season, int Value, T DayElements, string? Text = null, string? Layout = null, 
+internal record YearElement<T>(int Year, int Value, T SeasonElements, T? SeasonElementsSorted, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
+internal record RootElement<T>(int Value, T YearElements, T? YearElementsSorted, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
+internal record SeasonElement<T>(Season Season, int Value, T DayElements, T? DayElementsSorted, string? Text = null, string? Layout = null, 
     string? Tooltip = null, string? Tint = null, bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false);
 internal record DayElement(StardewDate Date, int Value, string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null);
 internal record InOutElement(string InText, string InLayout, string InTooltip, string InTint, string OutText, string OutLayout, string OutTooltip, string OutTint);

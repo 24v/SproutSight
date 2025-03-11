@@ -97,14 +97,14 @@
                     </lane>
                 </lane>
                 <lane *case="Year"margin="0,0,0,40" vertical-content-alignment="end">
-                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <image *repeat={ShippedGrid}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                 </lane>
 
                 <lane vertical-content-alignment="end" margin="40,40,0,0">
                 <lane *case="Season" *repeat={ShippedGrid} margin="0,0,0,40" vertical-content-alignment="end">
                     <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                    <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                    <image *repeat={SeasonElementsSorted} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                 </lane>
                 </lane>
 
@@ -138,14 +138,14 @@
                     </lane>
                 </lane>
                 <lane *case="Year"margin="0,0,0,40" vertical-content-alignment="end">
-                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     <image *repeat={ShippedGrid}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                 </lane>
 
                 <lane vertical-content-alignment="end" margin="40,40,0,0">
                     <lane *case="Season" *repeat={ShippedGrid} margin="0,0,0,40" vertical-content-alignment="end">
                     <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                        <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <image *repeat={SeasonElementsSorted} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>
                 </lane>
             </lane>
