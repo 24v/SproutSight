@@ -138,12 +138,12 @@
                     </lane>
                 </lane>
                 <lane *case="Year"margin="0,0,0,40" vertical-content-alignment="end">
-                    <image *repeat={ShippedGrid}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                    <image *repeat={WalletGrid}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                 </lane>
 
                 <lane vertical-content-alignment="end" margin="40,40,0,0">
-                    <lane *case="Season" *repeat={ShippedGrid} margin="0,0,0,40" vertical-content-alignment="end">
+                    <lane *case="Season" *repeat={WalletGrid} margin="0,0,0,40" vertical-content-alignment="end">
                     <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                         <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>

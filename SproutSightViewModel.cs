@@ -43,7 +43,7 @@ namespace SproutSight;
 // TODO: Should averages include the full year, or only up to certain date?
     // TODO: Better highlighting of todays date.
 // TOOD: Change name of "Grid"
-
+// TODO: Overflow of seasons
 
 internal partial class SproutSightViewModel
 {

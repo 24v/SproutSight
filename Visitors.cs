@@ -285,16 +285,17 @@ internal class SingleValueVisitor : BaseVisitor
     public virtual YearElement<List<SeasonElement<List<DayElement>>>> Visit(YearNode year)
     {
         var elements = year.Seasons.Select(Visit).ToList();
-        var reversedElements = elements.ToList();
-        reversedElements.Reverse();
         var golds = elements.Select(element => element.Value).ToList();
         int aggregated = DoOperation(golds);
         string tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         var highest = HighestOverallYearTotal;
         int rowHeight = CalculateRowHeight(aggregated, highest);
         string layout = FormatLayout(rowHeight);
+
+        var reversedElements = elements.ToList();
+        reversedElements.Reverse();
         var yearElement = new YearElement<List<SeasonElement<List<DayElement>>>>(
-                    year.Year, aggregated, elements, reversedElements, year + "", layout, tooltip);
+                    year.Year, aggregated, elements, reversedElements, year.Year + "", layout, tooltip);
         return yearElement;
     }
     
