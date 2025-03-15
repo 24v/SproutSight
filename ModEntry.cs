@@ -258,8 +258,7 @@ internal sealed class ModEntry : Mod
             return;
         }
 
-        // Avoid rendering during cutscenes.
-        if (!Game1.IsHudDrawn) 
+        if (!UIElementUtils.IsRenderingNormally()) 
         {
             return;
         }
