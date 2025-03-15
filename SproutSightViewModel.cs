@@ -10,9 +10,12 @@ using StardewUI.Framework;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.VisualBasic;
 using StardewValley.GameData.Pets;
+using Microsoft.Xna.Framework;
 
 namespace SproutSight;
 
+// TODO: Tooltip on Icons
+// TODO: Double check sale price
 // TODO: More specific icons
 // TODO: Move icon
 // TODO: Update to always use positive numbers in the tracked data.
@@ -68,11 +71,25 @@ internal partial class SproutSightViewModel
     [Notify]
     private TrackedDataAggregator _trackedDataAggregator;
 
+    private void OnParamsChange()
+    {
+        var newAggregator = new TrackedDataAggregator(trackedData, SelectedOperation, GetSelectedYearsArray());
+        newAggregator.LoadAggregationAndViewVisitor();
+        TrackedDataAggregator = newAggregator;
+        Logging.Monitor.Log("OnParamsChange", LogLevel.Error);
+    }
+
     public SproutSightViewModel(TrackedData trackedData) {
         this.trackedData = trackedData;
-        _trackedDataAggregator = new(trackedData, SelectedOperation);
-        _trackedDataAggregator.LoadAggregationAndViewVisitor();
+        SelectedYears = [new YearSelectionViewModel(YearSelectionViewModel.YEAR_ALL, true)];
+        for (int i = 1; i <= Game1.year ; i++ )
+        {
+            SelectedYears = SelectedYears.Append(new YearSelectionViewModel(i, false)).ToArray();
+        }
+
         _operations = GetAvailableOperations();
+        _trackedDataAggregator = new TrackedDataAggregator(trackedData, SelectedOperation, GetSelectedYearsArray());
+        OnParamsChange();
     }
     public static string FormatGoldNumber(int number)
     {
@@ -85,9 +102,7 @@ internal partial class SproutSightViewModel
     private Operation _selectedOperation = Operation.Sum;
     private void OnSelectedOperationChanged(Operation oldValue, Operation newValue)
     {
-        var newAggregator = new TrackedDataAggregator(trackedData, newValue);
-        newAggregator.LoadAggregationAndViewVisitor();
-        TrackedDataAggregator = newAggregator;
+        OnParamsChange();
     }
     
     [Notify] private Period selectedPeriod = Period.All;
@@ -118,8 +133,8 @@ internal partial class SproutSightViewModel
         }
         
         // Refresh data with the new operation
-        OnSelectedOperationChanged(SelectedOperation, SelectedOperation);
         Operations = GetAvailableOperations();
+        OnParamsChange();
     }
 
     public Operation[] GetAvailableOperations()
@@ -133,5 +148,23 @@ internal partial class SproutSightViewModel
             ShipmentTab.CashFlow => allOperations.Where(op => op != Operation.End).ToArray(),
             _ => allOperations
         };
+    }
+
+    [Notify] private bool isYearSelectionExpanded;
+
+    public YearSelectionViewModel[] SelectedYears { get; set; }
+
+    public int[] GetSelectedYearsArray()
+    {
+        return SelectedYears.Where(y => y.IsChecked).Select(y => y.Year).ToArray();
+    }
+
+    public void SelectYear(int year)
+    {
+        foreach (var Year in SelectedYears)
+        {
+            Year.HandleAllSelection(year == YearSelectionViewModel.YEAR_ALL);
+        }
+        OnParamsChange();
     }
 }

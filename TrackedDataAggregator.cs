@@ -1,6 +1,6 @@
 namespace SproutSight;
 
-internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operation)
+internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operation, int[]? SelectedYears)
 {
     // We decompose the Elements here to make it easier to bind in the sml since dot operations are not allowed.
 

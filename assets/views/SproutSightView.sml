@@ -71,12 +71,28 @@
                     </scrollable>
                 </lane>
 
-                <lane *case="Shipping" *switch={SelectedPeriod} *context={TrackedDataAggregator} layout="820px content" orientation="vertical">
+                <lane *case="Shipping" *switch={SelectedPeriod} *context={TrackedDataAggregator} 
+                        layout="820px content" 
+                        orientation="vertical" 
+                        horizontal-content-alignment="end">
+
                     <lane>
-                        <label text={ShippedTooltip} tooltip={ShippedTooltip} margin="0,0,10,10" layout="stretch"/>
+                        <label text={ShippedTooltip} tooltip={ShippedTooltip} margin="0,0,10,10" />
+                        <label text="(Note)" tooltip="Hover over year/season to see aggregated." scale=".5" layout="stretch"/>
                         <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                         <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
+                    <expander layout="stretch content"
+                            margin="515,0,0,4"
+                            header-padding="0,12"
+                            header-background-tint="#99c"
+                            is-expanded={<>^IsYearSelectionExpanded} >
+
+                        <label layout="stretch" *outlet="header" text="Selected Years"/>
+                        <lane orientation="vertical" margin="59,0,0,0" layout="stretch content" horizontal-content-alignment="start">
+                            <checkbox *repeat={^SelectedYears} label-text={Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
+                        </lane>
+                    </expander>
                     <lane *case="All" *repeat={ShippedGridReversed} orientation="vertical" margin="0,0,0,40">
                     <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                         <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
