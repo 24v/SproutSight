@@ -184,10 +184,10 @@
                     <lane *case="Year" margin="0,0,0,40" vertical-content-alignment="end">
                         <lane *repeat={CashFlowGrid} orientation="vertical" margin="1,0,0,0">
                         <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                            <label text={Text}/>
+                            <!-- <label text={Text}/> -->
                             <!-- Context is an InOutEntry -->
-                            <!-- <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} /> -->
-                            <!-- <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} /> -->
+                            <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                            <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
                     </lane>
                 </lane>

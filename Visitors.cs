@@ -22,11 +22,10 @@ internal static class Visitors
     }
 
     public static CashFlowVisitor CreateCashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation,
-                                                      int highestDay, int highestSeason, int highestYear,
                                                       int highestDayIn, int highestSeasonIn, int highestYearIn,
                                                       int highestDayOut, int highestSeasonOut, int highestYearOut)
     {
-        return new CashFlowVisitor(goldInOut, operation, highestDay, highestSeason, highestYear, highestDayIn, highestSeasonIn, highestYearIn, highestDayOut, highestSeasonOut, highestYearOut);
+        return new CashFlowVisitor(goldInOut, operation, highestDayIn, highestSeasonIn, highestYearIn, highestDayOut, highestSeasonOut, highestYearOut);
     }
 }
 
@@ -55,10 +54,6 @@ internal static class FirstPassVisitors
     }
 }
 
-/// <summary>
-/// For getting the highest values which will be used in the second pass for creating bar scales
-/// </summary>
-/// <param name="Operation">Which operation to perform</param>
 internal class BaseFirstPassVisitor(Operation Operation, Func<StardewDate, int> getDayValue) 
 {
     public int HighestDayValue { get; private set; } = 0;
@@ -105,10 +100,10 @@ internal class BaseFirstPassVisitor(Operation Operation, Func<StardewDate, int> 
     }
 }
 
-internal class CashFlowFirstPassVisitor : BaseFirstPassVisitor
+internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation) : BaseFirstPassVisitor(operation, date => 0)
 {
-    public Dictionary<StardewDate, GoldInOut> CashFlowByDate { get; set; } = [];
-    
+    public Dictionary<StardewDate, GoldInOut> CashFlowByDate { get; set; } = goldInOut;
+
     // Highest values for income
     public int HighestDayInValue { get; private set; } = 1;
     public int HighestSeasonInValue { get; private set; } = 1;
@@ -118,22 +113,6 @@ internal class CashFlowFirstPassVisitor : BaseFirstPassVisitor
     public int HighestDayOutValue { get; private set; } = 1;
     public int HighestSeasonOutValue { get; private set; } = 1;
     public int HighestYearOutValue { get; private set; } = 1;
-    
-    public CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation)
-        : base(operation, date => 0) // The getDayValue lambda is not used in this class
-    {
-        CashFlowByDate = goldInOut;
-        foreach (StardewDate date in goldInOut.Keys)
-        {
-            if (goldInOut.TryGetValue(date, out var flow))
-            {
-                var inValue = flow.In;
-                var outValue = Math.Abs(flow.Out);
-                HighestDayInValue = Math.Max(HighestDayInValue, inValue);
-                HighestDayOutValue = Math.Max(HighestDayOutValue, outValue);
-            }
-        }
-    }
 
     // Override Visit methods to handle the tuple return values
     public new (int, int) Visit(DayNode day)
@@ -315,7 +294,6 @@ internal class SingleValueVisitor : BaseVisitor
 }
 
 internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation,
-                      int highestDay, int highestSeason, int highestYear,
                       int highestDayIn, int highestSeasonIn, int highestYearIn,
                       int highestDayOut, int highestSeasonOut, int highestYearOut) : BaseVisitor(operation)
 {
@@ -330,11 +308,6 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
     public int HighestDayOutValue { get; } = Math.Max(1, highestDayOut);
     public int HighestSeasonOutValue { get; } = Math.Max(1, highestSeasonOut);
     public int HighestYearOutValue { get; } = Math.Max(1, highestYearOut);
-
-    // Overall highest values for each level
-    public int HighestOverallDayTotal { get; } = Math.Max(1, highestDay);
-    public int HighestOverallSeasonTotal { get; } = Math.Max(1, highestSeason);
-    public int HighestOverallYearTotal { get; } = Math.Max(1, highestYear);
 
     public (DayElement, (int, int)) VisitCashFlow(DayNode day)
     {
@@ -357,7 +330,6 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         string outLayout = FormatLayout(outRowHeight);
         
         // Determine colors based on net value
-        bool positive = dayIn + dayOut >= 0;
         var inTint = "#696969"; 
         var outTint = "#B22222"; 
         
@@ -382,26 +354,44 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
         int netValue = aggregatedIn + aggregatedOut;
+        
+        // Calculate in bar using season-specific highest value
+        int inRowHeight = CalculateRowHeight(aggregatedIn, HighestSeasonInValue);
+        string inLayout = FormatLayout(inRowHeight);
+        
+        // Calculate out bar using season-specific highest value
+        int outRowHeight = CalculateRowHeight(Math.Abs(aggregatedOut), HighestSeasonOutValue);
+        string outLayout = FormatLayout(outRowHeight);
+        
+        // Log layout calculations
+        Logging.Monitor.Log($"Season {season.Season} CashFlow Layout Calculations:", LogLevel.Debug);
+        Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestSeasonInValue: {HighestSeasonInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
+        Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestSeasonOutValue: {HighestSeasonOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
+        
+        // Determine colors based on net value
+        var inTint = "#696969"; 
+        var outTint = "#B22222";
+        
         string tooltip;
         if (Operation == Operation.Min || Operation == Operation.Max)
         {
-            tooltip = $"{Operation}:\n" +
-                             $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
-                             $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+            tooltip = $"{season.Season} Y-{season.Year} {Operation}:\n" +
+                      $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
+                      $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
         }
         else 
         {
-
-            tooltip = $"{Operation}:\n" +
-                             $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" +
-                             $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
-                             $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+            tooltip = $"{season.Season} Y-{season.Year} {Operation}:\n" +
+                      $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" +
+                      $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
+                      $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
         }
 
         var cashFlowSeasonEntry = new SeasonElement(
                 season.Season, netValue, elements, reversedElements, 
-                season + "", null, tooltip, GetTint(season.Season), 
-                season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
+                season.Season.ToString(), inLayout, tooltip, inTint, 
+                season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter,
+                "", outLayout, tooltip, outTint);
         return (cashFlowSeasonEntry, (aggregatedIn, aggregatedOut));
     }
     
@@ -417,23 +407,43 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
         int netValue = aggregatedIn + aggregatedOut;
+        
+        // Calculate in bar using year-specific highest value
+        int inRowHeight = CalculateRowHeight(aggregatedIn, HighestYearInValue);
+        string inLayout = FormatLayout(inRowHeight);
+        
+        // Calculate out bar using year-specific highest value
+        int outRowHeight = CalculateRowHeight(Math.Abs(aggregatedOut), HighestYearOutValue);
+        string outLayout = FormatLayout(outRowHeight);
+        
+        // Log layout calculations
+        Logging.Monitor.Log($"Year {year.Year} CashFlow Layout Calculations:", LogLevel.Debug);
+        Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestYearInValue: {HighestYearInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
+        Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestYearOutValue: {HighestYearOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
+        
+        // Determine colors based on net value
+        var inTint = "#696969"; 
+        var outTint = "#B22222";
+        
         string tooltip;
         if (Operation == Operation.Min || Operation == Operation.Max)
         {
-            tooltip = $"{Operation}:\n" +
-                             $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
-                             $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+            tooltip = $"Y-{year.Year} {Operation}:\n" +
+                      $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
+                      $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
         }
         else 
         {
-            tooltip = $"{Operation}:\n" +
-                             $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" +
-                             $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
-                             $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+            tooltip = $"Y-{year.Year} {Operation}:\n" +
+                      $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" +
+                      $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
+                      $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
         }
         
         var cashFlowYearEntry = new YearElement(
-                    year.Year, netValue, elements, reversedElements, year + "", null, tooltip);
+                year.Year, netValue, elements, reversedElements, 
+                year.Year.ToString(), inLayout, tooltip, inTint,
+                "", outLayout, tooltip, outTint);
         return (cashFlowYearEntry, (aggregatedIn, aggregatedOut));
     }
     
@@ -450,13 +460,32 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         int aggregatedOut = DoOperation(cashFlowOutValues);
         int netValue = aggregatedIn + aggregatedOut;
         
+        // Calculate in/out layouts for the overall root
+        int inRowHeight = CalculateRowHeight(aggregatedIn, HighestYearInValue);
+        string inLayout = FormatLayout(inRowHeight);
+        
+        int outRowHeight = CalculateRowHeight(Math.Abs(aggregatedOut), HighestYearOutValue);
+        string outLayout = FormatLayout(outRowHeight);
+        
+        // Log layout calculations
+        Logging.Monitor.Log($"Root CashFlow Layout Calculations:", LogLevel.Debug);
+        Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestYearInValue: {HighestYearInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
+        Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestYearOutValue: {HighestYearOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
+        
+        // Determine colors
+        var inTint = "#696969"; 
+        var outTint = "#B22222";
+        
         string tooltip = $"Overall {Operation}:\n" + 
                          $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" + 
                          $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" + 
                          $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
         
         string text = $"Cash Flow {Operation}";
-        var element = new RootElement(netValue, elements, reversedElements, $"Overall {Operation} Cash Flow", null, tooltip);
+        var element = new RootElement(
+                netValue, elements, reversedElements, 
+                $"Overall {Operation} Cash Flow", inLayout, tooltip, inTint,
+                $"", outLayout, tooltip, outTint);
 
         return element;
     }

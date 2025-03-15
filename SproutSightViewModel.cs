@@ -13,6 +13,9 @@ using StardewValley.GameData.Pets;
 
 namespace SproutSight;
 
+// TODO: More specific icons
+// TODO: Move icon
+// TODO: Update to always use positive numbers in the tracked data.
 // TODO: Base class for visitor for helper methods
 // TODO: Diff levels of aggregation
 // TODO: Remove generics :/

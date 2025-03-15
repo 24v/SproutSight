@@ -88,9 +88,6 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         var cashFlowVisitor = Visitors.CreateCashFlowVisitor(
                 TrackedData.GoldInOut, 
                 Operation,
-                cashFlowFirstPassVisitor.HighestDayValue, 
-                cashFlowFirstPassVisitor.HighestSeasonValue, 
-                cashFlowFirstPassVisitor.HighestYearValue,
                 cashFlowFirstPassVisitor.HighestDayInValue,
                 cashFlowFirstPassVisitor.HighestSeasonInValue,
                 cashFlowFirstPassVisitor.HighestYearInValue,
