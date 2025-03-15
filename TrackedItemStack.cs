@@ -1,7 +1,4 @@
 using StardewValley.ItemTypeDefinitions;
-using StardewModdingAPI;
-using StardewValley;
-using StardewValley.GameData;
 
 namespace SproutSight;
 internal partial class TrackedItemStack : IComparable<TrackedItemStack>
@@ -23,10 +20,6 @@ internal partial class TrackedItemStack : IComparable<TrackedItemStack>
     public string Name => _name ??= ParsedItemData.DisplayName;
 
     public ParsedItemData Sprite => ParsedItemData;
-
-    public TrackedItemStack()
-    {
-    }
 
     public TrackedItemStack(Item item)
     {
