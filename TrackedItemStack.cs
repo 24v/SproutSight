@@ -21,6 +21,11 @@ internal partial class TrackedItemStack : IComparable<TrackedItemStack>
 
     public ParsedItemData Sprite => ParsedItemData;
 
+    public TrackedItemStack()
+    {
+
+    }
+
     public TrackedItemStack(Item item)
     {
         this.Id = item.ItemId;
