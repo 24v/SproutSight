@@ -57,6 +57,7 @@ internal partial class SproutSightViewModel
     public const int MaxRowHeight = 128;
     public const int MinRowHeight = 2;
     public const int ZeroDataRowHeight = 1;
+    public const int NumYearsToShowByDefault = 2;
 
     // Showing Today's Info
     public StardewDate Date = StardewDate.GetStardewDate();
@@ -81,10 +82,10 @@ internal partial class SproutSightViewModel
 
     public SproutSightViewModel(TrackedData trackedData) {
         this.trackedData = trackedData;
-        SelectedYears = [new YearSelectionViewModel(YearSelectionViewModel.YEAR_ALL, true)];
-        for (int i = 1; i <= Game1.year ; i++ )
+        YearSelectionOptions = [new YearSelectionViewModel(YearSelectionViewModel.YEAR_ALL, true)];
+        for (int i = Game1.year ; i >= 1; i-- )
         {
-            SelectedYears = SelectedYears.Append(new YearSelectionViewModel(i, false)).ToArray();
+            YearSelectionOptions = YearSelectionOptions.Append(new YearSelectionViewModel(i, false)).ToArray();
         }
 
         _operations = GetAvailableOperations();
@@ -152,19 +153,27 @@ internal partial class SproutSightViewModel
 
     [Notify] private bool isYearSelectionExpanded;
 
-    public YearSelectionViewModel[] SelectedYears { get; set; }
+    public YearSelectionViewModel[] YearSelectionOptions { get; set; }
 
     public int[] GetSelectedYearsArray()
     {
-        return SelectedYears.Where(y => y.IsChecked).Select(y => y.Year).ToArray();
+        return YearSelectionOptions.Where(y => y.IsChecked).Select(y => y.Year).ToArray();
     }
 
-    public void SelectYear(int year)
+    public void SelectYear(int Year)
     {
-        foreach (var Year in SelectedYears)
+        bool allSelected;
+        if (Year == YearSelectionViewModel.YEAR_ALL)
         {
-            Year.HandleAllSelection(year == YearSelectionViewModel.YEAR_ALL);
+            var allYearViewModel = YearSelectionOptions[0];
+            allSelected = !allYearViewModel.IsChecked;
+        } else {
+            allSelected = false;
         }
-        OnParamsChange();
+
+        foreach (var yearViewModel in YearSelectionOptions)
+        {
+            yearViewModel.HandleAllSelection(allSelected);
+        }
     }
 }

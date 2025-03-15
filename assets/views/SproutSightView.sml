@@ -90,7 +90,7 @@
 
                         <label layout="stretch" *outlet="header" text="Selected Years"/>
                         <lane orientation="vertical" margin="59,0,0,0" layout="stretch content" horizontal-content-alignment="start">
-                            <checkbox *repeat={^SelectedYears} label-text={Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
+                            <checkbox *repeat={^YearSelectionOptions} label-text={Text} is-checked={<>IsChecked} click=|^^SelectYear(Year)|/>
                         </lane>
                     </expander>
                     <lane *case="All" *repeat={ShippedGridReversed} orientation="vertical" margin="0,0,0,40">
