@@ -2,14 +2,6 @@ using PropertyChanged.SourceGenerator;
 
 namespace SproutSight.Display;
 
-// TODO: Check results
-// TODO: Fix ordering of SML params
-// TODO: Double check sale price
-// TODO: Move icon
-// TODO: Move to package
-// TODO: Memoize
-// TODO: Improve title text
-
 internal partial class SproutSightViewModel
 {
 

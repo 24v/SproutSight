@@ -27,7 +27,12 @@ Todo:
   - More specific preserved names / icons.
   - Testing Script
   - Linter / Autoformat / C# Conventions
-  - Fix directory structure
+  - Check results
+  - Fix ordering of SML params
+  - Double check sale price
+  - Move icon
+  - Memoize
+  - Improve title text
 
 Ideas:
   - Value of all assets
@@ -263,8 +268,8 @@ internal sealed class ModEntry : Mod
 
         hud ??= stardewUIViewEngine!.CreateDrawableFromAsset($"{viewAssetPrefix}/HudIcon");
 
-        int marginRight = 83;
-        int marginTop = 306;
+        int marginRight = 39;
+        int marginTop = 262;
         var viewport = Game1.uiViewport;
         var x = viewport.Width - marginRight;
         var y = marginTop;
