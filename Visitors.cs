@@ -174,14 +174,19 @@ internal abstract class BaseVisitor(Operation operation, StardewDate UpToDate)
 
     public StardewDate UpToDate { get; } = UpToDate;
 
-    public int DoOperation(List<int> entries)
+    public int DoOperation(List<int> entries, int? countOverride = null)
     {
+        if (entries.Count == 0)
+        {
+            return 0;
+        }
         return Operation switch
         {
             Operation.Min => entries.Min(),
             Operation.Max => entries.Max(),
             Operation.Sum => entries.Sum(),
-            Operation.Average => (int)Math.Round(entries.Sum() / (float)entries.Count),
+            Operation.Average => (int)Math.Round(entries.Sum() / 
+                (float)(countOverride != null ? countOverride : entries.Count)),
             Operation.End => entries.Last(),
             _ => 0
         };
@@ -280,21 +285,23 @@ internal class SingleValueVisitor : BaseVisitor
             .Where(e => e.Valid)
             .Select(e => e.Value)
             .ToList();
-        int aggregated;
-        if (golds.Count > 0)
+        
+        var aggregated = DoOperation(golds, golds.Count);
+        var aggValue = new AggValue(aggregated, golds.Count > 0, golds.Count);
+        string tooltip;
+        if (aggValue.Valid)
         {
-            aggregated = DoOperation(golds);
-        } 
+            tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        }
         else 
         {
-            aggregated = 0;
+            tooltip = $"{season.Season} Y-{season.Year} {Operation}: Season in the future!";
         }
-        string tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         var highest = HighestOverallSeasonTotal;
         int rowHeight = CalculateRowHeight(aggregated, highest);
         string layout = FormatLayout(rowHeight);
         var seasonElement = new SeasonElement(
-                season.Season, aggregated, elements, reversedElements,
+                season.Season, aggValue, elements, reversedElements,
                 season + "", layout, tooltip, GetTint(season.Season), 
                 season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
         return seasonElement;
@@ -302,18 +309,62 @@ internal class SingleValueVisitor : BaseVisitor
 
     public virtual YearElement Visit(YearNode year)
     {
+        Logging.Monitor.Log($"Year {year.Year}");
         var elements = year.Seasons.Select(Visit).ToList();
-        var golds = elements.Select(element => element.Value).ToList();
-        int aggregated = DoOperation(golds);
-        string tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        foreach (var element in elements)
+        {
+            Logging.Monitor.Log($"    {element}");
+        }
+        var dayCount = elements
+            .Select(e => e.Value)
+            .Where(e => e.Valid)
+            .Select(e => e.TotalNumberOfDaysCovered)
+            .Sum();
+
+        int aggregated;
+        AggValue aggValue;
+        if (Operation == Operation.Average)
+        {
+
+            var averageGolds = elements
+                .Select(e => e.Value)
+                .Where(e => e.Valid)
+                .Select(e => e.Value * e.TotalNumberOfDaysCovered)
+                .ToList();
+
+            aggregated = DoOperation(averageGolds, dayCount);
+            Logging.Monitor.Log($"Year: {year.Year}, Value: {aggregated}, DayCount: {dayCount}, Average Golds: [{string.Join(",", averageGolds)}]");
+            aggValue = new AggValue(aggregated, averageGolds.Count > 0, dayCount);
+        }
+        else
+        {
+            var golds = elements
+                .Select(e => e.Value)
+                .Where(e => e.Valid)
+                .Select(e => e.Value)
+                .ToList();
+            aggregated = DoOperation(golds);
+            Logging.Monitor.Log($"Year: {year.Year}, Value: {aggregated}, DayCount: {dayCount}, Golds: [{string.Join(",", golds)}]");            
+            aggValue = new AggValue(aggregated, golds.Count > 0, dayCount);
+        }
+
+        // string tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         var highest = HighestOverallYearTotal;
         int rowHeight = CalculateRowHeight(aggregated, highest);
         string layout = FormatLayout(rowHeight);
+        string tooltip;
+        if (aggValue.Valid)
+        {
+            tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";        }
+        else 
+        {
+            tooltip = $"Y-{year.Year} {Operation}: Year is in the future!";        
+        }
 
         var reversedElements = elements.ToList();
         reversedElements.Reverse();
         var yearElement = new YearElement(
-                    year.Year, aggregated, elements, reversedElements, year.Year + "", layout, tooltip);
+                    year.Year, aggValue, elements, reversedElements, year.Year + "", layout, tooltip);
         return yearElement;
     }
     
@@ -322,8 +373,41 @@ internal class SingleValueVisitor : BaseVisitor
         var elements = root.Years.Select(Visit).ToList();
         var reversedElements = elements.ToList();
         reversedElements.Reverse();
-        var golds = elements.Select(element => element.Value).ToList();
-        int aggregated = DoOperation(golds);
+
+        int aggregated;
+        AggValue aggValue;
+        if (Operation == Operation.Average)
+        {
+            var dayCount = elements
+                .Select(e => e.Value)
+                .Where(e => e.Valid)
+                .Select(e => e.TotalNumberOfDaysCovered)
+                .Sum();
+            var averageGolds = elements
+                .Select(e => e.Value)
+                .Where(e => e.Valid)
+                .Select(e => e.Value * e.TotalNumberOfDaysCovered)
+                .ToList();
+
+            Logging.Monitor.Log($"<Root> DayCount: {dayCount}, Average Golds: [{string.Join(",", averageGolds)}]");
+            aggregated = DoOperation(averageGolds, dayCount);
+            aggValue = new AggValue(aggregated, averageGolds.Count > 0, averageGolds.Count);
+
+        }
+        else
+        {
+            var golds = elements
+                .Select(e => e.Value)
+                .Where(e => e.Valid)
+                .Select(e => e.Value)
+                .ToList();
+            Logging.Monitor.Log($"<Root> golds [{string.Join(",", golds)}]");
+            aggregated = DoOperation(golds);
+            aggValue = new AggValue(aggregated, golds.Count > 0, golds.Count);
+        }
+
+        // var golds = elements.Select(element => element.Value).ToList();
+        // int aggregated = DoOperation(golds);
         string tooltip = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         string text = tooltip;
         var element = new RootElement(aggregated, elements, reversedElements, $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);
@@ -428,7 +512,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         }
 
         var cashFlowSeasonEntry = new SeasonElement(
-                season.Season, netValue, elements, reversedElements, 
+                season.Season,  new AggValue(0, false, 1), elements, reversedElements, 
                 season.Season.ToString(), inLayout, tooltip, inTint, 
                 season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter,
                 "", outLayout, tooltip, outTint);
@@ -481,7 +565,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         }
         
         var cashFlowYearEntry = new YearElement(
-                year.Year, netValue, elements, reversedElements, 
+                year.Year, new AggValue(1, true, 1), elements, reversedElements, 
                 year.Year.ToString(), inLayout, tooltip, inTint,
                 "", outLayout, tooltip, outTint);
         return (cashFlowYearEntry, (aggregatedIn, aggregatedOut));

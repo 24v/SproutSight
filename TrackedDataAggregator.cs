@@ -81,41 +81,41 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         ShippedTooltip = shippedRoot.Tooltip;
         Logging.Monitor.Log($"ShippedVisitor results - Total: {ShippedTotal}, Text: {ShippedText}", LogLevel.Debug);
 
-        var walletGoldFirstPassVisitor = FirstPassVisitors.CreateWalletGoldVisitor(
-                TrackedData.GoldInOut, 
-                Operation);
-        walletGoldFirstPassVisitor.Visit(rootNode);
-        var walletGoldVisitor = Visitors.CreateWalletGoldVisitor(
-                TrackedData.GoldInOut, 
-                Operation,
-                walletGoldFirstPassVisitor.HighestDayValue, 
-                walletGoldFirstPassVisitor.HighestSeasonValue, 
-                walletGoldFirstPassVisitor.HighestYearValue);
-        var walletRoot = walletGoldVisitor.Visit(rootNode);
-        WalletGrid = walletRoot.YearElements;
-        WalletGridReversed = walletRoot.YearElementsReversed;
-        WalletText = walletRoot.Text;
-        WalletTooltip = walletRoot.Tooltip;
+        // var walletGoldFirstPassVisitor = FirstPassVisitors.CreateWalletGoldVisitor(
+        //         TrackedData.GoldInOut, 
+        //         Operation);
+        // walletGoldFirstPassVisitor.Visit(rootNode);
+        // var walletGoldVisitor = Visitors.CreateWalletGoldVisitor(
+        //         TrackedData.GoldInOut, 
+        //         Operation,
+        //         walletGoldFirstPassVisitor.HighestDayValue, 
+        //         walletGoldFirstPassVisitor.HighestSeasonValue, 
+        //         walletGoldFirstPassVisitor.HighestYearValue);
+        // var walletRoot = walletGoldVisitor.Visit(rootNode);
+        // WalletGrid = walletRoot.YearElements;
+        // WalletGridReversed = walletRoot.YearElementsReversed;
+        // WalletText = walletRoot.Text;
+        // WalletTooltip = walletRoot.Tooltip;
 
-        var cashFlowFirstPassVisitor = FirstPassVisitors.CreateCashFlowVisitor(
-                TrackedData.GoldInOut, 
-                Operation);
-        cashFlowFirstPassVisitor.Visit(rootNode);
-        var cashFlowVisitor = Visitors.CreateCashFlowVisitor(
-                TrackedData.GoldInOut, 
-                Operation,
-                cashFlowFirstPassVisitor.HighestDayInValue,
-                cashFlowFirstPassVisitor.HighestSeasonInValue,
-                cashFlowFirstPassVisitor.HighestYearInValue,
-                cashFlowFirstPassVisitor.HighestDayOutValue,
-                cashFlowFirstPassVisitor.HighestSeasonOutValue,
-                cashFlowFirstPassVisitor.HighestYearOutValue);
-        var cashFlowRoot = cashFlowVisitor.VisitCashFlow(rootNode);
-        CashFlowGrid = cashFlowRoot.YearElements;
-        CashFlowGridReversed = cashFlowRoot.YearElementsReversed;
-        CashFlowNetTotal = cashFlowRoot.Value;
-        CashFlowText = cashFlowRoot.Text;
-        CashFlowTooltip = cashFlowRoot.Tooltip;
+        // var cashFlowFirstPassVisitor = FirstPassVisitors.CreateCashFlowVisitor(
+        //         TrackedData.GoldInOut, 
+        //         Operation);
+        // cashFlowFirstPassVisitor.Visit(rootNode);
+        // var cashFlowVisitor = Visitors.CreateCashFlowVisitor(
+        //         TrackedData.GoldInOut, 
+        //         Operation,
+        //         cashFlowFirstPassVisitor.HighestDayInValue,
+        //         cashFlowFirstPassVisitor.HighestSeasonInValue,
+        //         cashFlowFirstPassVisitor.HighestYearInValue,
+        //         cashFlowFirstPassVisitor.HighestDayOutValue,
+        //         cashFlowFirstPassVisitor.HighestSeasonOutValue,
+        //         cashFlowFirstPassVisitor.HighestYearOutValue);
+        // var cashFlowRoot = cashFlowVisitor.VisitCashFlow(rootNode);
+        // CashFlowGrid = cashFlowRoot.YearElements;
+        // CashFlowGridReversed = cashFlowRoot.YearElementsReversed;
+        // CashFlowNetTotal = cashFlowRoot.Value;
+        // CashFlowText = cashFlowRoot.Text;
+        // CashFlowTooltip = cashFlowRoot.Tooltip;
 
         // LogGridStructures();
     }
@@ -163,19 +163,19 @@ internal record SeasonNode(Season Season, int Year, List<DayNode> Days);
 internal record DayNode(StardewDate Date);
 internal record RootNode(List<YearNode> Years);
 
-internal record AggValue(int Value, bool Valid, int Count);
+internal record AggValue(int Value, bool Valid, int TotalNumberOfDaysCovered);
 
 internal record RootElement(int Value, List<YearElement> YearElements, List<YearElement> YearElementsReversed, 
     string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,
     string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
 );
-internal record YearElement(int Year, int Value, List<SeasonElement> SeasonElements, List<SeasonElement> SeasonElementsReversed, 
+internal record YearElement(int Year, AggValue Value, List<SeasonElement> SeasonElements, List<SeasonElement> SeasonElementsReversed, 
     string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,
     string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
 );
 
 // TODO: Fix this trash
-internal record SeasonElement(Season Season, int Value, List<DayElement> DayElements, List<DayElement> DayElementsReversed, 
+internal record SeasonElement(Season Season, AggValue Value, List<DayElement> DayElements, List<DayElement> DayElementsReversed, 
     string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null, 
     bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false,
     string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
