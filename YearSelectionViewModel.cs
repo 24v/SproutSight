@@ -4,12 +4,11 @@ using System.ComponentModel;
 namespace SproutSight;
 
 
-internal partial class YearSelectionViewModel(int Year, bool isChecked) : INotifyPropertyChanged
+internal partial class YearSelectionViewModel(int Year, bool isChecked) 
 {
     public static readonly int YEAR_ALL = 0;
     
-    [Notify]
-    private bool _isChecked = isChecked;
+    public bool IsChecked {get; set; } = isChecked;
 
     public int Year {get; set;} = Year;
 

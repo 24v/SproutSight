@@ -70,26 +70,25 @@ internal partial class SproutSightViewModel
     private readonly TrackedData trackedData;
 
     [Notify]
-    private TrackedDataAggregator _trackedDataAggregator;
+    private TrackedDataAggregator _trackedDataAggregator = null!;
 
     private void OnParamsChange()
     {
-        var newAggregator = new TrackedDataAggregator(trackedData, SelectedOperation, GetSelectedYearsArray());
-        newAggregator.LoadAggregationAndViewVisitor();
-        TrackedDataAggregator = newAggregator;
-        Logging.Monitor.Log("OnParamsChange", LogLevel.Error);
+        var agg = new TrackedDataAggregator(trackedData, SelectedOperation, GetSelectedYearsArray());
+        agg.LoadAggregationAndViewVisitor();
+        TrackedDataAggregator = agg;
     }
 
     public SproutSightViewModel(TrackedData trackedData) {
         this.trackedData = trackedData;
-        YearSelectionOptions = [new YearSelectionViewModel(YearSelectionViewModel.YEAR_ALL, true)];
+        _operations = GetAvailableOperations();
+
+        _yearSelectionOptions = [new YearSelectionViewModel(YearSelectionViewModel.YEAR_ALL, true)];
         for (int i = Game1.year ; i >= 1; i-- )
         {
-            YearSelectionOptions = YearSelectionOptions.Append(new YearSelectionViewModel(i, false)).ToArray();
+            _yearSelectionOptions.Add(new YearSelectionViewModel(i, false));
         }
 
-        _operations = GetAvailableOperations();
-        _trackedDataAggregator = new TrackedDataAggregator(trackedData, SelectedOperation, GetSelectedYearsArray());
         OnParamsChange();
     }
     public static string FormatGoldNumber(int number)
@@ -153,27 +152,47 @@ internal partial class SproutSightViewModel
 
     [Notify] private bool isYearSelectionExpanded;
 
-    public YearSelectionViewModel[] YearSelectionOptions { get; set; }
+    [Notify]
+    private List<YearSelectionViewModel> _yearSelectionOptions { get; set; }
 
     public int[] GetSelectedYearsArray()
     {
         return YearSelectionOptions.Where(y => y.IsChecked).Select(y => y.Year).ToArray();
     }
 
-    public void SelectYear(int Year)
+    public void SelectYear(int ClickedYear)
     {
-        bool allSelected;
-        if (Year == YearSelectionViewModel.YEAR_ALL)
+        List<YearSelectionViewModel> newOptions = [];
+        for (int i = 0; i < YearSelectionOptions.Count; i ++)
         {
-            var allYearViewModel = YearSelectionOptions[0];
-            allSelected = !allYearViewModel.IsChecked;
-        } else {
-            allSelected = false;
+            newOptions.Add(new YearSelectionViewModel(YearSelectionOptions[i].Year,  YearSelectionOptions[i].IsChecked));
         }
 
-        foreach (var yearViewModel in YearSelectionOptions)
+        if (ClickedYear == 0)
         {
-            yearViewModel.HandleAllSelection(allSelected);
+            // A click on all clears all other options.
+            newOptions[0].IsChecked = !newOptions[0].IsChecked;
+            foreach (var option in newOptions)
+            {
+                if (option.Year != 0)
+                {
+                    option.IsChecked = false;
+                }
+            }
+        } 
+        else
+        {
+            // A click on any other option will uncheck "All" option.
+            newOptions[0].IsChecked = false;
+            foreach (var option in newOptions)
+            {
+                if (option.Year == ClickedYear)
+                {
+                    option.IsChecked = !option.IsChecked;
+                }
+            }
         }
+        YearSelectionOptions = newOptions; 
+        OnParamsChange();
     }
 }
