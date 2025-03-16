@@ -7,7 +7,6 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
     public List<YearElement> WalletYears { get; set; } = [];
     public List<YearElement> WalletYearsReversed { get; set; } = [];
     public string? WalletText { get; private set; } = "";
-    public string? WalletTooltip { get; private set; } = "";
 
     public List<YearElement> ShippedYears { get; set; } = [];
     public List<YearElement> ShippedYearsReversed { get; set; } = [];
@@ -74,21 +73,20 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         ShippedTotal = shippedRoot.Value;
         ShippedText = shippedRoot.Text;
 
-        // var walletGoldFirstPassVisitor = FirstPassVisitors.CreateWalletGoldVisitor(
-        //         TrackedData.GoldInOut, 
-        //         Operation);
-        // walletGoldFirstPassVisitor.Visit(rootNode);
-        // var walletGoldVisitor = Visitors.CreateWalletGoldVisitor(
-        //         TrackedData.GoldInOut, 
-        //         Operation,
-        //         walletGoldFirstPassVisitor.HighestDayValue, 
-        //         walletGoldFirstPassVisitor.HighestSeasonValue, 
-        //         walletGoldFirstPassVisitor.HighestYearValue);
-        // var walletRoot = walletGoldVisitor.Visit(rootNode);
-        // WalletGrid = walletRoot.YearElements;
-        // WalletGridReversed = walletRoot.YearElementsReversed;
-        // WalletText = walletRoot.Text;
-        // WalletTooltip = walletRoot.Tooltip;
+        var walletGoldFirstPassVisitor = FirstPassVisitors.CreateWalletGoldVisitor(
+                TrackedData.GoldInOut, 
+                Operation);
+        walletGoldFirstPassVisitor.Visit(rootNode);
+        var walletGoldVisitor = Visitors.CreateWalletGoldVisitor(
+                TrackedData.GoldInOut, 
+                Operation,
+                walletGoldFirstPassVisitor.HighestDayValue, 
+                walletGoldFirstPassVisitor.HighestSeasonValue, 
+                walletGoldFirstPassVisitor.HighestYearValue);
+        var walletRoot = walletGoldVisitor.Visit(rootNode);
+        WalletYears = walletRoot.YearElements;
+        WalletYearsReversed = walletRoot.YearElementsReversed;
+        WalletText = walletRoot.Text;
 
         // var cashFlowFirstPassVisitor = FirstPassVisitors.CreateCashFlowVisitor(
         //         TrackedData.GoldInOut, 

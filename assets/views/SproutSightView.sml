@@ -133,37 +133,64 @@
                 </lane>  
 
 
-                <lane *case="Wallet" *context={TrackedDataAggregator} *switch={SelectedPeriod} orientation="vertical" >
+                <!-- Wallet Tab -->
+                <lane *case="Wallet" 
+                        *context={TrackedDataAggregator} 
+                        *switch={SelectedPeriod} 
+                        orientation="vertical" >
+
+                    <!-- Header -->
                     <lane>
-                        <label text={WalletText} tooltip={WalletTooltip} margin="0,0,10,10" layout="stretch"/>
+                        <label text={WalletText} margin="0,0,10,10" />
+                        <label text="(Note)" tooltip="Hover over year/season to see aggregated." scale=".5" layout="stretch"/>
                         <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                         <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
-                    <lane *case="All" *repeat={WalletYearsReversed} orientation="vertical" margin="0,0,0,40">
-                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
-                            <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip} >
+
+                    <!-- Controls -->
+                    <expander layout="stretch content"
+                            margin="514,0,0,4"
+                            header-padding="0,12"
+                            header-background-tint="#99c"
+                            is-expanded={<>^IsYearSelectionExpanded} >
+
+                        <label layout="stretch" *outlet="header" text="Selected Years"/>
+                        <lane orientation="vertical" margin="59,0,0,0" layout="stretch content" horizontal-content-alignment="start">
+                            <checkbox *repeat={^YearSelectionOptions} label-text={Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
+                        </lane>
+                    </expander>
+
+                       <!-- All View -->
+                    <lane *case="All" *repeat={WalletYearsReversed} orientation="vertical">
+                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end"> 
+                            <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
                                 <image *if={IsFall} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
                                 <image *if={IsWinter} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
                                 <label text={Season} margin="5,0,0,0"/>
                             </lane>
-                            <image *repeat={DayElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                            <lane *if={IsWinter} margin="10,0,0,0" tooltip={^Tooltip}>
+                            <image *repeat={DayElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                            <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Tooltip}>
                                 <label text="Y-"/>
                                 <label text={^Year} />
                                 <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                             </lane>
                         </lane>
                     </lane>
-                    <lane *case="Year" margin="0,0,0,40" vertical-content-alignment="end">
-                        <image *repeat={WalletYears}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+
+                    <!-- Season View -->
+                    <lane *case="Season" vertical-content-alignment="end" layout="stretch content">
+                        <label text="Seasons" margin="0,0,20,0" />
+                        <lane *repeat={WalletYears} margin="0,0,20,0" vertical-content-alignment="end">
+                            <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        </lane>
                     </lane>
 
-                    <lane vertical-content-alignment="end" margin="40,40,0,0">
-                        <lane *case="Season" *repeat={WalletYears} margin="0,0,0,40" vertical-content-alignment="end">
-                            <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                        </lane>
+                    <!-- Year View -->
+                    <lane *case="Year" vertical-content-alignment="end" layout="stretch content">
+                        <label text="Years" margin="0,0,20,0" />
+                        <image *repeat={WalletYears} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>
                 </lane>
 
