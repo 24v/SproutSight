@@ -133,7 +133,7 @@ internal sealed class ModEntry : Mod
         }
         stardewUIViewEngine.RegisterViews($"Mods/{ModManifest.UniqueID}/Views", "assets/views");
         stardewUIViewEngine.RegisterSprites($"Mods/{ModManifest.UniqueID}/Sprites", "assets/sprites");
-        stardewUIViewEngine.EnableHotReloading("/Users/demo/CascadeProjects/stardew_valley/CascadeProjects/windsurf-project/stardew_mod/SproutSight");
+        stardewUIViewEngine.EnableHotReloading("/Users/demo/CascadeProjects/stardew_valley/CascadeProjects/windsurf-project/stardew_mod/SproutSight/SproutSight");
 
         // Setup gmcm
         if (genericModConfig is not null)

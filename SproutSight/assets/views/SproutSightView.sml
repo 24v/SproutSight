@@ -6,7 +6,7 @@
               orientation="vertical"
               horizontal-content-alignment="end"
               z-index="2">
-            <frame *repeat={AllTabs}
+            <frame *repeat={:AllTabs}
                    layout="125px 64px"
                    margin={Margin}
                    padding="16, 0"
@@ -31,24 +31,24 @@
                         <lane>
                             <lane orientation="vertical">
                                 <lane>
-                                    <label text={TotalProceeds}/>
+                                    <label text={:TotalProceeds}/>
                                     <image layout="24px" margin="5,0,0,20" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                                 </lane>
-                                <label *!if={ShippedSomething} margin="0,20,0,0" text="You have not shipped anything today." />
-                                <lane *repeat={CurrentItems} tooltip={Name} vertical-content-alignment="middle">
-                                    <panel *switch={QualityName} layout="64px" vertical-content-alignment="end">
-                                        <image layout="stretch" margin="4" sprite={Sprite} />
+                                <label *!if={:ShippedSomething} margin="0,20,0,0" text="You have not shipped anything today." />
+                                <lane *repeat={:CurrentItems} tooltip={:Name} vertical-content-alignment="middle">
+                                    <panel *switch={:QualityName} layout="64px" vertical-content-alignment="end">
+                                        <image layout="stretch" margin="4" sprite={:Sprite} />
                                         <lane vertical-content-alignment="end">
                                             <image *case="Silver" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarSilver} />
                                             <image *case="Gold" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarGold} />
                                             <image *case="Iridium" layout="24px" margin="4" sprite={@Mods/24v.SproutSight/Sprites/Cursors:QualityStarIridium} />
                                             <spacer layout="stretch 0px" />
-                                            <digits layout="content" scale="3.0" number={StackCount} />
+                                            <digits layout="content" scale="3.0" number={:StackCount} />
                                         </lane>
                                     </panel>
-                                    <label text={TotalSalePrice} margin="10,0,5,0"/>
+                                    <label text={:TotalSalePrice} margin="10,0,5,0"/>
                                     <image layout="24px" margin="0,0,10,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
-                                    <label text={FormattedSale}/>
+                                    <label text={:FormattedSale}/>
                                 </lane>
                             </lane>
                             <lane orientation="vertical" margin="120,0,0,0">
@@ -58,12 +58,12 @@
                                 </lane>
                                 <lane layout="content 64px" horizontal-content-alignment="end">
                                     <label text="Received:" margin="10,20,0,0"/>
-                                    <label text={TodayGoldIn} margin="10,20,0,0"/>
+                                    <label text={:TodayGoldIn} margin="10,20,0,0"/>
                                     <label text="g" margin="0,20,0,0"/>
                                 </lane>
                                 <lane layout="content 64px" horizontal-content-alignment="end">
                                     <label text="Spent:" margin="10,20,0,0"/>
-                                    <label text={TodayGoldOut} color="Red" margin="10,20,0,0"/>
+                                    <label text={:TodayGoldOut} color="Red" margin="10,20,0,0"/>
                                     <label text="g" margin="0,20,0,10"/>
                                 </lane>
                             </lane>
@@ -79,10 +79,10 @@
 
                     <!-- Header -->
                     <lane>
-                        <label text={ShippedText} margin="0,0,10,10" />
+                        <label text={:ShippedText} margin="0,0,10,10" />
                         <label text="(Note)" tooltip="Hover over year/season to see aggregated." scale=".5" layout="stretch"/>
-                        <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
-                        <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
+                        <dropdown option-min-width="100" options={:^Periods} selected-option={<>^SelectedPeriod} />
+                        <dropdown option-min-width="100" options={:^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
 
                     <!-- Controls -->
@@ -100,18 +100,18 @@
 
                     <!-- All View -->
                     <lane *case="All" *repeat={ShippedYearsReversed} orientation="vertical">
-                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end"> 
-                            <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
+                        <lane *repeat={:SeasonElementsReversed} vertical-content-alignment="end"> 
+                            <lane layout="140px 40px" vertical-content-alignment="end" tooltip={:Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
                                 <image *if={IsFall} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
                                 <image *if={IsWinter} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
-                                <label text={Season} margin="5,0,0,0"/>
+                                <label text={:Season} margin="5,0,0,0"/>
                             </lane>
-                            <image *repeat={DayElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                            <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Tooltip}>
+                            <image *repeat={:DayElements} tint={:Tint} fit="Stretch" margin="1,40,0,0" layout={:Layout} tooltip={:Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                            <lane *if={:IsWinter} margin="0,0,18,0" tooltip={:^Tooltip}>
                                 <label text="Y-"/>
-                                <label text={^Year} />
+                                <label text={:^Year} />
                                 <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                             </lane>
                         </lane>
@@ -120,15 +120,15 @@
                     <!-- Season View -->
                     <lane *case="Season" vertical-content-alignment="end" layout="stretch content">
                         <label text="Seasons" margin="0,0,20,0" />
-                        <lane *repeat={ShippedYears} margin="0,0,20,0" vertical-content-alignment="end">
-                            <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <lane *repeat={:ShippedYears} margin="0,0,20,0" vertical-content-alignment="end">
+                            <image *repeat={:SeasonElements} tint={:Tint} fit="Stretch" margin="1,40,0,0" layout={:Layout} tooltip={:Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
                     </lane>
 
                     <!-- Year View -->
                     <lane *case="Year" vertical-content-alignment="end" layout="stretch content">
                         <label text="Years" margin="0,0,20,0" />
-                        <image *repeat={ShippedYears} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <image *repeat={:ShippedYears} tint={:Tint} fit="Stretch" margin="1,40,0,0" layout={:Layout} tooltip={:Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>
                 </lane>  
 
@@ -141,10 +141,10 @@
 
                     <!-- Header -->
                     <lane>
-                        <label text={WalletText} margin="0,0,10,10" />
+                        <label text={:WalletText} margin="0,0,10,10" />
                         <label text="(Note)" tooltip="Hover over year/season to see aggregated." scale=".5" layout="stretch"/>
-                        <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
-                        <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
+                        <dropdown option-min-width="100" options={:^Periods} selected-option={<>^SelectedPeriod} />
+                        <dropdown option-min-width="100" options={:^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
 
                     <!-- Controls -->
@@ -161,19 +161,19 @@
                     </expander>
 
                     <!-- All View -->
-                    <lane *case="All" *repeat={WalletYearsReversed} orientation="vertical">
-                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end"> 
-                            <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
+                    <lane *case="All" *repeat={:WalletYearsReversed} orientation="vertical">
+                        <lane *repeat={:SeasonElementsReversed} vertical-content-alignment="end"> 
+                            <lane layout="140px 40px" vertical-content-alignment="end" tooltip={:Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
                                 <image *if={IsFall} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
                                 <image *if={IsWinter} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Winter} />
-                                <label text={Season} margin="5,0,0,0"/>
+                                <label text={:Season} margin="5,0,0,0"/>
                             </lane>
-                            <image *repeat={DayElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                            <image *repeat={:DayElements} tint={:Tint} fit="Stretch" margin="1,40,0,0" layout={:Layout} tooltip={:Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                             <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Tooltip}>
                                 <label text="Y-"/>
-                                <label text={^Year} />
+                                <label text={:^Year} />
                                 <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                             </lane>
                         </lane>
@@ -182,15 +182,15 @@
                     <!-- Season View -->
                     <lane *case="Season" vertical-content-alignment="end" layout="stretch content">
                         <label text="Seasons" margin="0,0,20,0" />
-                        <lane *repeat={WalletYears} margin="0,0,20,0" vertical-content-alignment="end">
-                            <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <lane *repeat={:WalletYears} margin="0,0,20,0" vertical-content-alignment="end">
+                            <image *repeat={:SeasonElements} tint={:Tint} fit="Stretch" margin="1,40,0,0" layout={:Layout} tooltip={:Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
                     </lane>
 
                     <!-- Year View -->
                     <lane *case="Year" vertical-content-alignment="end" layout="stretch content">
                         <label text="Years" margin="0,0,20,0" />
-                        <image *repeat={WalletYears} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <image *repeat={:WalletYears} tint={:Tint} fit="Stretch" margin="1,40,0,0" layout={:Layout} tooltip={:Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>
                 </lane>
 
@@ -203,7 +203,7 @@
 
                     <!-- Header -->
                     <lane>
-                        <label text={CashFlowText} margin="0,0,10,10" />
+                        <label text={:CashFlowText} margin="0,0,10,10" />
                         <label text="(Note)" tooltip="Hover over year/season to see aggregated." scale=".5" layout="stretch"/>
                         <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                         <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
@@ -218,13 +218,13 @@
 
                         <label layout="stretch" *outlet="header" text="Selected Years"/>
                         <lane orientation="vertical" margin="59,0,0,0" layout="stretch content" horizontal-content-alignment="start">
-                            <checkbox *repeat={^YearSelectionOptions} label-text={Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
+                            <checkbox *repeat={^YearSelectionOptions} label-text={:Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
                         </lane>
                     </expander>
 
                     <!-- All View -->
-                    <lane *case="All" *repeat={CashFlowYearsReversed} orientation="vertical">
-                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end"> 
+                    <lane *case="All" *repeat={:CashFlowYearsReversed} orientation="vertical">
+                        <lane *repeat={:SeasonElementsReversed} vertical-content-alignment="end"> 
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
@@ -233,13 +233,12 @@
                                 <label text={Season} margin="5,0,0,0"/>
                             </lane>
                             <lane *repeat={DayElements} orientation="vertical" margin="1,0,0,0">
-                                <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} margin="0,40,0,0" sprite={@Mods/StardewUI/Sprites/White} />
-                                <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
+                                <image tint={:Tint} fit="stretch" layout={:Layout} tooltip={:Tooltip} margin="0,40,0,0" sprite={@Mods/StardewUI/Sprites/White} />
+                                <image tint={:Tint2} fit="stretch" layout={:Layout2} tooltip={:Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
                             </lane>
-                            <!-- <image *repeat={DayElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} /> -->
-                            <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Tooltip}>
+                            <lane *if={IsWinter} margin="0,0,18,0" tooltip={:^Tooltip}>
                                 <label text="Y-"/>
-                                <label text={^Year} />
+                                <label text={:^Year} />
                                 <image layout="24px" margin="5,1,0,0" sprite={@Mods/24v.SproutSight/Sprites/Cursors:GoldIcon} />
                             </lane>
                         </lane>
@@ -249,11 +248,11 @@
                     <!-- Season View -->
                     <lane *case="Season" vertical-content-alignment="end" layout="stretch content">
                         <label text="Seasons" margin="0,0,20,0" />
-                        <lane *repeat={CashFlowYears} margin="0,0,20,0" vertical-content-alignment="end">
+                        <lane *repeat={:CashFlowYears} margin="0,0,20,0" vertical-content-alignment="end">
                             <!-- <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} /> -->
-                            <lane *repeat={SeasonElements} orientation="vertical" margin="1,0,0,0">
-                                <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} margin="0,40,0,0" sprite={@Mods/StardewUI/Sprites/White} />
-                                <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
+                            <lane *repeat={:SeasonElements} orientation="vertical" margin="1,0,0,0">
+                                <image tint={:Tint} fit="stretch" layout={:Layout} tooltip={:Tooltip} margin="0,40,0,0" sprite={@Mods/StardewUI/Sprites/White} />
+                                <image tint={:Tint2} fit="stretch" layout={:Layout2} tooltip={:Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
                             </lane>
                         </lane>
                     </lane>
@@ -261,9 +260,9 @@
                     <!-- Year View -->
                     <lane *case="Year" vertical-content-alignment="end" layout="stretch content">
                         <label text="Years" margin="0,0,20,0" />
-                        <lane *repeat={CashFlowYears} orientation="vertical" margin="1,0,0,0">
-                            <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} margin="0,40,0,0" sprite={@Mods/StardewUI/Sprites/White} />
-                            <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
+                        <lane *repeat={:CashFlowYears} orientation="vertical" margin="1,0,0,0">
+                            <image tint={:Tint} fit="stretch" layout={:Layout} tooltip={:Tooltip} margin="0,40,0,0" sprite={@Mods/StardewUI/Sprites/White} />
+                            <image tint={:Tint2} fit="stretch" layout={:Layout2} tooltip={:Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
                     </lane>
                 </lane>
