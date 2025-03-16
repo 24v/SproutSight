@@ -64,6 +64,7 @@ internal partial class SproutSightViewModel
     public const int MaxRowHeight = 128;
     public const int MinRowHeight = 3;
     public const int ZeroDataRowHeight = 2;
+    public const int DefaultNumYearsSelected = 5;
 
     // Showing Today's Info
     public StardewDate Date = StardewDate.GetStardewDate();
@@ -89,10 +90,11 @@ internal partial class SproutSightViewModel
         this.trackedData = trackedData;
         _operations = GetAvailableOperations();
 
-        _yearSelectionOptions = [new YearSelectionViewModel(YearSelectionViewModel.YEAR_ALL, true)];
+        _yearSelectionOptions = [new YearSelectionViewModel(YearSelectionViewModel.YEAR_ALL, false)];
         for (int i = Game1.year ; i >= 1; i-- )
         {
-            _yearSelectionOptions.Add(new YearSelectionViewModel(i, false));
+            bool selected = i > Game1.year - DefaultNumYearsSelected;
+            _yearSelectionOptions.Add(new YearSelectionViewModel(i, selected));
         }
 
         OnParamsChange();
