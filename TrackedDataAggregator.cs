@@ -28,7 +28,26 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         // Create the year data structure
         List<YearNode> yearNodes = [];
         RootNode rootNode = new(yearNodes);
-        for (int year = 1; year <= Game1.year; year++)
+        if (SelectedYears.Length == 0)
+        {
+            return;
+        }
+        int[] yearsToFill;
+        if (SelectedYears[0] == 0)
+        {
+            yearsToFill = [];
+            for (int i = 1; i <= Game1.year; i++)
+            {
+                yearsToFill[i] = i;
+            }
+        } 
+        else 
+        {
+            yearsToFill = SelectedYears;
+        }
+
+
+        foreach (var year in yearsToFill)
         {
             List<SeasonNode> seasonNodes = [];
             yearNodes.Add(new YearNode(year, seasonNodes));
