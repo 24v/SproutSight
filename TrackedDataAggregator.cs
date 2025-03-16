@@ -1,8 +1,8 @@
 namespace SproutSight;
 
-internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operation, int[] SelectedYears, StardewDate Date)
+internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operation, int[] SelectedYears)
 {
-    // We decompose the Elements here to make it easier to bind in the sml since dot operations are not allowed.
+    // We decompose the RootElements here to make it easier to bind in the sml since dot operations are not allowed.
 
     public List<YearElement> WalletYears { get; set; } = [];
     public List<YearElement> WalletYearsReversed { get; set; } = [];
