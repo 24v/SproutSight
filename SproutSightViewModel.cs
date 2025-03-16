@@ -7,13 +7,12 @@ namespace SproutSight;
 // TODO: Fix up inheritence of visitors
 // TODO: Fix imports that are unused.
 // TODO: Fix ordering of SML params
-// TODO: Change record's generic Elements to YearElements, etc
-// TODO: REmove tooltip on overall
+// TODO: Remove tooltip on overall
+    // READD??
 // TODO: Finish plumbing of date to visitor
 // TODO: Logging
 // TODO: Tooltip on Icons
 // TODO: Double check sale price
-// TODO: More specific icons
 // TODO: Move icon
 // TODO: Update to always use positive numbers in the tracked data.
 // TODO: Base class for visitor for helper methods
@@ -23,31 +22,12 @@ namespace SproutSight;
 // TODO: Create templates in view
 // TODO: Clean up averages
     // All up aggregation
-// TODO: fix in/out tooltips
-// TODO: Cache HighestOverallWalletGold
-// Dimensions
-    // Time (Day, Season, Year)
-    // Function (min, max, sum, average)
-// Update docs in sml
-// Two scrollables in sml??
 // Constants not used everyhwere (what is teh convention?)
-// Only load for current page?
+// TODO: Only load for current page?
 // TODO: fix tense in FirstPass
 // TODO: HighestOverallDayTotal naming
-// TODO: Min per day / max per day / hover
-// TODO: Log Levels
-// TODO: Autoformat linter
-// TODO: Better colors
-// TODO: Fix cursor colors
-// TODO: Use lambad instead of inherited classes
-// TODO: Why does it not use the more specific icon?
-// TODO: fix BaseFirstPassVisitor ai trash
 // TODO: Memoize
-// TODO: Should averages include the full year, or only up to certain date?
-    // TODO: Better highlighting of todays date.
-// TOOD: Change name of "Grid"
-// TODO: Overflow of seasons
-// public const int NumYearsToShowByDefault = 2;
+// TODO: Class interactions (i.e. defaults)
 
 internal partial class SproutSightViewModel
 {

@@ -18,29 +18,25 @@ using StardewValley.GameData.Shops;
 
 /*
 
-- Todo
-    - Better indication of current day 
-    - Add Borders to grid
-    - Those binding warnings in log (use ':')
-    - MultiPlayers multiFarms
-    - Wiki
-    - Animate the on hover on hud icon
-    - Log level based on json config entry
+Todo:
+  - Those binding warnings in log (use ':')
+  - MultiPlayers multiFarms
+  - Wiki
+  - Animate the on hover on hud icon
+  - More specific preserved names / icons.
+  - Testing Script
+  - Linter / Autoformat / C# Conventions
 
-- Ideas
-    - Value of all assets
-    - Make this a in-game element
-    - Track All Expenses
-        Purchases
-        Sales
-        Ships
-        Building
-        Shipping
-    - UI Updates
-        - Show where items are being shipped from
-    - Full Olap Cube and SQL support
-
-- Testing Script
+Ideas:
+  - Value of all assets
+  - Make this a in-game element
+  - Track All Expenses
+      Purchases
+      Sales
+      Ships
+      Building
+      Shipping
+  - Show where items are being shipped from
 
 */
 
