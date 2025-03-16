@@ -222,8 +222,9 @@
                         </lane>
                     </expander>
 
-                    <lane *case="All" *repeat={CashFlowYearsReversed} orientation="vertical" margin="0,0,0,40">
-                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
+                    <!-- All View -->
+                    <lane *case="All" *repeat={CashFlowYearsReversed} orientation="vertical">
+                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end"> 
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
@@ -232,9 +233,10 @@
                                 <label text={Season} margin="5,0,0,0"/>
                             </lane>
                             <lane *repeat={DayElements} orientation="vertical" margin="1,0,0,0">
-                                <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                                <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} margin="0,40,0,0" sprite={@Mods/StardewUI/Sprites/White} />
                                 <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
                             </lane>
+                            <!-- <image *repeat={DayElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} /> -->
                             <lane *if={IsWinter} margin="0,0,18,0" tooltip={^Tooltip}>
                                 <label text="Y-"/>
                                 <label text={^Year} />
@@ -242,6 +244,7 @@
                             </lane>
                         </lane>
                     </lane>
+
 
                     <!-- Season View -->
                     <lane *case="Season" vertical-content-alignment="end" layout="stretch content">
