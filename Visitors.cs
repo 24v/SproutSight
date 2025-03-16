@@ -61,16 +61,11 @@ internal class SingleValueFirstPassVisitor(Operation operation, Func<StardewDate
     public int HighestSeasonValue { get; private set; } = 0;
     public int HighestYearValue { get; private set; } = 0;
 
-    public void Visit(RootNode root)
+    public int Visit(DayNode day)
     {
-        root.Years.ForEach(e => Visit(e));
-    }
-
-    public int Visit(YearNode year)
-    {
-        int aggregateOfSeasons = DoOperation(year.Seasons.Select(Visit).ToList());
-        HighestYearValue = Math.Max(HighestYearValue, aggregateOfSeasons);
-        return aggregateOfSeasons;
+        var dayValue = getDayValue(day.Date);
+        HighestDayValue = Math.Max(HighestDayValue, dayValue);
+        return dayValue;
     }
 
     public int Visit(SeasonNode season)
@@ -80,11 +75,16 @@ internal class SingleValueFirstPassVisitor(Operation operation, Func<StardewDate
         return aggregateOfDays;
     }
 
-    public int Visit(DayNode day)
+    public int Visit(YearNode year)
     {
-        var dayValue = getDayValue(day.Date);
-        HighestDayValue = Math.Max(HighestDayValue, dayValue);
-        return dayValue;
+        int aggregateOfSeasons = DoOperation(year.Seasons.Select(Visit).ToList());
+        HighestYearValue = Math.Max(HighestYearValue, aggregateOfSeasons);
+        return aggregateOfSeasons;
+    }
+
+    public void Visit(RootNode root)
+    {
+        root.Years.ForEach(e => Visit(e));
     }
 
     public int DoOperation(List<int> entries)
@@ -131,7 +131,6 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> cashF
         };
     }
 
-    // Override Visit methods to handle the tuple return values
     public (int, int) Visit(DayNode day)
     {
         int dayIn = 0;
@@ -196,10 +195,7 @@ internal static class DisplayHelper
     public const string YearTint = "#40FC05";
     public const string CashFlowOutTint = "#B22222"; 
     public const string CashFlowInTint = "#696969";
-    public static string FormatGoldNumber(int number)
-    {
-        return $"{number:N0}g";
-    }
+    public static string FormatGoldNumber(int number) => $"{number:N0}g";
 
     public static string GetTint(Season season) 
     {
@@ -236,10 +232,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
     public int HighestOverallDayTotal { get; protected set; } = Math.Max(1, highestOverallDayTotal);
     public int HighestOverallSeasonTotal { get; protected set; } = Math.Max(1, highestOverallSeasonTotal);
     public int HighestOverallYearTotal { get; protected set; } = Math.Max(1, highestOverallYearTotal);
-    private readonly Func<StardewDate, int> _getDayValue = getDayValue;
-
-    public int GetDayValue(StardewDate date) => _getDayValue(date);
-
+    public int GetDayValue(StardewDate date) => getDayValue(date);
 
     public int DoOperation(List<int> entries, int? countOverride = null)
     {

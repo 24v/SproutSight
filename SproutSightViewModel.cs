@@ -30,6 +30,8 @@ namespace SproutSight;
 // TODO: Extract display helper
 // TODO: Move to package
 // TODO: Better title text (cash flow is inconsistent)
+// TODO: SingleFirstPassVisitor does not correctly calculate max averages for incomplete years. I also hate my life.
+// TODO: Constants for IN/Out tint
 
 internal partial class SproutSightViewModel
 {
