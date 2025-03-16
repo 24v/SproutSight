@@ -198,7 +198,7 @@ internal static class DisplayHelper
     public const string CashFlowInTint = "#696969";
     public static string FormatGoldNumber(int number)
     {
-        return $"{number.ToString("N0")}g";
+        return $"{number:N0}g";
     }
 
     public static string GetTint(Season season) 
@@ -595,12 +595,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         // Calculate out bar using year-specific highest value
         int outRowHeight = DisplayHelper.CalculateRowHeight(aggregatedOut, HighestYearOutValue);
         string outLayout = DisplayHelper.FormatLayout(outRowHeight);
-        
-        // Log layout calculations
-        // Logging.Monitor.Log($"Year {year.Year} CashFlow Layout Calculations:", LogLevel.Debug);
-        // Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestYearInValue: {HighestYearInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
-        // Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestYearOutValue: {HighestYearOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
-        
+
         // Determine colors based on net value
         var inTint = "#696969"; 
         var outTint = "#B22222";
