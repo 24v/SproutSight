@@ -71,6 +71,7 @@
                     </scrollable>
                 </lane>
 
+                <!-- Shipping Tab -->
                 <lane *case="Shipping" *switch={SelectedPeriod} *context={TrackedDataAggregator} 
                         layout="820px content" 
                         orientation="vertical" 

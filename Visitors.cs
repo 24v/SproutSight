@@ -323,7 +323,6 @@ internal class SingleValueVisitor : BaseVisitor
 
     public virtual YearElement Visit(YearNode year)
     {
-        Logging.Monitor.Log($"Year {year.Year}");
         var elements = year.Seasons.Select(Visit).ToList();
         var totalNumberOfDaysCoveredForAllSeasonInYear = elements
             .Select(e => e.Value)
