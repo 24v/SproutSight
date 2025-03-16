@@ -32,9 +32,9 @@ internal static class Visitors
 
 internal static class FirstPassVisitors
 {
-    public static BaseFirstPassVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation)
+    public static SingleValueFirstPassVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation)
     {
-        return new BaseFirstPassVisitor(operation, date => 
+        return new SingleValueFirstPassVisitor(operation, date => 
         {
             if (shippedData.TryGetValue(date, out var items))
             {
@@ -44,9 +44,9 @@ internal static class FirstPassVisitors
         });
     }
 
-    public static BaseFirstPassVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation)
+    public static SingleValueFirstPassVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation)
     {
-        return new BaseFirstPassVisitor(operation, date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0);
+        return new SingleValueFirstPassVisitor(operation, date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0);
     }
 
     public static CashFlowFirstPassVisitor CreateCashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation)
@@ -55,7 +55,7 @@ internal static class FirstPassVisitors
     }
 }
 
-internal class BaseFirstPassVisitor(Operation Operation, Func<StardewDate, int> getDayValue) 
+internal class SingleValueFirstPassVisitor(Operation Operation, Func<StardewDate, int> GetDayValue) 
 {
     public int HighestDayValue { get; private set; } = 0;
     public int HighestSeasonValue { get; private set; } = 0;
@@ -82,7 +82,7 @@ internal class BaseFirstPassVisitor(Operation Operation, Func<StardewDate, int> 
 
     public int Visit(DayNode day)
     {
-        var dayValue = getDayValue(day.Date);
+        var dayValue = GetDayValue(day.Date);
         HighestDayValue = Math.Max(HighestDayValue, dayValue);
         return dayValue;
     }
@@ -101,10 +101,8 @@ internal class BaseFirstPassVisitor(Operation Operation, Func<StardewDate, int> 
     }
 }
 
-internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation) : BaseFirstPassVisitor(operation, date => 0)
+internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> CashFlowByDate, Operation Operation)
 {
-    public Dictionary<StardewDate, GoldInOut> CashFlowByDate { get; set; } = goldInOut;
-
     // Highest values for income
     public int HighestDayInValue { get; private set; } = 1;
     public int HighestSeasonInValue { get; private set; } = 1;
@@ -115,8 +113,26 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
     public int HighestSeasonOutValue { get; private set; } = 1;
     public int HighestYearOutValue { get; private set; } = 1;
 
+    public int DoOperation(List<int> entries, bool forInValues, int? countOverride = null)
+    {
+        if (entries.Count == 0)
+        {
+            return 0;
+        }
+        return Operation switch
+        {
+            Operation.Min => forInValues? entries.Min() : entries.Max(),
+            Operation.Max => forInValues? entries.Max() : entries.Min(),
+            Operation.Sum => entries.Sum(),
+            Operation.Average => (int)Math.Round(entries.Sum() / 
+                (float)(countOverride != null ? countOverride : entries.Count)),
+            Operation.End => entries.Last(),
+            _ => 0
+        };
+    }
+
     // Override Visit methods to handle the tuple return values
-    public new (int, int) Visit(DayNode day)
+    public (int, int) Visit(DayNode day)
     {
         int dayIn = 0;
         int dayOut = 0;
@@ -132,14 +148,14 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
         return (dayIn, dayOut);
     }
 
-    public new (int, int) Visit(SeasonNode season)
+    public (int, int) Visit(SeasonNode season)
     {
         var dayValues = season.Days.Select(Visit).ToList();
         var inValues = dayValues.Select(v => v.Item1).ToList();
         var outValues = dayValues.Select(v => v.Item2).ToList();
         
-        int aggregatedIn = DoOperation(inValues);
-        int aggregatedOut = DoOperation(outValues);
+        int aggregatedIn = DoOperation(inValues, true);
+        int aggregatedOut = DoOperation(outValues, false);
         
         HighestSeasonInValue = Math.Max(HighestSeasonInValue, aggregatedIn);
         HighestSeasonOutValue = Math.Max(HighestSeasonOutValue, aggregatedOut);
@@ -147,14 +163,14 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
         return (aggregatedIn, aggregatedOut);
     }
 
-    public new (int, int) Visit(YearNode year)
+    public (int, int) Visit(YearNode year)
     {
         var seasonValues = year.Seasons.Select(Visit).ToList();
         var inValues = seasonValues.Select(v => v.Item1).ToList();
         var outValues = seasonValues.Select(v => v.Item2).ToList();
         
-        int aggregatedIn = DoOperation(inValues);
-        int aggregatedOut = DoOperation(outValues);
+        int aggregatedIn = DoOperation(inValues, true);
+        int aggregatedOut = DoOperation(outValues, false);
         
         HighestYearInValue = Math.Max(HighestYearInValue, aggregatedIn);
         HighestYearOutValue = Math.Max(HighestYearOutValue, aggregatedOut);
@@ -162,13 +178,13 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
         return (aggregatedIn, aggregatedOut);
     }
 
-    public new void Visit(RootNode root)
+    public void Visit(RootNode root)
     {
         root.Years.ForEach(e => Visit(e));
     }
 }
 
-internal abstract class BaseVisitor(Operation operation, StardewDate UpToDate)
+internal abstract class BaseVisitor(Operation Operation, StardewDate UpToDate)
 {
 
     public const string TodayTint = "#000000";
@@ -176,7 +192,7 @@ internal abstract class BaseVisitor(Operation operation, StardewDate UpToDate)
     public const string YearTint = "#40FC05";
     public const string CashFlowOutTint = "#B22222"; 
     public const string CashFlowInTint = "#696969";
-    public Operation Operation { get; } = operation;
+    public Operation Operation { get; } = Operation;
 
     public StardewDate UpToDate { get; } = UpToDate;
 
@@ -440,6 +456,24 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
     public int HighestSeasonOutValue { get; } = Math.Max(1, highestSeasonOut);
     public int HighestYearOutValue { get; } = Math.Max(1, highestYearOut);
 
+    public int DoOperation(List<int> entries, bool forInValues, int? countOverride = null)
+    {
+        if (entries.Count == 0)
+        {
+            return 0;
+        }
+        return Operation switch
+        {
+            Operation.Min => forInValues? entries.Min() : entries.Max(),
+            Operation.Max => forInValues? entries.Max() : entries.Min(),
+            Operation.Sum => entries.Sum(),
+            Operation.Average => (int)Math.Round(entries.Sum() / 
+                (float)(countOverride != null ? countOverride : entries.Count)),
+            Operation.End => entries.Last(),
+            _ => 0
+        };
+    }
+
     public (DayElement,(int,int)) VisitCashFlow(DayNode day)
     {
         int dayIn = 0;
@@ -499,13 +533,12 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
     {
         var elementsWithValues = season.Days.Select(VisitCashFlow).ToList();
         var elements = elementsWithValues.Select(e => e.Item1).ToList();
-        var reversedElements = elements.ToList();
-        reversedElements.Reverse();
+
         var cashFlowInValues = elementsWithValues.Select(e => e.Item2.Item1).ToList();
         var cashFlowOutValues = elementsWithValues.Select(e => e.Item2.Item2).ToList();
         
-        int aggregatedIn = DoOperation(cashFlowInValues);
-        int aggregatedOut = DoOperation(cashFlowOutValues);
+        int aggregatedIn = DoOperation(cashFlowInValues, true);
+        int aggregatedOut = DoOperation(cashFlowOutValues, false);
         int netValue = aggregatedIn - aggregatedOut;
         
         // Calculate in bar using season-specific highest value
@@ -515,11 +548,6 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         // Calculate out bar using season-specific highest value
         int outRowHeight = CalculateRowHeight(aggregatedOut, HighestSeasonOutValue);
         string outLayout = FormatLayout(outRowHeight);
-        
-        // Log layout calculations
-        // Logging.Monitor.Log($"Season {season.Season} CashFlow Layout Calculations:", LogLevel.Debug);
-        // Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestSeasonInValue: {HighestSeasonInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
-        // Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestSeasonOutValue: {HighestSeasonOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
         
         // Determine colors based on net value
         var inTint = "#696969"; 
@@ -540,6 +568,8 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
                       $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
         }
 
+        var reversedElements = elements.ToList();
+        reversedElements.Reverse();
         var cashFlowSeasonEntry = new SeasonElement(
                 season.Season,  new AggValue(0, false, 1), elements, reversedElements, 
                 season.Season.ToString(), inLayout, tooltip, inTint, 
@@ -557,8 +587,8 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         var cashFlowInValues = elementsWithValues.Select(e => e.Item2.Item1).ToList();
         var cashFlowOutValues = elementsWithValues.Select(e => e.Item2.Item2).ToList();
         
-        int aggregatedIn = DoOperation(cashFlowInValues);
-        int aggregatedOut = DoOperation(cashFlowOutValues);
+        int aggregatedIn = DoOperation(cashFlowInValues, true);
+        int aggregatedOut = DoOperation(cashFlowOutValues, false);
         int netValue = aggregatedIn - aggregatedOut;
         
         // Calculate in bar using year-specific highest value
@@ -609,8 +639,8 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         var cashFlowInValues = elementsWithValues.Select(e => e.Item2.Item1).ToList();
         var cashFlowOutValues = elementsWithValues.Select(e => e.Item2.Item2).ToList();
         
-        int aggregatedIn = DoOperation(cashFlowInValues);
-        int aggregatedOut = DoOperation(cashFlowOutValues);
+        int aggregatedIn = DoOperation(cashFlowInValues, true);
+        int aggregatedOut = DoOperation(cashFlowOutValues, false);
         int netValue = aggregatedIn - aggregatedOut;
         
         // Calculate in/out layouts for the overall root
@@ -619,12 +649,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         
         int outRowHeight = CalculateRowHeight(aggregatedOut, HighestYearOutValue);
         string outLayout = FormatLayout(outRowHeight);
-        
-        // Log layout calculations
-        // Logging.Monitor.Log($"Root CashFlow Layout Calculations:", LogLevel.Debug);
-        // Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestYearInValue: {HighestYearInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
-        // Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestYearOutValue: {HighestYearOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
-        
+
         // Determine colors
         var inTint = "#696969"; 
         var outTint = "#B22222";

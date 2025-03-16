@@ -1,19 +1,10 @@
-using System.ComponentModel;
-using StardewValley;
-using StardewUI;
-using StardewValley.ItemTypeDefinitions;
 using PropertyChanged.SourceGenerator;
-using xTile;
-using StardewModdingAPI;
-using System.Collections.Generic;
-using StardewUI.Framework;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.VisualBasic;
-using StardewValley.GameData.Pets;
-using Microsoft.Xna.Framework;
 
 namespace SproutSight;
 
+// TODO: Check results
+// TODO: Net value for cashflow
+// TODO: Fix up inheritence of visitors
 // TODO: Fix imports that are unused.
 // TODO: Fix ordering of SML params
 // TODO: Change record's generic Elements to YearElements, etc
