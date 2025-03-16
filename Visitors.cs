@@ -186,6 +186,21 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> cashF
 
 internal static class DisplayHelper
 {
+    public const int RowWidth = 20;
+    public const int MaxRowHeight = 128;
+    public const int MinRowHeight = 3;
+    public const int ZeroDataRowHeight = 2;
+    public const int DefaultNumYearsSelected = 5;
+    public const string TodayTint = "#000000";
+    public const string FutureTint = "#959595";
+    public const string YearTint = "#40FC05";
+    public const string CashFlowOutTint = "#B22222"; 
+    public const string CashFlowInTint = "#696969";
+    public static string FormatGoldNumber(int number)
+    {
+        return $"{number.ToString("N0")}g";
+    }
+
     public static string GetTint(Season season) 
     {
         return season switch
@@ -198,21 +213,20 @@ internal static class DisplayHelper
         };
     }
     
-    // Helper methods for scale calculations
     public static int CalculateRowHeight(int value, int highest)
     {
-        var rowHeight = SproutSightViewModel.ZeroDataRowHeight;
+        var rowHeight = ZeroDataRowHeight;
         if (value > 0)
         {
             var scale = (float)value / highest;
-            rowHeight = (int)Math.Round(Math.Max(SproutSightViewModel.MinRowHeight, scale * SproutSightViewModel.MaxRowHeight));
+            rowHeight = (int)Math.Round(Math.Max(MinRowHeight, scale * MaxRowHeight));
         }
         return rowHeight;
     }
     
     public static string FormatLayout(int rowHeight)
     {
-        return $"{SproutSightViewModel.RowWidth}px {rowHeight}px";
+        return $"{RowWidth}px {rowHeight}px";
     }
 }
 
@@ -256,7 +270,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         bool valid;
         if (day.Date.IsBefore(upToDate))
         {
-            tooltip = $"{day.Date.Season}-{day.Date.Day}: {SproutSightViewModel.FormatGoldNumber(dayGold)}";
+            tooltip = $"{day.Date.Season}-{day.Date.Day}: {DisplayHelper.FormatGoldNumber(dayGold)}";
             tint = DisplayHelper.GetTint(day.Date.Season);
             layout = DisplayHelper.FormatLayout(rowHeight);
             valid = true;
@@ -264,16 +278,16 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         else if (day.Date.Equals(upToDate))
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}: Today! Check back tomorrow. (Data is saved at the end of the day.)";
-            tint = SproutSightViewModel.TodayTint;
+            tint = DisplayHelper.TodayTint;
             // Make today a little larger than 0
-            layout = DisplayHelper.FormatLayout(SproutSightViewModel.MinRowHeight + 5);
+            layout = DisplayHelper.FormatLayout(DisplayHelper.MinRowHeight + 5);
             valid = false;
         }
         else 
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}: The Future! No data yet!";
-            tint = SproutSightViewModel.FutureTint;
-            layout = DisplayHelper.FormatLayout(SproutSightViewModel.MinRowHeight);
+            tint = DisplayHelper.FutureTint;
+            layout = DisplayHelper.FormatLayout(DisplayHelper.MinRowHeight);
             valid = false;
         } 
 
@@ -297,18 +311,18 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         string tint;
         if (upToDate.Year == season.Year && upToDate.Season == season.Season)
         {
-            tooltip = $"{season.Season} Y-{season.Year} {operation}: {SproutSightViewModel.FormatGoldNumber(newAggregated)}\n(Season in progress)";
-            tint = SproutSightViewModel.TodayTint; 
+            tooltip = $"{season.Season} Y-{season.Year} {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}\n(Season in progress)";
+            tint = DisplayHelper.TodayTint; 
         }
         else if (aggValue.Valid)
         {
-            tooltip = $"{season.Season} Y-{season.Year} {operation}: {SproutSightViewModel.FormatGoldNumber(newAggregated)}";
+            tooltip = $"{season.Season} Y-{season.Year} {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}";
             tint = DisplayHelper.GetTint(season.Season);
         }
         else 
         {
             tooltip = $"{season.Season} Y-{season.Year} {operation}: Season in the future!";
-            tint = SproutSightViewModel.FutureTint;
+            tint = DisplayHelper.FutureTint;
         }
 
         int rowHeight = DisplayHelper.CalculateRowHeight(newAggregated, HighestOverallSeasonTotal);
@@ -360,18 +374,18 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         string tint;
         if (upToDate.Year == year.Year) 
         {
-            tooltip = $"Y-{year.Year} {operation}: {SproutSightViewModel.FormatGoldNumber(newAggregated)}\n(Year in progress)";
-            tint = SproutSightViewModel.TodayTint;
+            tooltip = $"Y-{year.Year} {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}\n(Year in progress)";
+            tint = DisplayHelper.TodayTint;
         }
         else if (aggValue.Valid)
         {
-            tooltip = $"Y-{year.Year} {operation}: {SproutSightViewModel.FormatGoldNumber(newAggregated)}";        
-            tint = SproutSightViewModel.YearTint;
+            tooltip = $"Y-{year.Year} {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}";        
+            tint = DisplayHelper.YearTint;
         }
         else 
         {
             tooltip = $"Y-{year.Year} {operation}: Year is in the future! This should not happen!";        
-            tint = SproutSightViewModel.FutureTint;
+            tint = DisplayHelper.FutureTint;
         }
 
         int rowHeight = DisplayHelper.CalculateRowHeight(newAggregated, HighestOverallYearTotal);
@@ -415,7 +429,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
             aggValue = new AggValue(aggregated, aggregationValuesForYears.Count > 0, totalNumberofDaysCoveredForAllYears);
         }
 
-        string text = $"Overall {operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+        string text = $"Overall {operation}: {DisplayHelper.FormatGoldNumber(aggregated)}";
         var reversedElements = elements.ToList();
         reversedElements.Reverse();
         var element = new RootElement(aggregated, elements, reversedElements, text);
@@ -477,11 +491,11 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         if (day.Date.IsBefore(upToDate))
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}\n" +
-                    $"Net: {SproutSightViewModel.FormatGoldNumber(dayIn + dayOut)}\n" +
-                    $"In: {SproutSightViewModel.FormatGoldNumber(dayIn)}\n" +
-                    $"Out: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
-            inTint = SproutSightViewModel.CashFlowInTint;
-            outTint = SproutSightViewModel.CashFlowOutTint;
+                    $"Net: {DisplayHelper.FormatGoldNumber(dayIn + dayOut)}\n" +
+                    $"In: {DisplayHelper.FormatGoldNumber(dayIn)}\n" +
+                    $"Out: {DisplayHelper.FormatGoldNumber(dayOut)}";
+            inTint = DisplayHelper.CashFlowInTint;
+            outTint = DisplayHelper.CashFlowOutTint;
             int inRowHeight = DisplayHelper.CalculateRowHeight(dayIn, HighestDayInValue);
             inLayout = DisplayHelper.FormatLayout(inRowHeight);
             int outRowHeight = DisplayHelper.CalculateRowHeight(dayOut, HighestDayOutValue);
@@ -491,18 +505,18 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         else if (day.Date.Equals(upToDate))
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}: Today! Check back tomorrow. (Data is saved at the end of the day.)";
-            inTint = SproutSightViewModel.TodayTint;
-            outTint = SproutSightViewModel.TodayTint;
-            inLayout = DisplayHelper.FormatLayout(SproutSightViewModel.MinRowHeight + 5);
-            outLayout = DisplayHelper.FormatLayout(SproutSightViewModel.MinRowHeight + 5);
+            inTint = DisplayHelper.TodayTint;
+            outTint = DisplayHelper.TodayTint;
+            inLayout = DisplayHelper.FormatLayout(DisplayHelper.MinRowHeight + 5);
+            outLayout = DisplayHelper.FormatLayout(DisplayHelper.MinRowHeight + 5);
             valid = false;
         }
         else 
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}: The Future! No data yet!";
-            inTint = SproutSightViewModel.FutureTint;
-            outTint = SproutSightViewModel.FutureTint;
-            inLayout = DisplayHelper.FormatLayout(SproutSightViewModel.MinRowHeight);
+            inTint = DisplayHelper.FutureTint;
+            outTint = DisplayHelper.FutureTint;
+            inLayout = DisplayHelper.FormatLayout(DisplayHelper.MinRowHeight);
             outLayout = DisplayHelper.FormatLayout(0);
             valid = false;
         } 
@@ -540,15 +554,15 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         if (operation == Operation.Min || operation == Operation.Max)
         {
             tooltip = $"{season.Season} Y-{season.Year} {operation}:\n" +
-                      $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
-                      $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+                      $"In: {DisplayHelper.FormatGoldNumber(aggregatedIn)}\n" +
+                      $"Out: {DisplayHelper.FormatGoldNumber(aggregatedOut)}";
         }
         else 
         {
             tooltip = $"{season.Season} Y-{season.Year} {operation}:\n" +
-                      $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" +
-                      $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
-                      $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+                      $"Net: {DisplayHelper.FormatGoldNumber(netValue)}\n" +
+                      $"In: {DisplayHelper.FormatGoldNumber(aggregatedIn)}\n" +
+                      $"Out: {DisplayHelper.FormatGoldNumber(aggregatedOut)}";
         }
 
         var reversedElements = elements.ToList();
@@ -595,15 +609,15 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         if (operation == Operation.Min || operation == Operation.Max)
         {
             tooltip = $"Y-{year.Year} {operation}:\n" +
-                      $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
-                      $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+                      $"In: {DisplayHelper.FormatGoldNumber(aggregatedIn)}\n" +
+                      $"Out: {DisplayHelper.FormatGoldNumber(aggregatedOut)}";
         }
         else 
         {
             tooltip = $"Y-{year.Year} {operation}:\n" +
-                      $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" +
-                      $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" +
-                      $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+                      $"Net: {DisplayHelper.FormatGoldNumber(netValue)}\n" +
+                      $"In: {DisplayHelper.FormatGoldNumber(aggregatedIn)}\n" +
+                      $"Out: {DisplayHelper.FormatGoldNumber(aggregatedOut)}";
         }
         
         var cashFlowYearEntry = new YearElement(
@@ -638,9 +652,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         var outTint = "#B22222";
         
         string tooltip = $"Overall {operation}:\n" + 
-                         $"Net: {SproutSightViewModel.FormatGoldNumber(netValue)}\n" + 
-                         $"In: {SproutSightViewModel.FormatGoldNumber(aggregatedIn)}\n" + 
-                         $"Out: {SproutSightViewModel.FormatGoldNumber(aggregatedOut)}";
+                         $"Net: {DisplayHelper.FormatGoldNumber(netValue)}\n" + 
+                         $"In: {DisplayHelper.FormatGoldNumber(aggregatedIn)}\n" + 
+                         $"Out: {DisplayHelper.FormatGoldNumber(aggregatedOut)}";
         
         string text = $"Cash Flow {operation}";
         var element = new RootElement(

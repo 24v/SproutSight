@@ -33,16 +33,6 @@ namespace SproutSight;
 
 internal partial class SproutSightViewModel
 {
-    public const int RowWidth = 20;
-    public const int MaxRowHeight = 128;
-    public const int MinRowHeight = 3;
-    public const int ZeroDataRowHeight = 2;
-    public const int DefaultNumYearsSelected = 5;
-    public const string TodayTint = "#000000";
-    public const string FutureTint = "#959595";
-    public const string YearTint = "#40FC05";
-    public const string CashFlowOutTint = "#B22222"; 
-    public const string CashFlowInTint = "#696969";
 
     // Showing Today's Info
     public StardewDate Date = StardewDate.GetStardewDate();
@@ -50,7 +40,7 @@ internal partial class SproutSightViewModel
     public int TodayGoldIn;
     public int TodayGoldOut;
     public bool ShippedSomething => CurrentItems.Count > 0;
-    public string TotalProceeds => $"Current Shipped: {FormatGoldNumber(CurrentItems.Select(item => item.StackCount * item.SalePrice).Sum())}";
+    public string TotalProceeds => $"Current Shipped: {DisplayHelper.FormatGoldNumber(CurrentItems.Select(item => item.StackCount * item.SalePrice).Sum())}";
 
     private readonly TrackedData trackedData;
 
@@ -71,16 +61,13 @@ internal partial class SproutSightViewModel
         _yearSelectionOptions = [new YearSelectionViewModel(YearSelectionViewModel.YEAR_ALL, false)];
         for (int i = Game1.year ; i >= 1; i-- )
         {
-            bool selected = i > Game1.year - DefaultNumYearsSelected;
+            bool selected = i > Game1.year - DisplayHelper.DefaultNumYearsSelected;
             _yearSelectionOptions.Add(new YearSelectionViewModel(i, selected));
         }
 
         OnParamsChange();
     }
-    public static string FormatGoldNumber(int number)
-    {
-        return $"{number.ToString("N0")}g";
-    }
+
 
     [Notify]
     public Operation[] _operations = Enum.GetValues<Operation>();
