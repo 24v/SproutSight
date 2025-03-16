@@ -13,7 +13,6 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
     public List<YearElement> ShippedGridReversed { get; set; } = [];
     public int ShippedTotal { get; private set; } = 0;
     public string? ShippedText { get; private set; } = "";
-    public string? ShippedTooltip { get; private set; } = "";
 
     public List<YearElement> CashFlowGrid { get; set; } = [];
     public List<YearElement> CashFlowGridReversed { get; set; } = [];
@@ -63,9 +62,7 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         var shippedFirstPassVisitor = FirstPassVisitors.CreateShippedVisitor(
                 TrackedData.ShippedData, 
                 Operation);
-        Logging.Monitor.Log($"Starting FirstPassVisitor with operation: {Operation}, ShippedData count: {TrackedData.ShippedData.Count}", LogLevel.Debug);
         shippedFirstPassVisitor.Visit(rootNode);
-        Logging.Monitor.Log($"FirstPassVisitor results - Day: {shippedFirstPassVisitor.HighestDayValue}, Season: {shippedFirstPassVisitor.HighestSeasonValue}, Year: {shippedFirstPassVisitor.HighestYearValue}", LogLevel.Debug);
         var shippedVisitor = Visitors.CreateShippedVisitor(
                 TrackedData.ShippedData, 
                 Operation, 
@@ -73,13 +70,10 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
                 shippedFirstPassVisitor.HighestSeasonValue, 
                 shippedFirstPassVisitor.HighestYearValue);
         var shippedRoot = shippedVisitor.Visit(rootNode);
-        Logging.Monitor.Log($"ShippedVisitor.Visit returned root with value={shippedRoot.Value}, entries count={shippedRoot.YearElements.Count}", LogLevel.Debug);
         ShippedGrid = shippedRoot.YearElements;
         ShippedGridReversed = shippedRoot.YearElementsReversed;
         ShippedTotal = shippedRoot.Value;
         ShippedText = shippedRoot.Text;
-        ShippedTooltip = shippedRoot.Tooltip;
-        Logging.Monitor.Log($"ShippedVisitor results - Total: {ShippedTotal}, Text: {ShippedText}", LogLevel.Debug);
 
         // var walletGoldFirstPassVisitor = FirstPassVisitors.CreateWalletGoldVisitor(
         //         TrackedData.GoldInOut, 

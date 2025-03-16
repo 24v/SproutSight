@@ -77,7 +77,7 @@
                         horizontal-content-alignment="end">
 
                     <lane>
-                        <label text={ShippedTooltip} tooltip={ShippedTooltip} margin="0,0,10,10" />
+                        <label text={ShippedText} margin="0,0,10,10" />
                         <label text="(Note)" tooltip="Hover over year/season to see aggregated." scale=".5" layout="stretch"/>
                         <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                         <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />

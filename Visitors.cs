@@ -170,6 +170,10 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
 
 internal abstract class BaseVisitor(Operation operation, StardewDate UpToDate)
 {
+
+    public const string TodayTint = "#000000";
+    public const string FutureTint = "#959595";
+    public const String YearTint = "#40FC05";
     public Operation Operation { get; } = operation;
 
     public StardewDate UpToDate { get; } = UpToDate;
@@ -242,9 +246,9 @@ internal class SingleValueVisitor : BaseVisitor
 
     public virtual DayElement Visit(DayNode day)
     {
-        var highest = HighestOverallDayTotal;
         var dayGold = GetDayValue(day.Date);
-        int rowHeight = CalculateRowHeight(dayGold, highest);
+        int rowHeight = CalculateRowHeight(dayGold, HighestOverallDayTotal);
+
         string tooltip;
         string tint;
         string layout;
@@ -259,56 +263,57 @@ internal class SingleValueVisitor : BaseVisitor
         else if (day.Date.Equals(UpToDate))
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}: Today! Check back tomorrow. (Data is saved at the end of the day.)";
-            tint = "#000000";
-            // Make today a little larger
+            tint = TodayTint;
+            // Make today a little larger than 0
             layout = FormatLayout(rowHeight + 5);
             valid = false;
         }
         else 
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}: The Future! No data yet!";
-            tint = "#959595";
+            tint = FutureTint;
             layout = FormatLayout(rowHeight);
             valid = false;
         } 
+
         AggValue aggValue = new(dayGold, valid, 1);
-        return new DayElement(day.Date, aggValue, "", layout, tooltip, tint);
+        return new DayElement(day.Date, aggValue, "<Not Used>", layout, tooltip, tint);
     }
 
     public virtual SeasonElement Visit(SeasonNode season)
     {
         var elements = season.Days.Select(Visit).ToList();
-        var reversedElements = elements.ToList();
-        reversedElements.Reverse();
-        var golds = elements
+
+        var aggregationValuesForDays = elements
             .Select(e => e.Value)
             .Where(e => e.Valid)
             .Select(e => e.Value)
             .ToList();
         
-        var aggregated = DoOperation(golds, golds.Count);
-        var aggValue = new AggValue(aggregated, golds.Count > 0, golds.Count);
+        var newAggregated = DoOperation(aggregationValuesForDays, aggregationValuesForDays.Count);
+        var aggValue = new AggValue(newAggregated, aggregationValuesForDays.Count > 0, aggregationValuesForDays.Count);
         string tooltip;
         string tint;
         if (UpToDate.Year == season.Year && UpToDate.Season == season.Season)
         {
-            tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}\n(Season in progress)";
-            tint = "#000000"; 
+            tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(newAggregated)}\n(Season in progress)";
+            tint = TodayTint; 
         }
         else if (aggValue.Valid)
         {
-            tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+            tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(newAggregated)}";
             tint = GetTint(season.Season);
         }
         else 
         {
             tooltip = $"{season.Season} Y-{season.Year} {Operation}: Season in the future!";
-            tint = "#959595";
+            tint = FutureTint;
         }
 
-        var highest = HighestOverallSeasonTotal;
-        int rowHeight = CalculateRowHeight(aggregated, highest);
+        int rowHeight = CalculateRowHeight(newAggregated, HighestOverallSeasonTotal);
         string layout = FormatLayout(rowHeight);
+        var reversedElements = elements.ToList();
+        reversedElements.Reverse();
         var seasonElement = new SeasonElement(
                 season.Season, aggValue, elements, reversedElements,
                 season + "", layout, tooltip, tint, 
@@ -320,11 +325,68 @@ internal class SingleValueVisitor : BaseVisitor
     {
         Logging.Monitor.Log($"Year {year.Year}");
         var elements = year.Seasons.Select(Visit).ToList();
-        foreach (var element in elements)
+        var totalNumberOfDaysCoveredForAllSeasonInYear = elements
+            .Select(e => e.Value)
+            .Where(e => e.Valid)
+            .Select(e => e.TotalNumberOfDaysCovered)
+            .Sum();
+
+        int newAggregated;
+        AggValue aggValue;
+        if (Operation == Operation.Average)
         {
-            Logging.Monitor.Log($"    {element}");
+            // Average of averages magic
+            var aggregationValuesforSeasonsNormalized = elements
+                .Select(e => e.Value)
+                .Where(e => e.Valid)
+                .Select(e => e.Value * e.TotalNumberOfDaysCovered)
+                .ToList();
+
+            newAggregated = DoOperation(aggregationValuesforSeasonsNormalized, totalNumberOfDaysCoveredForAllSeasonInYear);
+            aggValue = new AggValue(newAggregated, aggregationValuesforSeasonsNormalized.Count > 0, totalNumberOfDaysCoveredForAllSeasonInYear);
         }
-        var dayCount = elements
+        else
+        {
+            var aggregationValuesForSeasons = elements
+                .Select(e => e.Value)
+                .Where(e => e.Valid)
+                .Select(e => e.Value)
+                .ToList();
+            newAggregated = DoOperation(aggregationValuesForSeasons);
+            aggValue = new AggValue(newAggregated, aggregationValuesForSeasons.Count > 0, totalNumberOfDaysCoveredForAllSeasonInYear);
+        }
+
+        string tooltip;
+        string tint;
+        if (UpToDate.Year == year.Year) 
+        {
+            tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(newAggregated)}\n(Year in progress)";
+            tint = TodayTint;
+        }
+        else if (aggValue.Valid)
+        {
+            tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(newAggregated)}";        
+            tint = YearTint;
+        }
+        else 
+        {
+            tooltip = $"Y-{year.Year} {Operation}: Year is in the future! This should not happen!";        
+            tint = FutureTint;
+        }
+
+        int rowHeight = CalculateRowHeight(newAggregated, HighestOverallYearTotal);
+        string layout = FormatLayout(rowHeight);
+        var reversedElements = elements.ToList();
+        reversedElements.Reverse();
+        var yearElement = new YearElement(year.Year, aggValue, elements, 
+                reversedElements, year.Year + "", layout, tooltip, tint);
+        return yearElement;
+    }
+    
+    public virtual RootElement Visit(RootNode root)
+    {
+        var elements = root.Years.Select(Visit).ToList();
+        var totalNumberofDaysCoveredForAllYears = elements
             .Select(e => e.Value)
             .Where(e => e.Valid)
             .Select(e => e.TotalNumberOfDaysCovered)
@@ -334,91 +396,29 @@ internal class SingleValueVisitor : BaseVisitor
         AggValue aggValue;
         if (Operation == Operation.Average)
         {
-
-            var averageGolds = elements
+            var aggregationValuesForYearsNormalized = elements
                 .Select(e => e.Value)
                 .Where(e => e.Valid)
                 .Select(e => e.Value * e.TotalNumberOfDaysCovered)
                 .ToList();
-
-            aggregated = DoOperation(averageGolds, dayCount);
-            Logging.Monitor.Log($"Year: {year.Year}, Value: {aggregated}, DayCount: {dayCount}, Average Golds: [{string.Join(",", averageGolds)}]");
-            aggValue = new AggValue(aggregated, averageGolds.Count > 0, dayCount);
+            aggregated = DoOperation(aggregationValuesForYearsNormalized, totalNumberofDaysCoveredForAllYears);
+            aggValue = new AggValue(aggregated, aggregationValuesForYearsNormalized.Count > 0, totalNumberofDaysCoveredForAllYears);
         }
         else
         {
-            var golds = elements
+            var aggregationValuesForYears = elements
                 .Select(e => e.Value)
                 .Where(e => e.Valid)
                 .Select(e => e.Value)
                 .ToList();
-            aggregated = DoOperation(golds);
-            Logging.Monitor.Log($"Year: {year.Year}, Value: {aggregated}, DayCount: {dayCount}, Golds: [{string.Join(",", golds)}]");            
-            aggValue = new AggValue(aggregated, golds.Count > 0, dayCount);
+            aggregated = DoOperation(aggregationValuesForYears);
+            aggValue = new AggValue(aggregated, aggregationValuesForYears.Count > 0, totalNumberofDaysCoveredForAllYears);
         }
 
-        // string tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
-        var highest = HighestOverallYearTotal;
-        int rowHeight = CalculateRowHeight(aggregated, highest);
-        string layout = FormatLayout(rowHeight);
-        string tooltip;
-        if (aggValue.Valid)
-        {
-            tooltip = $"Y-{year.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";        }
-        else 
-        {
-            tooltip = $"Y-{year.Year} {Operation}: Year is in the future!";        
-        }
-
+        string text = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         var reversedElements = elements.ToList();
         reversedElements.Reverse();
-        var yearElement = new YearElement(
-                    year.Year, aggValue, elements, reversedElements, year.Year + "", layout, tooltip);
-        return yearElement;
-    }
-    
-    public virtual RootElement Visit(RootNode root)
-    {
-        var elements = root.Years.Select(Visit).ToList();
-        var reversedElements = elements.ToList();
-        reversedElements.Reverse();
-
-        int aggregated;
-        AggValue aggValue;
-        if (Operation == Operation.Average)
-        {
-            var dayCount = elements
-                .Select(e => e.Value)
-                .Where(e => e.Valid)
-                .Select(e => e.TotalNumberOfDaysCovered)
-                .Sum();
-            var averageGolds = elements
-                .Select(e => e.Value)
-                .Where(e => e.Valid)
-                .Select(e => e.Value * e.TotalNumberOfDaysCovered)
-                .ToList();
-
-            Logging.Monitor.Log($"<Root> DayCount: {dayCount}, Average Golds: [{string.Join(",", averageGolds)}]");
-            aggregated = DoOperation(averageGolds, dayCount);
-            aggValue = new AggValue(aggregated, averageGolds.Count > 0, averageGolds.Count);
-
-        }
-        else
-        {
-            var golds = elements
-                .Select(e => e.Value)
-                .Where(e => e.Valid)
-                .Select(e => e.Value)
-                .ToList();
-            Logging.Monitor.Log($"<Root> golds [{string.Join(",", golds)}]");
-            aggregated = DoOperation(golds);
-            aggValue = new AggValue(aggregated, golds.Count > 0, golds.Count);
-        }
-
-        string tooltip = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
-        string text = tooltip;
-        var element = new RootElement(aggregated, elements, reversedElements, $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);
-
+        var element = new RootElement(aggregated, elements, reversedElements, text);
         return element;
     }
 }
