@@ -1,7 +1,5 @@
 # Development Guide
 
-## Quick Reference
-
 ### Setup
 ```bash
 git clone [repository-url]
@@ -20,53 +18,22 @@ git commit -m "Description of changes"
 
 # Push changes
 git push origin feature/my-feature
-
-# When done, merge to main
-git checkout main
-git merge feature/my-feature
-git push origin main
 ```
 
 ### Release Process
 
-1. Update version numbers:
-   ```bash
-   # Edit manifest.json to bump version
-   # Update CHANGELOG.md with new version
-   git add manifest.json CHANGELOG.md
-   git commit -m "Prepare release v1.0.0"
-   ```
+#### Release Candidate ####
+1. Edit manifest.json to bump version
+2. Update CHANGELOG.md with new version
+3. git add manifest.json CHANGELOG.md && git commit -m "Prepare release v1.0.0"
+4. dotnet build --configuration Release
+5. git tag <new version> 
+6. git push origin <new version>
+7. When accepted
+      git checkout main
+      git merge feature/my-feature
+      git push origin main
 
-2. Create and push tag:
-   ```bash
-   git tag v1.0.0
-   git push origin main v1.0.0
-   ```
-
-3. GitHub Actions will automatically:
-   - Build the project
-   - Create GitHub release
-   - Generate release notes
-   - Create mod zip file
-   - Upload to Nexus Mods (if configured)
-
-### Release Configuration
-
-#### GitHub Secrets Required
-- `NEXUS_API_KEY`: Get from https://www.nexusmods.com/users/myaccount?tab=api
-- `NEXUS_MOD_ID`: The number from your mod's Nexus URL
-
-#### Manual Release (if needed)
-```bash
-# Build
-dotnet build --configuration Release
-
-# Create zip with:
-# - SproutSight.dll
-# - manifest.json
-# - Other required files
-```
-
-Upload manually to:
+8. Upload to 
 - GitHub Releases
 - Nexus Mods
