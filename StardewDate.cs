@@ -28,7 +28,7 @@ internal class StardewDate
         return HashCode.Combine(Year, Season, Day);
     }
 
-    public static StardewDate GetStardewDate()
+    public static StardewDate GetTodaysDate()
     {
         return new StardewDate(Game1.year, Game1.season, Game1.dayOfMonth);
     }

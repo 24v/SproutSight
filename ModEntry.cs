@@ -185,7 +185,7 @@ internal sealed class ModEntry : Mod
     private void OnDayEnding(object? sender, DayEndingEventArgs e)
     {
         _pendingItems = GetCurrentShippedItems();
-        _pendingDate = StardewDate.GetStardewDate();
+        _pendingDate = StardewDate.GetTodaysDate();
         Monitor.Log($"Day ending with {_pendingItems.Count} items queued for save", LogLevel.Trace);
     }
 
@@ -380,7 +380,7 @@ internal sealed class ModEntry : Mod
     private void SaveStats()
     {
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
-        var date = StardewDate.GetStardewDate();
+        var date = StardewDate.GetTodaysDate();
         DataFileHandler handler = new DataFileHandler();
         handler.SaveShippedItems(
             statsFolderPath,

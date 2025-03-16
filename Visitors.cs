@@ -1,10 +1,12 @@
+using SproutSight.Display;
+
 namespace SproutSight;
 internal static class Visitors
 {
     public static SingleValueVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation, 
                                                   int highestDay, int highestSeason, int highestYear)
     {
-        return new SingleValueVisitor(operation, StardewDate.GetStardewDate(), highestDay, highestSeason, highestYear, date => 
+        return new SingleValueVisitor(operation, StardewDate.GetTodaysDate(), highestDay, highestSeason, highestYear, date => 
         {
             if (shippedData.TryGetValue(date, out var items))
             {
@@ -17,7 +19,7 @@ internal static class Visitors
     public static SingleValueVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation, 
                                                     int highestDay, int highestSeason, int highestYear)
     {
-        return new SingleValueVisitor(operation, StardewDate.GetStardewDate(), highestDay, highestSeason, highestYear, 
+        return new SingleValueVisitor(operation, StardewDate.GetTodaysDate(), highestDay, highestSeason, highestYear, 
                               date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0);
     }
 
@@ -25,7 +27,7 @@ internal static class Visitors
                                                       int highestDayIn, int highestSeasonIn, int highestYearIn,
                                                       int highestDayOut, int highestSeasonOut, int highestYearOut)
     {
-        return new CashFlowVisitor(goldInOut, operation, StardewDate.GetStardewDate(), highestDayIn, highestSeasonIn, 
+        return new CashFlowVisitor(goldInOut, operation, StardewDate.GetTodaysDate(), highestDayIn, highestSeasonIn, 
                 highestYearIn, highestDayOut, highestSeasonOut, highestYearOut);
     }
 }
@@ -41,12 +43,12 @@ internal static class FirstPassVisitors
                 return items.Select(item => item.TotalSalePrice).Sum();
             }
             return 0;
-        });
+        }, StardewDate.GetTodaysDate());
     }
 
     public static SingleValueFirstPassVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation)
     {
-        return new SingleValueFirstPassVisitor(operation, date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0);
+        return new SingleValueFirstPassVisitor(operation, date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0, StardewDate.GetTodaysDate());
     }
 
     public static CashFlowFirstPassVisitor CreateCashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation)
@@ -55,31 +57,58 @@ internal static class FirstPassVisitors
     }
 }
 
-internal class SingleValueFirstPassVisitor(Operation operation, Func<StardewDate, int> getDayValue) 
+internal class SingleValueFirstPassVisitor(Operation operation, Func<StardewDate, int> getDayValue, StardewDate upToDate) 
 {
     public int HighestDayValue { get; private set; } = 0;
     public int HighestSeasonValue { get; private set; } = 0;
     public int HighestYearValue { get; private set; } = 0;
 
-    public int Visit(DayNode day)
+    public AggValue Visit(DayNode day)
     {
         var dayValue = getDayValue(day.Date);
         HighestDayValue = Math.Max(HighestDayValue, dayValue);
-        return dayValue;
+        var valid = day.Date.IsBefore(upToDate);
+        return new AggValue(dayValue, valid, 1);
     }
 
-    public int Visit(SeasonNode season)
+    public AggValue Visit(SeasonNode season)
     {
-        int aggregateOfDays = DoOperation(season.Days.Select(Visit).ToList());
-        HighestSeasonValue = Math.Max(HighestSeasonValue, aggregateOfDays);
-        return aggregateOfDays;
+        var dayAggValues = season.Days
+            .Select(Visit)
+            .Where(a => a.IsValid)
+            .ToList(); 
+        var aggValue = CalculateAggValue(dayAggValues);
+        HighestSeasonValue = Math.Max(HighestSeasonValue, aggValue.Value);
+        return aggValue;
+        // var totalDaysCovered = dayAggValues.Select(a => a.TotalNumberOfDaysCovered).Sum();
+        // var valuesToAggregate = dayAggValues.Select(a => a.Value).ToList();
+        // if (operation == Operation.Average)
+        // {
+        //     valuesToAggregate = seasonAggValues.Select(a => a.Value * a.TotalNumberOfDaysCovered).ToList();
+        // }
+        // int aggregateOfDays = DoOperation(valuesToAggregate, totalDaysCovered);
+        // return new AggValue(aggregateOfDays, totalDaysCovered > 0, totalDaysCovered);
     }
 
-    public int Visit(YearNode year)
+    public AggValue Visit(YearNode year)
     {
-        int aggregateOfSeasons = DoOperation(year.Seasons.Select(Visit).ToList());
-        HighestYearValue = Math.Max(HighestYearValue, aggregateOfSeasons);
-        return aggregateOfSeasons;
+        var seasonAggValues = year.Seasons
+            .Select(Visit)
+            .Where(a => a.IsValid)
+            .ToList(); 
+        var aggValue = CalculateAggValue(seasonAggValues);
+        HighestYearValue = Math.Max(HighestYearValue, aggValue.Value);
+        return aggValue;
+        // var aggValue = CalculateAggValue(seasonAggValues);
+        // var totalDaysCovered = seasonAggValues.Select(a => a.TotalNumberOfDaysCovered).Sum();
+        // var valuesToAggregate = seasonAggValues.Select(a => a.Value).ToList();
+        // if (operation == Operation.Average)
+        // {
+        //     valuesToAggregate = seasonAggValues.Select(a => a.Value * a.TotalNumberOfDaysCovered).ToList();
+        // }
+        // int aggregateOfDays = DoOperation(valuesToAggregate, totalDaysCovered);
+        // HighestSeasonValue = Math.Max(HighestSeasonValue, aggregateOfDays);
+        // return new AggValue(aggregateOfDays, totalDaysCovered > 0, totalDaysCovered);
     }
 
     public void Visit(RootNode root)
@@ -87,14 +116,32 @@ internal class SingleValueFirstPassVisitor(Operation operation, Func<StardewDate
         root.Years.ForEach(e => Visit(e));
     }
 
-    public int DoOperation(List<int> entries)
+    private AggValue CalculateAggValue(List<AggValue> aggValues)
     {
+        var validAggValues = aggValues.Where(a => a.IsValid).ToList();
+        var totalDaysCovered = validAggValues.Select(a => a.TotalNumberOfDaysCovered).Sum();
+        var valuesToAggregate = validAggValues.Select(a => a.Value).ToList();
+        if (operation == Operation.Average)
+        {
+            valuesToAggregate = validAggValues.Select(a => a.Value * a.TotalNumberOfDaysCovered).ToList();
+        }
+        int aggregationValue = DoOperation(valuesToAggregate, totalDaysCovered);
+        return new AggValue(aggregationValue, totalDaysCovered > 0, totalDaysCovered);
+    }
+
+    private int DoOperation(List<int> entries, int? countOverride = null)
+    {
+        if (entries.Count == 0)
+        {
+            return 0;
+        }
         return operation switch
         {
             Operation.Min => entries.Min(),
             Operation.Max => entries.Max(),
             Operation.Sum => entries.Sum(),
-            Operation.Average => (int)Math.Round(entries.Sum() / (float)entries.Count),
+            Operation.Average => (int)Math.Round(entries.Sum() / 
+                (float)(countOverride != null ? countOverride : entries.Count)),
             Operation.End => entries.Last(),
             _ => 0
         };
@@ -183,48 +230,6 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> cashF
     }
 }
 
-internal static class DisplayHelper
-{
-    public const int RowWidth = 20;
-    public const int MaxRowHeight = 128;
-    public const int MinRowHeight = 3;
-    public const int ZeroDataRowHeight = 2;
-    public const int DefaultNumYearsSelected = 5;
-    public const string TodayTint = "#000000";
-    public const string FutureTint = "#959595";
-    public const string YearTint = "#40FC05";
-    public const string CashFlowOutTint = "#B22222"; 
-    public const string CashFlowInTint = "#696969";
-    public static string FormatGoldNumber(int number) => $"{number:N0}g";
-
-    public static string GetTint(Season season) 
-    {
-        return season switch
-        {
-            Season.Spring => "#2CA014",
-            Season.Summer => "#FEFF17",
-            Season.Fall => "#D13400",
-            Season.Winter => "#A9F0FF",
-            _ => "White"
-        };
-    }
-    
-    public static int CalculateRowHeight(int value, int highest)
-    {
-        var rowHeight = ZeroDataRowHeight;
-        if (value > 0)
-        {
-            var scale = (float)value / highest;
-            rowHeight = (int)Math.Round(Math.Max(MinRowHeight, scale * MaxRowHeight));
-        }
-        return rowHeight;
-    }
-    
-    public static string FormatLayout(int rowHeight)
-    {
-        return $"{RowWidth}px {rowHeight}px";
-    }
-}
 
 internal class SingleValueVisitor(Operation operation, StardewDate upToDate, 
         int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal, Func<StardewDate, int> getDayValue)
@@ -294,7 +299,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
 
         var aggregationValuesForDays = elements
             .Select(e => e.Value)
-            .Where(e => e.Valid)
+            .Where(e => e.IsValid)
             .Select(e => e.Value)
             .ToList();
         
@@ -307,7 +312,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
             tooltip = $"{season.Season} Y-{season.Year} {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}\n(Season in progress)";
             tint = DisplayHelper.TodayTint; 
         }
-        else if (aggValue.Valid)
+        else if (aggValue.IsValid)
         {
             tooltip = $"{season.Season} Y-{season.Year} {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}";
             tint = DisplayHelper.GetTint(season.Season);
@@ -326,6 +331,11 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
                 season.Season, aggValue, elements, reversedElements,
                 season + "", layout, tooltip, tint, 
                 season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
+
+        if (rowHeight > DisplayHelper.MaxRowHeight)
+        {
+            Logging.Monitor.Log($"WARNING: rowHeight ({rowHeight}) exceeds MaxRowHeight ({DisplayHelper.MaxRowHeight}). Values: newAggregated={newAggregated}, HighestOverallSeasonTotal={HighestOverallSeasonTotal}, season={season.Season}", StardewModdingAPI.LogLevel.Warn);
+        }
         return seasonElement;
     }
 
@@ -334,7 +344,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         var elements = year.Seasons.Select(Visit).ToList();
         var totalNumberOfDaysCoveredForAllSeasonInYear = elements
             .Select(e => e.Value)
-            .Where(e => e.Valid)
+            .Where(e => e.IsValid)
             .Select(e => e.TotalNumberOfDaysCovered)
             .Sum();
 
@@ -345,7 +355,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
             // Average of averages magic
             var aggregationValuesforSeasonsNormalized = elements
                 .Select(e => e.Value)
-                .Where(e => e.Valid)
+                .Where(e => e.IsValid)
                 .Select(e => e.Value * e.TotalNumberOfDaysCovered)
                 .ToList();
 
@@ -356,7 +366,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         {
             var aggregationValuesForSeasons = elements
                 .Select(e => e.Value)
-                .Where(e => e.Valid)
+                .Where(e => e.IsValid)
                 .Select(e => e.Value)
                 .ToList();
             newAggregated = DoOperation(aggregationValuesForSeasons);
@@ -370,7 +380,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
             tooltip = $"Y-{year.Year} {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}\n(Year in progress)";
             tint = DisplayHelper.TodayTint;
         }
-        else if (aggValue.Valid)
+        else if (aggValue.IsValid)
         {
             tooltip = $"Y-{year.Year} {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}";        
             tint = DisplayHelper.YearTint;
@@ -395,7 +405,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         var elements = root.Years.Select(Visit).ToList();
         var totalNumberofDaysCoveredForAllYears = elements
             .Select(e => e.Value)
-            .Where(e => e.Valid)
+            .Where(e => e.IsValid)
             .Select(e => e.TotalNumberOfDaysCovered)
             .Sum();
 
@@ -405,7 +415,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         {
             var aggregationValuesForYearsNormalized = elements
                 .Select(e => e.Value)
-                .Where(e => e.Valid)
+                .Where(e => e.IsValid)
                 .Select(e => e.Value * e.TotalNumberOfDaysCovered)
                 .ToList();
             aggregated = DoOperation(aggregationValuesForYearsNormalized, totalNumberofDaysCoveredForAllYears);
@@ -415,7 +425,7 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         {
             var aggregationValuesForYears = elements
                 .Select(e => e.Value)
-                .Where(e => e.Valid)
+                .Where(e => e.IsValid)
                 .Select(e => e.Value)
                 .ToList();
             aggregated = DoOperation(aggregationValuesForYears);
@@ -538,7 +548,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         // Calculate out bar using season-specific highest value
         int outRowHeight = DisplayHelper.CalculateRowHeight(aggregatedOut, HighestSeasonOutValue);
         string outLayout = DisplayHelper.FormatLayout(outRowHeight);
-        
+
         // Determine colors based on net value
         var inTint = "#696969"; 
         var outTint = "#B22222";

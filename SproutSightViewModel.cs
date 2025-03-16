@@ -1,4 +1,5 @@
 using PropertyChanged.SourceGenerator;
+using SproutSight.Display;
 
 namespace SproutSight;
 
@@ -32,12 +33,13 @@ namespace SproutSight;
 // TODO: Better title text (cash flow is inconsistent)
 // TODO: SingleFirstPassVisitor does not correctly calculate max averages for incomplete years. I also hate my life.
 // TODO: Constants for IN/Out tint
+// TODO: Overall End => Up until today
 
 internal partial class SproutSightViewModel
 {
 
     // Showing Today's Info
-    public StardewDate Date = StardewDate.GetStardewDate();
+    public StardewDate Date = StardewDate.GetTodaysDate();
     public List<TrackedItemStack> CurrentItems { get; internal set; } = new();
     public int TodayGoldIn;
     public int TodayGoldOut;
