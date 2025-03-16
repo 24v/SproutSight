@@ -80,14 +80,6 @@ internal class SingleValueFirstPassVisitor(Operation operation, Func<StardewDate
         var aggValue = CalculateAggValue(dayAggValues);
         HighestSeasonValue = Math.Max(HighestSeasonValue, aggValue.Value);
         return aggValue;
-        // var totalDaysCovered = dayAggValues.Select(a => a.TotalNumberOfDaysCovered).Sum();
-        // var valuesToAggregate = dayAggValues.Select(a => a.Value).ToList();
-        // if (operation == Operation.Average)
-        // {
-        //     valuesToAggregate = seasonAggValues.Select(a => a.Value * a.TotalNumberOfDaysCovered).ToList();
-        // }
-        // int aggregateOfDays = DoOperation(valuesToAggregate, totalDaysCovered);
-        // return new AggValue(aggregateOfDays, totalDaysCovered > 0, totalDaysCovered);
     }
 
     public AggValue Visit(YearNode year)
@@ -99,16 +91,6 @@ internal class SingleValueFirstPassVisitor(Operation operation, Func<StardewDate
         var aggValue = CalculateAggValue(seasonAggValues);
         HighestYearValue = Math.Max(HighestYearValue, aggValue.Value);
         return aggValue;
-        // var aggValue = CalculateAggValue(seasonAggValues);
-        // var totalDaysCovered = seasonAggValues.Select(a => a.TotalNumberOfDaysCovered).Sum();
-        // var valuesToAggregate = seasonAggValues.Select(a => a.Value).ToList();
-        // if (operation == Operation.Average)
-        // {
-        //     valuesToAggregate = seasonAggValues.Select(a => a.Value * a.TotalNumberOfDaysCovered).ToList();
-        // }
-        // int aggregateOfDays = DoOperation(valuesToAggregate, totalDaysCovered);
-        // HighestSeasonValue = Math.Max(HighestSeasonValue, aggregateOfDays);
-        // return new AggValue(aggregateOfDays, totalDaysCovered > 0, totalDaysCovered);
     }
 
     public void Visit(RootNode root)
@@ -494,7 +476,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         if (day.Date.IsBefore(upToDate))
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}\n" +
-                    $"Net: {DisplayHelper.FormatGoldNumber(dayIn + dayOut)}\n" +
+                    $"Net: {DisplayHelper.FormatGoldNumber(dayIn - dayOut)}\n" +
                     $"In: {DisplayHelper.FormatGoldNumber(dayIn)}\n" +
                     $"Out: {DisplayHelper.FormatGoldNumber(dayOut)}";
             inTint = DisplayHelper.CashFlowInTint;
