@@ -1,6 +1,6 @@
 namespace SproutSight;
 
-internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operation, int[] SelectedYears)
+internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operation, int[] SelectedYears, StardewDate Date)
 {
     // We decompose the Elements here to make it easier to bind in the sml since dot operations are not allowed.
 
@@ -162,6 +162,9 @@ internal record YearNode(int Year, List<SeasonNode> Seasons);
 internal record SeasonNode(Season Season, int Year, List<DayNode> Days);
 internal record DayNode(StardewDate Date);
 internal record RootNode(List<YearNode> Years);
+
+internal record AggValue(int Value, bool Valid, int Count);
+
 internal record RootElement(int Value, List<YearElement> YearElements, List<YearElement> YearElementsReversed, 
     string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,
     string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
@@ -177,7 +180,7 @@ internal record SeasonElement(Season Season, int Value, List<DayElement> DayElem
     bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false,
     string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
 );
-internal record DayElement(StardewDate Date, int Value, 
+internal record DayElement(StardewDate Date, AggValue Value, 
         string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,
         string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
 

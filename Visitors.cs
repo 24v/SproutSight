@@ -4,7 +4,7 @@ internal static class Visitors
     public static SingleValueVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation, 
                                                   int highestDay, int highestSeason, int highestYear)
     {
-        return new SingleValueVisitor(operation, highestDay, highestSeason, highestYear, date => 
+        return new SingleValueVisitor(operation, StardewDate.GetStardewDate(), highestDay, highestSeason, highestYear, date => 
         {
             if (shippedData.TryGetValue(date, out var items))
             {
@@ -17,7 +17,7 @@ internal static class Visitors
     public static SingleValueVisitor CreateWalletGoldVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation, 
                                                     int highestDay, int highestSeason, int highestYear)
     {
-        return new SingleValueVisitor(operation, highestDay, highestSeason, highestYear, 
+        return new SingleValueVisitor(operation, StardewDate.GetStardewDate(), highestDay, highestSeason, highestYear, 
                               date => goldInOut.GetValueOrDefault(date)?.GoldInWallet ?? 0);
     }
 
@@ -25,7 +25,8 @@ internal static class Visitors
                                                       int highestDayIn, int highestSeasonIn, int highestYearIn,
                                                       int highestDayOut, int highestSeasonOut, int highestYearOut)
     {
-        return new CashFlowVisitor(goldInOut, operation, highestDayIn, highestSeasonIn, highestYearIn, highestDayOut, highestSeasonOut, highestYearOut);
+        return new CashFlowVisitor(goldInOut, operation, StardewDate.GetStardewDate(), highestDayIn, highestSeasonIn, 
+                highestYearIn, highestDayOut, highestSeasonOut, highestYearOut);
     }
 }
 
@@ -167,9 +168,11 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
     }
 }
 
-internal abstract class BaseVisitor(Operation operation)
+internal abstract class BaseVisitor(Operation operation, StardewDate UpToDate)
 {
     public Operation Operation { get; } = operation;
+
+    public StardewDate UpToDate { get; } = UpToDate;
 
     public int DoOperation(List<int> entries)
     {
@@ -221,8 +224,8 @@ internal class SingleValueVisitor : BaseVisitor
     public int HighestOverallYearTotal { get; protected set; }
     private readonly Func<StardewDate, int> _getDayValue;
 
-    public SingleValueVisitor(Operation operation, int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal, Func<StardewDate, int> getDayValue)
-        : base(operation)
+    public SingleValueVisitor(Operation operation, StardewDate date, int highestOverallDayTotal, int highestOverallSeasonTotal, int highestOverallYearTotal, Func<StardewDate, int> getDayValue)
+        : base(operation, date)
     {
         HighestOverallDayTotal = Math.Max(1, highestOverallDayTotal);
         HighestOverallSeasonTotal = Math.Max(1, highestOverallSeasonTotal);
@@ -237,10 +240,34 @@ internal class SingleValueVisitor : BaseVisitor
         var highest = HighestOverallDayTotal;
         var dayGold = GetDayValue(day.Date);
         int rowHeight = CalculateRowHeight(dayGold, highest);
-        string layout = FormatLayout(rowHeight);
-        // Logging.Monitor.Log($"Visit: {day.Date}, highest={highest}, dayGold={dayGold}, rowHeight={rowHeight}", LogLevel.Debug);
-        string tooltip = $"{day.Date.Season}-{day.Date.Day}: {SproutSightViewModel.FormatGoldNumber(dayGold)}";
-        return new DayElement(day.Date, dayGold, "", layout, tooltip, GetTint(day.Date.Season));
+        string tooltip;
+        string tint;
+        string layout;
+        bool valid;
+        if (day.Date.IsBefore(UpToDate))
+        {
+            tooltip = $"{day.Date.Season}-{day.Date.Day}: {SproutSightViewModel.FormatGoldNumber(dayGold)}";
+            tint = GetTint(day.Date.Season);
+            layout = FormatLayout(rowHeight);
+            valid = true;
+        }
+        else if (day.Date.Equals(UpToDate))
+        {
+            tooltip = $"{day.Date.Season}-{day.Date.Day}: Today! Check back tomorrow. (Data is saved at the end of the day.)";
+            tint = "#000000";
+            // Make today a little larger
+            layout = FormatLayout(rowHeight + 5);
+            valid = false;
+        }
+        else 
+        {
+            tooltip = $"{day.Date.Season}-{day.Date.Day}: The Future! No data yet!";
+            tint = "#959595";
+            layout = FormatLayout(rowHeight);
+            valid = false;
+        } 
+        AggValue aggValue = new(dayGold, valid, 1);
+        return new DayElement(day.Date, aggValue, "", layout, tooltip, tint);
     }
 
     public virtual SeasonElement Visit(SeasonNode season)
@@ -248,8 +275,20 @@ internal class SingleValueVisitor : BaseVisitor
         var elements = season.Days.Select(Visit).ToList();
         var reversedElements = elements.ToList();
         reversedElements.Reverse();
-        var golds = elements.Select(element => element.Value).ToList();
-        int aggregated = DoOperation(golds);
+        var golds = elements
+            .Select(e => e.Value)
+            .Where(e => e.Valid)
+            .Select(e => e.Value)
+            .ToList();
+        int aggregated;
+        if (golds.Count > 0)
+        {
+            aggregated = DoOperation(golds);
+        } 
+        else 
+        {
+            aggregated = 0;
+        }
         string tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         var highest = HighestOverallSeasonTotal;
         int rowHeight = CalculateRowHeight(aggregated, highest);
@@ -293,9 +332,9 @@ internal class SingleValueVisitor : BaseVisitor
     }
 }
 
-internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation,
+internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation, StardewDate date,
                       int highestDayIn, int highestSeasonIn, int highestYearIn,
-                      int highestDayOut, int highestSeasonOut, int highestYearOut) : BaseVisitor(operation)
+                      int highestDayOut, int highestSeasonOut, int highestYearOut) : BaseVisitor(operation, date)
 {
     public Dictionary<StardewDate, GoldInOut> CashFlowByDate { get; } = goldInOut;
 
@@ -339,7 +378,8 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
                 $"In: {SproutSightViewModel.FormatGoldNumber(dayIn)}\n" + 
                 $"Out: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
         
-        return (new DayElement(day.Date, 0, "", inLayout, tooltip, inTint, "", outLayout, tooltip, outTint), (dayIn, dayOut));
+
+        return (new DayElement(day.Date, new AggValue(0, false, 1), "", inLayout, tooltip, inTint, "", outLayout, tooltip, outTint), (dayIn, dayOut));
     }
 
     public (SeasonElement, (int, int)) VisitCashFlow(SeasonNode season)
@@ -364,9 +404,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         string outLayout = FormatLayout(outRowHeight);
         
         // Log layout calculations
-        Logging.Monitor.Log($"Season {season.Season} CashFlow Layout Calculations:", LogLevel.Debug);
-        Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestSeasonInValue: {HighestSeasonInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
-        Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestSeasonOutValue: {HighestSeasonOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
+        // Logging.Monitor.Log($"Season {season.Season} CashFlow Layout Calculations:", LogLevel.Debug);
+        // Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestSeasonInValue: {HighestSeasonInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
+        // Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestSeasonOutValue: {HighestSeasonOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
         
         // Determine colors based on net value
         var inTint = "#696969"; 
@@ -417,9 +457,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         string outLayout = FormatLayout(outRowHeight);
         
         // Log layout calculations
-        Logging.Monitor.Log($"Year {year.Year} CashFlow Layout Calculations:", LogLevel.Debug);
-        Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestYearInValue: {HighestYearInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
-        Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestYearOutValue: {HighestYearOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
+        // Logging.Monitor.Log($"Year {year.Year} CashFlow Layout Calculations:", LogLevel.Debug);
+        // Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestYearInValue: {HighestYearInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
+        // Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestYearOutValue: {HighestYearOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
         
         // Determine colors based on net value
         var inTint = "#696969"; 
@@ -468,9 +508,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         string outLayout = FormatLayout(outRowHeight);
         
         // Log layout calculations
-        Logging.Monitor.Log($"Root CashFlow Layout Calculations:", LogLevel.Debug);
-        Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestYearInValue: {HighestYearInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
-        Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestYearOutValue: {HighestYearOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
+        // Logging.Monitor.Log($"Root CashFlow Layout Calculations:", LogLevel.Debug);
+        // Logging.Monitor.Log($"  AggregatedIn: {aggregatedIn}, HighestYearInValue: {HighestYearInValue}, InRowHeight: {inRowHeight}, InLayout: {inLayout}", LogLevel.Debug);
+        // Logging.Monitor.Log($"  AggregatedOut: {aggregatedOut}, HighestYearOutValue: {HighestYearOutValue}, OutRowHeight: {outRowHeight}, OutLayout: {outLayout}", LogLevel.Debug);
         
         // Determine colors
         var inTint = "#696969"; 

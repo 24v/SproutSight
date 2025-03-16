@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework;
 
 namespace SproutSight;
 
+// TODO: Finish plumbing of date to visitor
 // TODO: Logging
 // TODO: Tooltip on Icons
 // TODO: Double check sale price
@@ -51,14 +52,14 @@ namespace SproutSight;
     // TODO: Better highlighting of todays date.
 // TOOD: Change name of "Grid"
 // TODO: Overflow of seasons
+// public const int NumYearsToShowByDefault = 2;
 
 internal partial class SproutSightViewModel
 {
     public const int RowWidth = 20;
     public const int MaxRowHeight = 128;
-    public const int MinRowHeight = 2;
-    public const int ZeroDataRowHeight = 1;
-    public const int NumYearsToShowByDefault = 2;
+    public const int MinRowHeight = 3;
+    public const int ZeroDataRowHeight = 2;
 
     // Showing Today's Info
     public StardewDate Date = StardewDate.GetStardewDate();
@@ -75,7 +76,7 @@ internal partial class SproutSightViewModel
 
     private void OnParamsChange()
     {
-        var agg = new TrackedDataAggregator(trackedData, SelectedOperation, GetSelectedYearsArray());
+        var agg = new TrackedDataAggregator(trackedData, SelectedOperation, GetSelectedYearsArray(), StardewDate.GetStardewDate());
         agg.LoadAggregationAndViewVisitor();
         TrackedDataAggregator = agg;
     }

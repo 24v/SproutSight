@@ -38,6 +38,61 @@ internal class StardewDate
         return $"{Year}-{Season}-{Day}";
     }
 
+    /// <summary>
+    /// Checks if this date is before another date
+    /// </summary>
+    /// <param name="other">The date to compare with</param>
+    /// <returns>True if this date is before the other date</returns>
+    public bool IsBefore(StardewDate other)
+    {
+        if (Year < other.Year) return true;
+        if (Year > other.Year) return false;
+        
+        // Same year, check season
+        if ((int)Season < (int)other.Season) return true;
+        if ((int)Season > (int)other.Season) return false;
+        
+        // Same year and season, check day
+        return Day < other.Day;
+    }
+
+    /// <summary>
+    /// Checks if this date is after another date
+    /// </summary>
+    /// <param name="other">The date to compare with</param>
+    /// <returns>True if this date is after the other date</returns>
+    public bool IsAfter(StardewDate other)
+    {
+        if (Year > other.Year) return true;
+        if (Year < other.Year) return false;
+        
+        // Same year, check season
+        if ((int)Season > (int)other.Season) return true;
+        if ((int)Season < (int)other.Season) return false;
+        
+        // Same year and season, check day
+        return Day > other.Day;
+    }
+
+    /// <summary>
+    /// Checks if this date is on or before another date
+    /// </summary>
+    /// <param name="other">The date to compare with</param>
+    /// <returns>True if this date is on or before the other date</returns>
+    public bool IsOnOrBefore(StardewDate other)
+    {
+        return IsBefore(other) || Equals(other);
+    }
+
+    /// <summary>
+    /// Checks if this date is on or after another date
+    /// </summary>
+    /// <param name="other">The date to compare with</param>
+    /// <returns>True if this date is on or after the other date</returns>
+    public bool IsOnOrAfter(StardewDate other)
+    {
+        return IsAfter(other) || Equals(other);
+    }
 }
 
 internal record StardewYear(int Year);
