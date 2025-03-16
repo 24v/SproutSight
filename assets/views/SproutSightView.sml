@@ -98,8 +98,8 @@
                     </expander>
 
                     <!-- All View -->
-                    <lane *case="All" *repeat={ShippedYearsReversed} orientation="vertical" margin="0,0,0,0">
-                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,0"> 
+                    <lane *case="All" *repeat={ShippedYearsReversed} orientation="vertical">
+                        <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end"> 
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
@@ -117,17 +117,17 @@
                     </lane>
 
                     <!-- Season View -->
-                    <lane *case="Season" margin="0,20,0,0" vertical-content-alignment="end" layout="stretch content">
+                    <lane *case="Season" vertical-content-alignment="end" layout="stretch content">
                         <label text="Seasons" margin="0,0,20,0" />
                         <lane *repeat={ShippedYears} margin="0,0,20,0" vertical-content-alignment="end">
-                            <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                            <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
                     </lane>
 
                     <!-- Year View -->
-                    <lane *case="Year" margin="0,20,0,0" vertical-content-alignment="end" layout="stretch content">
+                    <lane *case="Year" vertical-content-alignment="end" layout="stretch content">
                         <label text="Years" margin="0,0,20,0" />
-                        <image *repeat={ShippedYears} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        <image *repeat={ShippedYears} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>
                 </lane>  
 
