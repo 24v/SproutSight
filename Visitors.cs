@@ -124,7 +124,7 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
         if (CashFlowByDate.TryGetValue(day.Date, out var goldInOut))
         {
             dayIn = goldInOut.In;
-            dayOut = Math.Abs(goldInOut.Out);
+            dayOut = goldInOut.Out;
             HighestDayInValue = Math.Max(HighestDayInValue, dayIn);
             HighestDayOutValue = Math.Max(HighestDayOutValue, dayOut);
         }
@@ -142,7 +142,7 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
         int aggregatedOut = DoOperation(outValues);
         
         HighestSeasonInValue = Math.Max(HighestSeasonInValue, aggregatedIn);
-        HighestSeasonOutValue = Math.Max(HighestSeasonOutValue, Math.Abs(aggregatedOut));
+        HighestSeasonOutValue = Math.Max(HighestSeasonOutValue, aggregatedOut);
         
         return (aggregatedIn, aggregatedOut);
     }
@@ -157,7 +157,7 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> goldI
         int aggregatedOut = DoOperation(outValues);
         
         HighestYearInValue = Math.Max(HighestYearInValue, aggregatedIn);
-        HighestYearOutValue = Math.Max(HighestYearOutValue, Math.Abs(aggregatedOut));
+        HighestYearOutValue = Math.Max(HighestYearOutValue, aggregatedOut);
         
         return (aggregatedIn, aggregatedOut);
     }
@@ -467,7 +467,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
             outTint = CashFlowOutTint;
             int inRowHeight = CalculateRowHeight(dayIn, HighestDayInValue);
             inLayout = FormatLayout(inRowHeight);
-            int outRowHeight = CalculateRowHeight(Math.Abs(dayOut), HighestDayOutValue);
+            int outRowHeight = CalculateRowHeight(dayOut, HighestDayOutValue);
             outLayout = FormatLayout(outRowHeight);
             valid = true;
         }
@@ -506,14 +506,14 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
-        int netValue = aggregatedIn + aggregatedOut;
+        int netValue = aggregatedIn - aggregatedOut;
         
         // Calculate in bar using season-specific highest value
         int inRowHeight = CalculateRowHeight(aggregatedIn, HighestSeasonInValue);
         string inLayout = FormatLayout(inRowHeight);
         
         // Calculate out bar using season-specific highest value
-        int outRowHeight = CalculateRowHeight(Math.Abs(aggregatedOut), HighestSeasonOutValue);
+        int outRowHeight = CalculateRowHeight(aggregatedOut, HighestSeasonOutValue);
         string outLayout = FormatLayout(outRowHeight);
         
         // Log layout calculations
@@ -559,14 +559,14 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
-        int netValue = aggregatedIn + aggregatedOut;
+        int netValue = aggregatedIn - aggregatedOut;
         
         // Calculate in bar using year-specific highest value
         int inRowHeight = CalculateRowHeight(aggregatedIn, HighestYearInValue);
         string inLayout = FormatLayout(inRowHeight);
         
         // Calculate out bar using year-specific highest value
-        int outRowHeight = CalculateRowHeight(Math.Abs(aggregatedOut), HighestYearOutValue);
+        int outRowHeight = CalculateRowHeight(aggregatedOut, HighestYearOutValue);
         string outLayout = FormatLayout(outRowHeight);
         
         // Log layout calculations
@@ -611,13 +611,13 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         
         int aggregatedIn = DoOperation(cashFlowInValues);
         int aggregatedOut = DoOperation(cashFlowOutValues);
-        int netValue = aggregatedIn + aggregatedOut;
+        int netValue = aggregatedIn - aggregatedOut;
         
         // Calculate in/out layouts for the overall root
         int inRowHeight = CalculateRowHeight(aggregatedIn, HighestYearInValue);
         string inLayout = FormatLayout(inRowHeight);
         
-        int outRowHeight = CalculateRowHeight(Math.Abs(aggregatedOut), HighestYearOutValue);
+        int outRowHeight = CalculateRowHeight(aggregatedOut, HighestYearOutValue);
         string outLayout = FormatLayout(outRowHeight);
         
         // Log layout calculations
