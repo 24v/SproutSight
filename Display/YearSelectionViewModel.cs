@@ -1,8 +1,4 @@
-using PropertyChanged.SourceGenerator;
-using System.ComponentModel;
-
-namespace SproutSight;
-
+namespace SproutSight.Display;
 
 internal partial class YearSelectionViewModel(int Year, bool isChecked) 
 {

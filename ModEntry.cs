@@ -15,6 +15,7 @@ using StardewValley.Menus;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.CompilerServices;
 using StardewValley.GameData.Shops;
+using SproutSight.Display;
 
 /*
 
@@ -26,6 +27,7 @@ Todo:
   - More specific preserved names / icons.
   - Testing Script
   - Linter / Autoformat / C# Conventions
+  - Fix directory structure
 
 Ideas:
   - Value of all assets

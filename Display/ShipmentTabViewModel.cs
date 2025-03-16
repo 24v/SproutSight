@@ -1,7 +1,7 @@
 using PropertyChanged.SourceGenerator;
 using System.ComponentModel;
 
-namespace SproutSight;
+namespace SproutSight.Display;
 
 
 internal enum ShipmentTab

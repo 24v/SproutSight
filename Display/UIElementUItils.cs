@@ -1,6 +1,4 @@
-using StardewValley;
-
-namespace SproutSight;
+namespace SproutSight.Display;
 
 // I stole this from UIInfoSuite2. I hope it does what I want.
 public static class UIElementUtils

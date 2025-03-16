@@ -1,38 +1,14 @@
 using PropertyChanged.SourceGenerator;
-using SproutSight.Display;
 
-namespace SproutSight;
+namespace SproutSight.Display;
 
 // TODO: Check results
-// TODO: Fix up inheritence of visitors
-// TODO: Fix imports that are unused.
 // TODO: Fix ordering of SML params
-// TODO: Remove tooltip on overall
-    // READD??
-// TODO: Finish plumbing of date to visitor
-// TODO: Logging
-// TODO: Tooltip on Icons
 // TODO: Double check sale price
 // TODO: Move icon
-// TODO: Update to always use positive numbers in the tracked data.
-// TODO: Base class for visitor for helper methods
-// TODO: Diff levels of aggregation
-// TODO: Remove generics :/
-// TODO: Use accept
-// TODO: Create templates in view
-// TODO: Clean up averages
-    // All up aggregation
-// Constants not used everyhwere (what is teh convention?)
-// TODO: Only load for current page?
-// TODO: fix tense in FirstPass
-// TODO: HighestOverallDayTotal naming(?)
-// TODO: Memoize
-// TODO: Extract display helper
 // TODO: Move to package
-// TODO: Better title text (cash flow is inconsistent)
-// TODO: SingleFirstPassVisitor does not correctly calculate max averages for incomplete years. I also hate my life.
-// TODO: Constants for IN/Out tint
-// TODO: Overall End => Up until today
+// TODO: Memoize
+// TODO: Improve title text
 
 internal partial class SproutSightViewModel
 {

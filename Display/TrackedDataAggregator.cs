@@ -1,4 +1,4 @@
-namespace SproutSight;
+namespace SproutSight.Display;
 
 internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operation, int[] SelectedYears)
 {

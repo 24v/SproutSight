@@ -1,6 +1,4 @@
-using SproutSight.Display;
-
-namespace SproutSight;
+namespace SproutSight.Display;
 internal static class Visitors
 {
     public static SingleValueVisitor CreateShippedVisitor(Dictionary<StardewDate, List<TrackedItemStack>> shippedData, Operation operation, 
@@ -322,10 +320,6 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
                 season + "", layout, tooltip, tint, 
                 season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
 
-        if (rowHeight > DisplayHelper.MaxRowHeight)
-        {
-            Logging.Monitor.Log($"WARNING: rowHeight ({rowHeight}) exceeds MaxRowHeight ({DisplayHelper.MaxRowHeight}). Values: newAggregated={newAggregated}, HighestOverallSeasonTotal={HighestOverallSeasonTotal}, season={season.Season}", StardewModdingAPI.LogLevel.Warn);
-        }
         return seasonElement;
     }
 
