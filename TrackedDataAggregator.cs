@@ -88,47 +88,25 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         WalletYearsReversed = walletRoot.YearElementsReversed;
         WalletText = walletRoot.Text;
 
-        // var cashFlowFirstPassVisitor = FirstPassVisitors.CreateCashFlowVisitor(
-        //         TrackedData.GoldInOut, 
-        //         Operation);
-        // cashFlowFirstPassVisitor.Visit(rootNode);
-        // var cashFlowVisitor = Visitors.CreateCashFlowVisitor(
-        //         TrackedData.GoldInOut, 
-        //         Operation,
-        //         cashFlowFirstPassVisitor.HighestDayInValue,
-        //         cashFlowFirstPassVisitor.HighestSeasonInValue,
-        //         cashFlowFirstPassVisitor.HighestYearInValue,
-        //         cashFlowFirstPassVisitor.HighestDayOutValue,
-        //         cashFlowFirstPassVisitor.HighestSeasonOutValue,
-        //         cashFlowFirstPassVisitor.HighestYearOutValue);
-        // var cashFlowRoot = cashFlowVisitor.VisitCashFlow(rootNode);
-        // CashFlowGrid = cashFlowRoot.YearElements;
-        // CashFlowGridReversed = cashFlowRoot.YearElementsReversed;
-        // CashFlowNetTotal = cashFlowRoot.Value;
-        // CashFlowText = cashFlowRoot.Text;
-        // CashFlowTooltip = cashFlowRoot.Tooltip;
-
-        // LogGridStructures();
-    }
-
-    public void LogGridStructures() 
-    {
-        Logging.Monitor.Log("=== Wallet Grid Structure ===", LogLevel.Info);
-        foreach (var yearElements in WalletYears)
-        {
-            Logging.Monitor.Log($"Year {yearElements.Year}:", LogLevel.Info);
-            Logging.Monitor.Log($"  Text: {yearElements.Text}", LogLevel.Info);
-            foreach (var seasonElements in yearElements.SeasonElements)
-            {
-                Logging.Monitor.Log($"  Season {seasonElements.Season}:", LogLevel.Info);
-                Logging.Monitor.Log($"    Text: {seasonElements.Text}", LogLevel.Info);
-                Logging.Monitor.Log($"    Days:", LogLevel.Info);
-                foreach (var dayElements in seasonElements.DayElements)
-                {
-                    Logging.Monitor.Log($"      Date: {dayElements.Date}, Display: Layout={dayElements.Layout}, Tooltip={dayElements.Tooltip}, Tint={dayElements.Tint}", LogLevel.Info);
-                }
-            }
-        }
+        var cashFlowFirstPassVisitor = FirstPassVisitors.CreateCashFlowVisitor(
+                TrackedData.GoldInOut, 
+                Operation);
+        cashFlowFirstPassVisitor.Visit(rootNode);
+        var cashFlowVisitor = Visitors.CreateCashFlowVisitor(
+                TrackedData.GoldInOut, 
+                Operation,
+                cashFlowFirstPassVisitor.HighestDayInValue,
+                cashFlowFirstPassVisitor.HighestSeasonInValue,
+                cashFlowFirstPassVisitor.HighestYearInValue,
+                cashFlowFirstPassVisitor.HighestDayOutValue,
+                cashFlowFirstPassVisitor.HighestSeasonOutValue,
+                cashFlowFirstPassVisitor.HighestYearOutValue);
+        var cashFlowRoot = cashFlowVisitor.VisitCashFlow(rootNode);
+        CashFlowYears = cashFlowRoot.YearElements;
+        CashFlowYearsReversed = cashFlowRoot.YearElementsReversed;
+        CashFlowNetTotal = cashFlowRoot.Value;
+        CashFlowText = cashFlowRoot.Text;
+        CashFlowTooltip = cashFlowRoot.Tooltip;
     }
 }
 
@@ -154,7 +132,7 @@ internal record SeasonNode(Season Season, int Year, List<DayNode> Days);
 internal record DayNode(StardewDate Date);
 internal record RootNode(List<YearNode> Years);
 
-internal record AggValue(int Value, bool Valid, int TotalNumberOfDaysCovered);
+internal record AggValue(int Value, bool Valid, int TotalNumberOfDaysCovered, int? Value2 = null);
 
 internal record RootElement(int Value, List<YearElement> YearElements, List<YearElement> YearElementsReversed, 
     string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,

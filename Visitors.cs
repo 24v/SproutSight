@@ -173,7 +173,9 @@ internal abstract class BaseVisitor(Operation operation, StardewDate UpToDate)
 
     public const string TodayTint = "#000000";
     public const string FutureTint = "#959595";
-    public const String YearTint = "#40FC05";
+    public const string YearTint = "#40FC05";
+    public const string CashFlowOutTint = "#B22222"; 
+    public const string CashFlowInTint = "#696969";
     public Operation Operation { get; } = operation;
 
     public StardewDate UpToDate { get; } = UpToDate;
@@ -265,14 +267,14 @@ internal class SingleValueVisitor : BaseVisitor
             tooltip = $"{day.Date.Season}-{day.Date.Day}: Today! Check back tomorrow. (Data is saved at the end of the day.)";
             tint = TodayTint;
             // Make today a little larger than 0
-            layout = FormatLayout(rowHeight + 5);
+            layout = FormatLayout(SproutSightViewModel.MinRowHeight + 5);
             valid = false;
         }
         else 
         {
             tooltip = $"{day.Date.Season}-{day.Date.Day}: The Future! No data yet!";
             tint = FutureTint;
-            layout = FormatLayout(rowHeight);
+            layout = FormatLayout(SproutSightViewModel.MinRowHeight);
             valid = false;
         } 
 
@@ -438,9 +440,8 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
     public int HighestSeasonOutValue { get; } = Math.Max(1, highestSeasonOut);
     public int HighestYearOutValue { get; } = Math.Max(1, highestYearOut);
 
-    public (DayElement, (int, int)) VisitCashFlow(DayNode day)
+    public (DayElement,(int,int)) VisitCashFlow(DayNode day)
     {
-        // Default values if date not found
         int dayIn = 0;
         int dayOut = 0;
         
@@ -449,27 +450,49 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
             dayIn = goldInOut.In;
             dayOut = goldInOut.Out;
         }
-        
-        // Calculate in bar using day-specific highest value
-        int inRowHeight = CalculateRowHeight(dayIn, HighestDayInValue);
-        string inLayout = FormatLayout(inRowHeight);
-        
-        // Calculate out bar using day-specific highest value
-        int outRowHeight = CalculateRowHeight(Math.Abs(dayOut), HighestDayOutValue);
-        string outLayout = FormatLayout(outRowHeight);
-        
-        // Determine colors based on net value
-        var inTint = "#696969"; 
-        var outTint = "#B22222"; 
-        
-        // Create tooltip with all information
-        string tooltip = $"{day.Date.Season}-{day.Date.Day}\n" + 
-                $"Net: {SproutSightViewModel.FormatGoldNumber(dayIn + dayOut)}\n" + 
-                $"In: {SproutSightViewModel.FormatGoldNumber(dayIn)}\n" + 
-                $"Out: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
-        
 
-        return (new DayElement(day.Date, new AggValue(0, false, 1), "", inLayout, tooltip, inTint, "", outLayout, tooltip, outTint), (dayIn, dayOut));
+        string tooltip;
+        bool valid;
+        string inTint;
+        string outTint;
+        string inLayout;
+        string outLayout;
+        if (day.Date.IsBefore(UpToDate))
+        {
+            tooltip = $"{day.Date.Season}-{day.Date.Day}\n" +
+                    $"Net: {SproutSightViewModel.FormatGoldNumber(dayIn + dayOut)}\n" +
+                    $"In: {SproutSightViewModel.FormatGoldNumber(dayIn)}\n" +
+                    $"Out: {SproutSightViewModel.FormatGoldNumber(dayOut)}";
+            inTint = CashFlowInTint;
+            outTint = CashFlowOutTint;
+            int inRowHeight = CalculateRowHeight(dayIn, HighestDayInValue);
+            inLayout = FormatLayout(inRowHeight);
+            int outRowHeight = CalculateRowHeight(Math.Abs(dayOut), HighestDayOutValue);
+            outLayout = FormatLayout(outRowHeight);
+            valid = true;
+        }
+        else if (day.Date.Equals(UpToDate))
+        {
+            tooltip = $"{day.Date.Season}-{day.Date.Day}: Today! Check back tomorrow. (Data is saved at the end of the day.)";
+            inTint = TodayTint;
+            outTint = TodayTint;
+            inLayout = FormatLayout(SproutSightViewModel.MinRowHeight + 5);
+            outLayout = FormatLayout(SproutSightViewModel.MinRowHeight + 5);
+            valid = false;
+        }
+        else 
+        {
+            tooltip = $"{day.Date.Season}-{day.Date.Day}: The Future! No data yet!";
+            inTint = FutureTint;
+            outTint = FutureTint;
+            inLayout = FormatLayout(SproutSightViewModel.MinRowHeight);
+            outLayout = FormatLayout(0);
+            valid = false;
+        } 
+
+        var returnValue = new AggValue(dayIn, valid, 1, dayOut);
+
+        return (new DayElement(day.Date, returnValue, "", inLayout, tooltip, inTint, "", outLayout, tooltip, outTint), (dayIn, dayOut));
     }
 
     public (SeasonElement, (int, int)) VisitCashFlow(SeasonNode season)
