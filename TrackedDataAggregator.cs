@@ -4,18 +4,18 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
 {
     // We decompose the Elements here to make it easier to bind in the sml since dot operations are not allowed.
 
-    public List<YearElement> WalletGrid { get; set; } = [];
-    public List<YearElement> WalletGridReversed { get; set; } = [];
+    public List<YearElement> WalletYears { get; set; } = [];
+    public List<YearElement> WalletYearsReversed { get; set; } = [];
     public string? WalletText { get; private set; } = "";
     public string? WalletTooltip { get; private set; } = "";
 
-    public List<YearElement> ShippedGrid { get; set; } = [];
-    public List<YearElement> ShippedGridReversed { get; set; } = [];
+    public List<YearElement> ShippedYears { get; set; } = [];
+    public List<YearElement> ShippedYearsReversed { get; set; } = [];
     public int ShippedTotal { get; private set; } = 0;
     public string? ShippedText { get; private set; } = "";
 
-    public List<YearElement> CashFlowGrid { get; set; } = [];
-    public List<YearElement> CashFlowGridReversed { get; set; } = [];
+    public List<YearElement> CashFlowYears { get; set; } = [];
+    public List<YearElement> CashFlowYearsReversed { get; set; } = [];
     public int CashFlowNetTotal { get; private set; } = 0;
     public string? CashFlowText { get; private set; } = "";
     public string? CashFlowTooltip { get; private set; } = "";
@@ -70,8 +70,8 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
                 shippedFirstPassVisitor.HighestSeasonValue, 
                 shippedFirstPassVisitor.HighestYearValue);
         var shippedRoot = shippedVisitor.Visit(rootNode);
-        ShippedGrid = shippedRoot.YearElements;
-        ShippedGridReversed = shippedRoot.YearElementsReversed;
+        ShippedYears = shippedRoot.YearElements;
+        ShippedYearsReversed = shippedRoot.YearElementsReversed;
         ShippedTotal = shippedRoot.Value;
         ShippedText = shippedRoot.Text;
 
@@ -117,7 +117,7 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
     public void LogGridStructures() 
     {
         Logging.Monitor.Log("=== Wallet Grid Structure ===", LogLevel.Info);
-        foreach (var yearElements in WalletGrid)
+        foreach (var yearElements in WalletYears)
         {
             Logging.Monitor.Log($"Year {yearElements.Year}:", LogLevel.Info);
             Logging.Monitor.Log($"  Text: {yearElements.Text}", LogLevel.Info);

@@ -76,14 +76,17 @@
                         orientation="vertical" 
                         horizontal-content-alignment="end">
 
+                    <!-- Header -->
                     <lane>
                         <label text={ShippedText} margin="0,0,10,10" />
                         <label text="(Note)" tooltip="Hover over year/season to see aggregated." scale=".5" layout="stretch"/>
                         <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                         <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
+
+                    <!-- Controls -->
                     <expander layout="stretch content"
-                            margin="515,0,0,4"
+                            margin="514,0,0,4"
                             header-padding="0,12"
                             header-background-tint="#99c"
                             is-expanded={<>^IsYearSelectionExpanded} >
@@ -93,10 +96,10 @@
                             <checkbox *repeat={^YearSelectionOptions} label-text={Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
                         </lane>
                     </expander>
-                    <lane *case="All" *repeat={ShippedGridReversed} orientation="vertical" margin="0,0,0,40">
-                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+
+                    <!-- All View -->
+                    <lane *case="All" *repeat={ShippedYearsReversed} orientation="vertical" margin="0,0,0,40">
                         <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
-                        <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
@@ -112,19 +115,19 @@
                             </lane>
                         </lane>
                     </lane>
-                    <lane *case="Year"margin="0,0,0,40" vertical-content-alignment="end">
-                        <image *repeat={ShippedGrid}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                        <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                    </lane>
 
-                    <lane vertical-content-alignment="end" margin="40,0,0,0" layout="stretch content">
-                        <lane *case="Season" *repeat={ShippedGrid} margin="0,0,20,0" vertical-content-alignment="end">
-                            <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                    <!-- Season View -->
+                    <lane vertical-content-alignment="end" layout="stretch content">
+                        <label text="Seasons" margin="0,0,20,0" />
+                        <lane *case="Season" *repeat={ShippedYears} margin="0,0,20,0" vertical-content-alignment="end">
                             <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
                     </lane>
 
-
+                    <!-- Year View -->
+                    <lane *case="Year" margin="0,0,0,40" vertical-content-alignment="end" layout="stretch content">
+                        <image *repeat={ShippedYears}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                    </lane>
                 </lane>  
 
 
@@ -134,10 +137,8 @@
                         <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                         <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
-                    <lane *case="All" *repeat={WalletGridReversed} orientation="vertical" margin="0,0,0,40">
-                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                    <lane *case="All" *repeat={WalletYearsReversed} orientation="vertical" margin="0,0,0,40">
                         <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
-                        <!-- Context is a SeasonEntryElement(Season Season, List<DayEntryElement> Value, string text, ...) -->
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip} >
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
@@ -153,14 +154,12 @@
                             </lane>
                         </lane>
                     </lane>
-                    <lane *case="Year"margin="0,0,0,40" vertical-content-alignment="end">
-                        <image *repeat={WalletGrid}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                        <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                    <lane *case="Year" margin="0,0,0,40" vertical-content-alignment="end">
+                        <image *repeat={WalletYears}  fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                     </lane>
 
                     <lane vertical-content-alignment="end" margin="40,40,0,0">
-                        <lane *case="Season" *repeat={WalletGrid} margin="0,0,0,40" vertical-content-alignment="end">
-                        <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                        <lane *case="Season" *repeat={WalletYears} margin="0,0,0,40" vertical-content-alignment="end">
                             <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
                     </lane>
@@ -168,16 +167,13 @@
 
 
                 <lane *case="CashFlow" *context={TrackedDataAggregator}  *switch={SelectedPeriod} layout="820px content" orientation="vertical">
-                    <!-- <label text={CashFlowText} tooltip={CashFlowTooltip} margin="0,0,0,10"/> -->
                     <lane>
                         <label text={CashFlowText} tooltip={CashFlowTooltip} margin="0,0,10,10" layout="stretch"/>
                         <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
                         <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
-                    <lane *case="All" *repeat={CashFlowGridReversed} orientation="vertical" margin="0,0,0,40">
-                    <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<InOutEntry>>> Value) -->
+                    <lane *case="All" *repeat={CashFlowYearsReversed} orientation="vertical" margin="0,0,0,40">
                         <lane *repeat={SeasonElementsReversed} vertical-content-alignment="end" margin="0,0,0,10"> 
-                        <!-- Context is a SeasonEntryElement(Season Season, List<InOutEntry> Value, string text, ...) -->
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
@@ -186,7 +182,6 @@
                                 <label text={Season} margin="5,0,0,0"/>
                             </lane>
                             <lane *repeat={DayElements} orientation="vertical" margin="1,0,0,0">
-                            <!-- Context is an InOutEntry -->
                                 <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                                 <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
                             </lane>
@@ -198,10 +193,7 @@
                         </lane>
                     </lane>
                     <lane *case="Year" margin="0,0,0,40" vertical-content-alignment="end">
-                        <lane *repeat={CashFlowGrid} orientation="vertical" margin="1,0,0,0">
-                        <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                            <!-- <label text={Text}/> -->
-                            <!-- Context is an InOutEntry -->
+                        <lane *repeat={CashFlowYears} orientation="vertical" margin="1,0,0,0">
                             <image tint={Tint} fit="stretch" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
                             <image tint={Tint2} fit="stretch" layout={Layout2} tooltip={Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
                         </lane>
