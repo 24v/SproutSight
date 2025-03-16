@@ -28,11 +28,11 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         // Create the year data structure
         List<YearNode> yearNodes = [];
         RootNode rootNode = new(yearNodes);
-        if (SelectedYears.Length == 0)
-        {
-            Logging.Monitor.Log("No years selected, returning early", LogLevel.Error);
-            return;
-        }
+        // if (SelectedYears.Length == 0)
+        // {
+        //     Logging.Monitor.Log("No years selected, returning early", LogLevel.Error);
+        //     return;
+        // }
         
         Logging.Monitor.Log($"SelectedYears: [{string.Join(", ", SelectedYears)}], Game1.year: {Game1.year}", LogLevel.Error);
         
@@ -44,14 +44,14 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
             yearsToFill = new int[Game1.year];
             for (int i = 0; i < Game1.year ; i++)
             {
-                yearsToFill[i] = Game1.year - i;
-                Logging.Monitor.Log($"Added year {Game1.year - i} at index {i}", LogLevel.Error);
+                yearsToFill[i] = i + 1;
+                Logging.Monitor.Log($"Added year {i + 1} at index {i}", LogLevel.Error);
             }
         } 
         else 
         {
             Logging.Monitor.Log($"Using specific years: [{string.Join(", ", SelectedYears)}]", LogLevel.Error);
-            yearsToFill = SelectedYears;
+            yearsToFill = SelectedYears.Reverse().ToArray();
         }
         
         Logging.Monitor.Log($"Final yearsToFill: [{string.Join(", ", yearsToFill)}]", LogLevel.Error);
@@ -129,7 +129,7 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
         CashFlowText = cashFlowRoot.Text;
         CashFlowTooltip = cashFlowRoot.Tooltip;
 
-        LogGridStructures();
+        // LogGridStructures();
     }
 
     public void LogGridStructures() 

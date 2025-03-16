@@ -28,17 +28,17 @@ internal partial class YearSelectionViewModel(int Year, bool isChecked)
 
     public void HandleAllSelection(bool allSelected)
     {
-        Logging.Monitor.Log($"Handle All Selection {Year}, {allSelected}");
+        // Logging.Monitor.Log($"Handle All Selection {Year}, {allSelected}");
         if (Year == YEAR_ALL && !allSelected)
         {
             IsChecked = false;
-            Logging.Monitor.Log($"1 -> setting isChecked to {IsChecked}");
+            // Logging.Monitor.Log($"1 -> setting isChecked to {IsChecked}");
         }
 
         if (Year != YEAR_ALL && allSelected)
         {
             IsChecked = false;
-            Logging.Monitor.Log($"2 -> setting isChecked to {IsChecked}");
+            // Logging.Monitor.Log($"2 -> setting isChecked to {IsChecked}");
         }
     }
 }

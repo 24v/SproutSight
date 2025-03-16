@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework;
 
 namespace SproutSight;
 
+// TODO: Logging
 // TODO: Tooltip on Icons
 // TODO: Double check sale price
 // TODO: More specific icons
