@@ -132,7 +132,7 @@ internal record SeasonNode(Season Season, int Year, List<DayNode> Days);
 internal record DayNode(StardewDate Date);
 internal record RootNode(List<YearNode> Years);
 
-internal record AggValue(int Value, bool IsValid, int TotalNumberOfDaysCovered, int? Value2 = null);
+internal record AggValue(int Value, bool IsValid, int TotalNumberOfDaysCovered, int Value2 = 0);
 
 internal record RootElement(int Value, List<YearElement> YearElements, List<YearElement> YearElementsReversed, 
     string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,

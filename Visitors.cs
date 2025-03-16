@@ -53,7 +53,7 @@ internal static class FirstPassVisitors
 
     public static CashFlowFirstPassVisitor CreateCashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Operation operation)
     {
-        return new CashFlowFirstPassVisitor(goldInOut, operation);
+        return new CashFlowFirstPassVisitor(goldInOut, operation, StardewDate.GetTodaysDate());
     }
 }
 
@@ -130,7 +130,7 @@ internal class SingleValueFirstPassVisitor(Operation operation, Func<StardewDate
     }
 }
 
-internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> cashFlowByDate, Operation operation)
+internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> cashFlowByDate, Operation operation, StardewDate upToDate)
 {
     // Highest values for income
     public int HighestDayInValue { get; private set; } = 1;
@@ -141,6 +141,65 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> cashF
     public int HighestDayOutValue { get; private set; } = 1;
     public int HighestSeasonOutValue { get; private set; } = 1;
     public int HighestYearOutValue { get; private set; } = 1;
+
+    public AggValue Visit(DayNode day)
+    {
+        int dayIn = 0;
+        int dayOut = 0;
+        
+        if (cashFlowByDate.TryGetValue(day.Date, out var goldInOut))
+        {
+            dayIn = goldInOut.In;
+            dayOut = goldInOut.Out;
+            HighestDayInValue = Math.Max(HighestDayInValue, dayIn);
+            HighestDayOutValue = Math.Max(HighestDayOutValue, dayOut);
+        }
+        
+        return new AggValue(dayIn, day.Date.IsBefore(upToDate), 1, dayOut);
+    }
+
+    public AggValue Visit(SeasonNode season)
+    {
+        var aggValues = season.Days.Select(Visit).ToList();
+        var aggValue = CalculateAggValue(aggValues);
+        HighestSeasonInValue = Math.Max(HighestSeasonInValue, aggValue.Value);
+        HighestSeasonOutValue = Math.Max(HighestSeasonOutValue, aggValue.Value2);
+        return aggValue;
+    }
+
+    public AggValue Visit(YearNode year)
+    {
+        var aggValues = year.Seasons.Select(Visit).ToList();
+        var aggValue = CalculateAggValue(aggValues);
+        HighestYearInValue = Math.Max(HighestYearInValue, aggValue.Value);
+        HighestYearOutValue = Math.Max(HighestYearOutValue, aggValue.Value2);
+        return aggValue;
+    }
+    private AggValue CalculateAggValue(List<AggValue> aggValues)
+    {
+        var validAggValues = aggValues.Where(a => a.IsValid).ToList();
+        var totalDaysCovered = validAggValues.Select(a => a.TotalNumberOfDaysCovered).Sum();
+
+        var inValuesToAggregate = validAggValues.Select(a => a.Value).ToList();
+        if (operation == Operation.Average)
+        {
+            inValuesToAggregate = validAggValues.Select(a => a.Value * a.TotalNumberOfDaysCovered).ToList();
+        }
+        int inAggregationValue = DoOperation(inValuesToAggregate, true, totalDaysCovered);
+
+        var outValuesToAggregate = validAggValues.Select(a => a.Value2).ToList();
+        if (operation == Operation.Average)
+        {
+            outValuesToAggregate = validAggValues.Select(a => a.Value2 * a.TotalNumberOfDaysCovered).ToList();
+        }
+        int outAggregationValue = DoOperation(outValuesToAggregate, false, totalDaysCovered);
+        return new AggValue(inAggregationValue, totalDaysCovered > 0, totalDaysCovered, outAggregationValue);
+    }
+
+    public void Visit(RootNode root)
+    {
+        root.Years.ForEach(e => Visit(e));
+    }
 
     public int DoOperation(List<int> entries, bool forInValues, int? countOverride = null)
     {
@@ -158,57 +217,6 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> cashF
             Operation.End => entries.Last(),
             _ => 0
         };
-    }
-
-    public (int, int) Visit(DayNode day)
-    {
-        int dayIn = 0;
-        int dayOut = 0;
-        
-        if (cashFlowByDate.TryGetValue(day.Date, out var goldInOut))
-        {
-            dayIn = goldInOut.In;
-            dayOut = goldInOut.Out;
-            HighestDayInValue = Math.Max(HighestDayInValue, dayIn);
-            HighestDayOutValue = Math.Max(HighestDayOutValue, dayOut);
-        }
-        
-        return (dayIn, dayOut);
-    }
-
-    public (int, int) Visit(SeasonNode season)
-    {
-        var dayValues = season.Days.Select(Visit).ToList();
-        var inValues = dayValues.Select(v => v.Item1).ToList();
-        var outValues = dayValues.Select(v => v.Item2).ToList();
-        
-        int aggregatedIn = DoOperation(inValues, true);
-        int aggregatedOut = DoOperation(outValues, false);
-        
-        HighestSeasonInValue = Math.Max(HighestSeasonInValue, aggregatedIn);
-        HighestSeasonOutValue = Math.Max(HighestSeasonOutValue, aggregatedOut);
-        
-        return (aggregatedIn, aggregatedOut);
-    }
-
-    public (int, int) Visit(YearNode year)
-    {
-        var seasonValues = year.Seasons.Select(Visit).ToList();
-        var inValues = seasonValues.Select(v => v.Item1).ToList();
-        var outValues = seasonValues.Select(v => v.Item2).ToList();
-        
-        int aggregatedIn = DoOperation(inValues, true);
-        int aggregatedOut = DoOperation(outValues, false);
-        
-        HighestYearInValue = Math.Max(HighestYearInValue, aggregatedIn);
-        HighestYearOutValue = Math.Max(HighestYearOutValue, aggregatedOut);
-        
-        return (aggregatedIn, aggregatedOut);
-    }
-
-    public void Visit(RootNode root)
-    {
-        root.Years.ForEach(e => Visit(e));
     }
 }
 
