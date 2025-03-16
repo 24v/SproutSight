@@ -647,8 +647,8 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         string text = $"Cash Flow {operation}";
         var element = new RootElement(
                 netValue, elements, reversedElements, 
-                $"Overall {operation} Cash Flow", inLayout, tooltip, inTint,
-                $"", outLayout, tooltip, outTint);
+                $"{operation} Cash Flow", inLayout, tooltip, inTint,
+                "", outLayout, tooltip, outTint);
 
         return element;
     }
