@@ -117,11 +117,11 @@
                         <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
                     </lane>
 
-                    <lane vertical-content-alignment="end" margin="40,40,0,0">
-                    <lane *case="Season" *repeat={ShippedGrid} margin="0,0,0,40" vertical-content-alignment="end">
-                        <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
-                        <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
-                    </lane>
+                    <lane vertical-content-alignment="end" margin="40,0,0,0" layout="stretch content">
+                        <lane *case="Season" *repeat={ShippedGrid} margin="0,0,20,0" vertical-content-alignment="end">
+                            <!-- Context is a YearEntryElement(int Year, List<SeasonEntryElement<List<DayEntryEntryElement>>> Value) -->
+                            <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,0,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} />
+                        </lane>
                     </lane>
 
 

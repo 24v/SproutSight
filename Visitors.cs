@@ -289,20 +289,29 @@ internal class SingleValueVisitor : BaseVisitor
         var aggregated = DoOperation(golds, golds.Count);
         var aggValue = new AggValue(aggregated, golds.Count > 0, golds.Count);
         string tooltip;
-        if (aggValue.Valid)
+        string tint;
+        if (UpToDate.Year == season.Year && UpToDate.Season == season.Season)
+        {
+            tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}\n(Season in progress)";
+            tint = "#000000"; 
+        }
+        else if (aggValue.Valid)
         {
             tooltip = $"{season.Season} Y-{season.Year} {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
+            tint = GetTint(season.Season);
         }
         else 
         {
             tooltip = $"{season.Season} Y-{season.Year} {Operation}: Season in the future!";
+            tint = "#959595";
         }
+
         var highest = HighestOverallSeasonTotal;
         int rowHeight = CalculateRowHeight(aggregated, highest);
         string layout = FormatLayout(rowHeight);
         var seasonElement = new SeasonElement(
                 season.Season, aggValue, elements, reversedElements,
-                season + "", layout, tooltip, GetTint(season.Season), 
+                season + "", layout, tooltip, tint, 
                 season.Season == Season.Spring, season.Season == Season.Summer, season.Season == Season.Fall, season.Season == Season.Winter);
         return seasonElement;
     }
@@ -406,8 +415,6 @@ internal class SingleValueVisitor : BaseVisitor
             aggValue = new AggValue(aggregated, golds.Count > 0, golds.Count);
         }
 
-        // var golds = elements.Select(element => element.Value).ToList();
-        // int aggregated = DoOperation(golds);
         string tooltip = $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}";
         string text = tooltip;
         var element = new RootElement(aggregated, elements, reversedElements, $"Overall {Operation}: {SproutSightViewModel.FormatGoldNumber(aggregated)}", null, tooltip);

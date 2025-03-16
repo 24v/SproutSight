@@ -14,6 +14,8 @@ using Microsoft.Xna.Framework;
 
 namespace SproutSight;
 
+// TODO: ShippedGrid => ShippedYearElements
+// TODO: Change record's generic Elements to YearElements, etc
 // TODO: REmove tooltip on overall
 // TODO: Finish plumbing of date to visitor
 // TODO: Logging
