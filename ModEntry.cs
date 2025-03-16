@@ -175,7 +175,7 @@ internal sealed class ModEntry : Mod
         todayGoldOut = 0;
         todayGoldIn = 0;
 
-        trackedData = new DataFileHandler().LoadTrackedData(
+        trackedData = new TrackingDataSerializer().LoadTrackedData(
             statsFolderPath,
             Game1.player.Name,
             Game1.uniqueIDForThisGame
@@ -197,7 +197,7 @@ internal sealed class ModEntry : Mod
             return;
         }
 
-        var handler = new DataFileHandler();
+        var handler = new TrackingDataSerializer();
         handler.SaveShippedItems(
             statsFolderPath,
             Game1.player.Name,
@@ -326,7 +326,7 @@ internal sealed class ModEntry : Mod
             Monitor.Log("Cannot load data - save not loaded", LogLevel.Warn);
             return;
         }
-        trackedData = new DataFileHandler().LoadTrackedData(
+        trackedData = new TrackingDataSerializer().LoadTrackedData(
             statsFolderPath,
             Game1.player.Name,
             Game1.uniqueIDForThisGame
@@ -381,7 +381,7 @@ internal sealed class ModEntry : Mod
     {
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
         var date = StardewDate.GetTodaysDate();
-        DataFileHandler handler = new DataFileHandler();
+        TrackingDataSerializer handler = new TrackingDataSerializer();
         handler.SaveShippedItems(
             statsFolderPath,
             Game1.player.Name,

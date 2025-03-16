@@ -1,35 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using StardewValley;
-using StardewValley.ItemTypeDefinitions;
-using StardewModdingAPI;
-using xTile;
 
 namespace SproutSight;
-internal class DataFileHandler
+internal class TrackingDataSerializer
 {
-    // Col Format
     private const String SHIPPING_HEADER = "PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,ItemId,ItemName,QualityId,QualityName,Count,Price,CategoryId,CategoryName";
     private const String GOLD_HEADER = "PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,GoldIn,GoldOut,GoldInWallet";
 
-    private string GetStatsFilePath(string statsFolderPath, string playerName, ulong saveId)
+    private static string GetStatsFilePath(string statsFolderPath, string playerName, ulong saveId)
     {
         return Path.Combine(statsFolderPath, $"{playerName}_{saveId}.csv");
     }
 
-    private string GetBackupFilePath(string statsFilePath)
+    private static string GetBackupFilePath(string statsFilePath)
     {
         return statsFilePath + ".bak";
     }
 
-    private string GetGoldFilePath(string statsFolderPath, string playerName, ulong saveId)
+    private static string GetGoldFilePath(string statsFolderPath, string playerName, ulong saveId)
     {
         return Path.Combine(statsFolderPath, $"{playerName}_{saveId}_gold.csv");
     }
 
-    private string GetBackupGoldFile(string statsFilePath)
+    private static string GetBackupGoldFile(string statsFilePath)
     {
         return statsFilePath + ".bak";
     }

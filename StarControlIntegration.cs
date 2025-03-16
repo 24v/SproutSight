@@ -1,7 +1,4 @@
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
-using System.Drawing;
-using StardewValley;
 
 namespace SproutSight;
 

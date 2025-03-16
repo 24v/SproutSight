@@ -1,7 +1,8 @@
-using System.Linq;
 using StardewValley;
 
 namespace SproutSight;
+
+// I stole this from UIInfoSuite2. I hope it does what I want.
 public static class UIElementUtils
 {
   public static bool IsRenderingNormally()

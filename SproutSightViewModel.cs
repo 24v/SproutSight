@@ -4,7 +4,6 @@ using SproutSight.Display;
 namespace SproutSight;
 
 // TODO: Check results
-// TODO: Net value for cashflow
 // TODO: Fix up inheritence of visitors
 // TODO: Fix imports that are unused.
 // TODO: Fix ordering of SML params
