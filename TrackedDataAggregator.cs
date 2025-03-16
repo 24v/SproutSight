@@ -41,7 +41,6 @@ internal class TrackedDataAggregator(TrackedData TrackedData, Operation Operatio
             yearsToFill = SelectedYears.Reverse().ToArray();
         }
         
-        Logging.Monitor.Log($"Final yearsToFill: [{string.Join(", ", yearsToFill)}]", LogLevel.Error);
 
         foreach (var year in yearsToFill)
         {
