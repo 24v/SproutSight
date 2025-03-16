@@ -25,11 +25,10 @@ namespace SproutSight;
 // Constants not used everyhwere (what is teh convention?)
 // TODO: Only load for current page?
 // TODO: fix tense in FirstPass
-// TODO: HighestOverallDayTotal naming
+// TODO: HighestOverallDayTotal naming(?)
 // TODO: Memoize
-// TODO: Class interactions (i.e. defaults)
-// TODO: Primary constructor case
-// TODO: Move everything to display helper?
+// TODO: Extract display helper
+// TODO: Move to package
 
 internal partial class SproutSightViewModel
 {
