@@ -132,7 +132,8 @@ internal record SeasonNode(Season Season, int Year, List<DayNode> Days);
 internal record DayNode(StardewDate Date);
 internal record RootNode(List<YearNode> Years);
 
-internal record AggValue(int Value, bool IsValid, int TotalNumberOfDaysCovered, int Value2 = 0);
+// Ok, yeah, i can get rid of the Value2, Value3 junk by adding generics to the other records, but you cant make me.
+internal record AggValue(int Value, bool IsValid, int TotalNumberOfDaysCovered, int Value2 = 0, int Value3 = 0);
 
 internal record RootElement(int Value, List<YearElement> YearElements, List<YearElement> YearElementsReversed, 
     string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null,
@@ -143,7 +144,6 @@ internal record YearElement(int Year, AggValue Value, List<SeasonElement> Season
     string? Text2 = null, string? Layout2 = null, string? Tooltip2 = null, string? Tint2 = null
 );
 
-// TODO: Fix this trash
 internal record SeasonElement(Season Season, AggValue Value, List<DayElement> DayElements, List<DayElement> DayElementsReversed, 
     string? Text = null, string? Layout = null, string? Tooltip = null, string? Tint = null, 
     bool IsSpring = false, bool IsSummer = false, bool IsFall = false, bool IsWinter = false,
