@@ -25,6 +25,32 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
         };
     }
 
+    private AggValue DoAggregation(List<AggValue> aggValues)
+    {
+        var totalDaysCovered = aggValues
+            .Where(e => e.IsValid)
+            .Select(e => e.TotalNumberOfDaysCovered)
+            .Sum();
+
+        List<int> values;
+        if (operation == Operation.Average)
+        {
+            values = aggValues
+                .Where(e => e.IsValid)
+                .Select(e => e.Value * e.TotalNumberOfDaysCovered)
+                .ToList();
+        }
+        else 
+        {
+            values = aggValues
+                .Where(e => e.IsValid)
+                .Select(e => e.Value)
+                .ToList();
+        }
+
+        int aggregated = DoOperation(values,  totalDaysCovered);
+        return new AggValue(aggregated, totalDaysCovered > 0, totalDaysCovered);
+    }
     public virtual DayElement Visit(DayNode day)
     {
         var dayGold = GetDayValue(day.Date);
@@ -64,15 +90,12 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
     public virtual SeasonElement Visit(SeasonNode season)
     {
         var elements = season.Days.Select(Visit).ToList();
+        var aggValue = DoAggregation(elements.Select(e => e.Value).ToList());
+        var newAggregated = aggValue.Value;
 
-        var aggregationValuesForDays = elements
-            .Select(e => e.Value)
-            .Where(e => e.IsValid)
-            .Select(e => e.Value)
-            .ToList();
-        
-        var newAggregated = DoOperation(aggregationValuesForDays, aggregationValuesForDays.Count);
-        var aggValue = new AggValue(newAggregated, aggregationValuesForDays.Count > 0, aggregationValuesForDays.Count);
+        int rowHeight = DisplayHelper.CalculateRowHeight(newAggregated, HighestOverallSeasonTotal);
+        string layout = DisplayHelper.FormatLayout(rowHeight);
+
         string tooltip;
         string tint;
         if (upToDate.Year == season.Year && upToDate.Season == season.Season)
@@ -91,8 +114,6 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
             tint = DisplayHelper.FutureTint;
         }
 
-        int rowHeight = DisplayHelper.CalculateRowHeight(newAggregated, HighestOverallSeasonTotal);
-        string layout = DisplayHelper.FormatLayout(rowHeight);
         var reversedElements = elements.ToList();
         reversedElements.Reverse();
         var seasonElement = new SeasonElement(
@@ -106,36 +127,11 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
     public virtual YearElement Visit(YearNode year)
     {
         var elements = year.Seasons.Select(Visit).ToList();
-        var totalNumberOfDaysCoveredForAllSeasonInYear = elements
-            .Select(e => e.Value)
-            .Where(e => e.IsValid)
-            .Select(e => e.TotalNumberOfDaysCovered)
-            .Sum();
+        var aggValue = DoAggregation(elements.Select(e => e.Value).ToList());
+        var newAggregated = aggValue.Value;
 
-        int newAggregated;
-        AggValue aggValue;
-        if (operation == Operation.Average)
-        {
-            // Average of averages magic
-            var aggregationValuesforSeasonsNormalized = elements
-                .Select(e => e.Value)
-                .Where(e => e.IsValid)
-                .Select(e => e.Value * e.TotalNumberOfDaysCovered)
-                .ToList();
-
-            newAggregated = DoOperation(aggregationValuesforSeasonsNormalized, totalNumberOfDaysCoveredForAllSeasonInYear);
-            aggValue = new AggValue(newAggregated, aggregationValuesforSeasonsNormalized.Count > 0, totalNumberOfDaysCoveredForAllSeasonInYear);
-        }
-        else
-        {
-            var aggregationValuesForSeasons = elements
-                .Select(e => e.Value)
-                .Where(e => e.IsValid)
-                .Select(e => e.Value)
-                .ToList();
-            newAggregated = DoOperation(aggregationValuesForSeasons);
-            aggValue = new AggValue(newAggregated, aggregationValuesForSeasons.Count > 0, totalNumberOfDaysCoveredForAllSeasonInYear);
-        }
+        int rowHeight = DisplayHelper.CalculateRowHeight(newAggregated, HighestOverallYearTotal);
+        string layout = DisplayHelper.FormatLayout(rowHeight);
 
         string tooltip;
         string tint;
@@ -155,8 +151,6 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
             tint = DisplayHelper.FutureTint;
         }
 
-        int rowHeight = DisplayHelper.CalculateRowHeight(newAggregated, HighestOverallYearTotal);
-        string layout = DisplayHelper.FormatLayout(rowHeight);
         var reversedElements = elements.ToList();
         reversedElements.Reverse();
         var yearElement = new YearElement(year.Year, aggValue, elements, 
@@ -167,39 +161,13 @@ internal class SingleValueVisitor(Operation operation, StardewDate upToDate,
     public virtual RootElement Visit(RootNode root)
     {
         var elements = root.Years.Select(Visit).ToList();
-        var totalNumberofDaysCoveredForAllYears = elements
-            .Select(e => e.Value)
-            .Where(e => e.IsValid)
-            .Select(e => e.TotalNumberOfDaysCovered)
-            .Sum();
+        var aggValue = DoAggregation(elements.Select(e => e.Value).ToList());
+        var newAggregated = aggValue.Value;
 
-        int aggregated;
-        AggValue aggValue;
-        if (operation == Operation.Average)
-        {
-            var aggregationValuesForYearsNormalized = elements
-                .Select(e => e.Value)
-                .Where(e => e.IsValid)
-                .Select(e => e.Value * e.TotalNumberOfDaysCovered)
-                .ToList();
-            aggregated = DoOperation(aggregationValuesForYearsNormalized, totalNumberofDaysCoveredForAllYears);
-            aggValue = new AggValue(aggregated, aggregationValuesForYearsNormalized.Count > 0, totalNumberofDaysCoveredForAllYears);
-        }
-        else
-        {
-            var aggregationValuesForYears = elements
-                .Select(e => e.Value)
-                .Where(e => e.IsValid)
-                .Select(e => e.Value)
-                .ToList();
-            aggregated = DoOperation(aggregationValuesForYears);
-            aggValue = new AggValue(aggregated, aggregationValuesForYears.Count > 0, totalNumberofDaysCoveredForAllYears);
-        }
-
-        string text = $"Overall {operation}: {DisplayHelper.FormatGoldNumber(aggregated)}";
+        string text = $"Overall {operation}: {DisplayHelper.FormatGoldNumber(newAggregated)}";
         var reversedElements = elements.ToList();
         reversedElements.Reverse();
-        var element = new RootElement(aggregated, elements, reversedElements, text);
+        var element = new RootElement(newAggregated, elements, reversedElements, text);
         return element;
     }
 }

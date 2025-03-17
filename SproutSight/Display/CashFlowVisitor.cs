@@ -33,9 +33,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         };
     }
 
-    private AggValue DoAggregation(List<AggValue> values)
+    private AggValue DoAggregation(List<AggValue> aggValues)
     {
-        var totalDaysCovered = values
+        var totalDaysCovered = aggValues
             .Where(e => e.IsValid)
             .Select(e => e.TotalNumberOfDaysCovered)
             .Sum();
@@ -44,22 +44,22 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         List<int> cashFlowOutValues;
         if (operation == Operation.Average)
         {
-            cashFlowInValues = values
+            cashFlowInValues = aggValues
                 .Where(e => e.IsValid)
                 .Select(e => e.Value * e.TotalNumberOfDaysCovered)
                 .ToList();
-            cashFlowOutValues = values
+            cashFlowOutValues = aggValues
                 .Where(e => e.IsValid)
                 .Select(e => e.Value2 * e.TotalNumberOfDaysCovered)
                 .ToList();
         }
         else 
         {
-            cashFlowInValues = values
+            cashFlowInValues = aggValues
                 .Where(e => e.IsValid)
                 .Select(e => e.Value)
                 .ToList();
-            cashFlowOutValues = values
+            cashFlowOutValues = aggValues
                 .Where(e => e.IsValid)
                 .Select(e => e.Value2)
                 .ToList();
