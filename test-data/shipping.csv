@@ -1,0 +1,25 @@
+PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,ItemId,ItemName,QualityId,QualityName,Count,Price,CategoryId,CategoryName
+
+# Test with year = 2. season = 2. day = 22.
+
+# Spring 1
+    # Min = 0. Max = 3000. Sum = 3333. Avg = 120
+Demo,Misthaven,20250312160846,1,0,Spring,1,303,Pale Ale,2,Gold,1,3,-80,Flower
+Demo,Misthaven,20250312160846,1,0,Spring,1,303,Pale Ale,2,Gold,3,10,-80,Flower
+Demo,Misthaven,20250312160846,1,0,Spring,1,303,Pale Ale,2,Gold,3,100,-80,Flower
+Demo,Misthaven,20250312160846,1,0,Spring,2,303,Pale Ale,2,Gold,3,1000,-80,Flower
+
+# Year 1. Min = 0. Max = 3000. Sum = 3333. Year Avg = 30.
+
+# Fall 2 (incomplete)
+    # Min = 0. Max = 3000. Sum = 3333. Avg = 159.
+Demo,Misthaven,20250312160846,2,2,Spring,1,303,Pale Ale,2,Gold,1,3,-80,Flower
+Demo,Misthaven,20250312160846,2,2,Spring,1,303,Pale Ale,2,Gold,3,10,-80,Flower
+Demo,Misthaven,20250312160846,2,2,Spring,1,303,Pale Ale,2,Gold,3,100,-80,Flower
+Demo,Misthaven,20250312160846,2,2,Spring,2,303,Pale Ale,2,Gold,3,1000,-80,Flower
+
+# Year 2 (incomplete)
+    # Min = 0. Max = 3000. Sum = 3333. Year avg = 43.
+
+# Root
+    # Min = 0. Max = 3000. sum = 6666. Avg = 35.

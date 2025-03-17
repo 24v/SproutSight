@@ -20,25 +20,20 @@ using SproutSight.Display;
 /*
 
 Todo:
-  - Check results
+  - Some actual testing, like I am a real programmer.
+  - In game testing automation
   - Animate the on hover on hud icon
   - More specific preserved names / icons.
-  - Testing Script
   - Linter / Autoformat / C# Conventions
   - Fix ordering of SML params
-  - Memoize
+  - Memoize aggregations
   - Improve title text
   - MultiPlayers multiFarms
 
 Ideas:
   - Value of all assets
   - Make this a in-game element
-  - Track All Expenses
-      Purchases
-      Sales
-      Ships
-      Building
-      Shipping
+  - Track All Expenses (e.g. Purchases, Sales, Ships, Building, Shipping, etc)
   - Show where items are being shipped from
 
 */

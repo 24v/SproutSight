@@ -10,8 +10,8 @@ internal static class DisplayHelper
     public const string TodayTint = "#000000";
     public const string FutureTint = "#959595";
     public const string YearTint = "#40FC05";
-    public const string CashFlowOutTint = "#B22222"; 
     public const string CashFlowInTint = "#696969";
+    public const string CashFlowOutTint = "#B22222"; 
     public static string FormatGoldNumber(int number) => $"{number:N0}g";
 
     public static string GetTint(Season season) 

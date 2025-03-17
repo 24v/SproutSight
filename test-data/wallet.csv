@@ -1,0 +1,41 @@
+PlayerName,FarmName,SaveDate,Year,SeasonId,SeasonName,Day,GoldIn,GoldOut,GoldInWallet
+
+# Test with year = 2. season = 2. day = 22.
+
+# Spring 1
+    # Min = 0. Max = 1000. End = 0. Season avg = 40.
+Demo,Misthaven,20250316,1,0,Spring,1,0,0,0
+Demo,Misthaven,20250311,1,0,Spring,2,0,0,1
+Demo,Misthaven,20250313,1,0,Spring,3,0,0,10
+Demo,Misthaven,20250310,1,0,Spring,4,0,0,100
+Demo,Misthaven,20250310,1,0,Spring,5,0,0,1000
+# Winter 1
+    # Min = 0. Max = 1000. End = 1000. Season avg = 40. 
+Demo,Misthaven,20250316,1,3,Spring,24,0,0,0
+Demo,Misthaven,20250311,1,3,Spring,25,0,0,1
+Demo,Misthaven,20250313,1,3,Spring,26,0,0,10
+Demo,Misthaven,20250310,1,3,Spring,27,0,0,100
+Demo,Misthaven,20250310,1,3,Spring,28,0,0,1000
+# Year 1
+    # Min = 0. Max = 1000. End = 1000. Avg = 2,222 / 112 = 20
+
+
+# Spring 2
+    # Spiring. Min = 0. Max = 1000. End = 0. Season avg = 40.
+Demo,Misthaven,20250316,2,0,Spring,1,0,0,0
+Demo,Misthaven,20250311,2,0,Spring,2,0,0,1
+Demo,Misthaven,20250313,2,0,Spring,3,0,0,10
+Demo,Misthaven,20250310,2,0,Spring,4,0,0,100
+Demo,Misthaven,20250310,2,0,Spring,5,0,0,1000
+# Fall 2
+    # Min = 0. Max = 1000. End = 1000. Season avg = 53. 
+Demo,Misthaven,20250316,2,2,Spring,17,0,0,0
+Demo,Misthaven,20250311,2,2,Spring,18,0,0,1
+Demo,Misthaven,20250313,2,2,Spring,19,0,0,10
+Demo,Misthaven,20250310,2,2,Spring,20,0,0,100
+Demo,Misthaven,20250310,2,2,Spring,21,0,0,1000
+# Year 2 (partial). Avg = 2,222 / 77 = 28. End = 1000.
+    # Min = 0. Max = 1000. End = 1000. Avg = 2,222 / 77 = 29
+
+# Root
+    # Min = 0. Max = 0. End = 1000. Avg = 4444 / (112 + 77) = 24

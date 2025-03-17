@@ -131,7 +131,7 @@ internal class TrackingDataSerializer
                         result[date] = items;
                     }
                     items.Add(stack);
-                    Logging.Monitor.Log($"Added item: {stack}", LogLevel.Trace);
+                    // Logging.Monitor.Log($"Added item: {stack}", LogLevel.Trace);
                 }
                 catch (Exception ex)
                 {
@@ -334,7 +334,7 @@ internal class TrackingDataSerializer
 
                     var date = new StardewDate(year, (Season)seasonId, day);
                     result[date] = new GoldInOut(goldIn, goldOut, goldInWallet);
-                    Logging.Monitor.Log($"Added gold data: {date} In:{goldIn} Out:{goldOut} Wallet:{goldInWallet}", LogLevel.Trace);
+                    // Logging.Monitor.Log($"Added gold data: {date} In:{goldIn} Out:{goldOut} Wallet:{goldInWallet}", LogLevel.Trace);
                 }
                 catch (Exception ex)
                 {
