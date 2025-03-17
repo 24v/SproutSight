@@ -20,19 +20,15 @@ using SproutSight.Display;
 /*
 
 Todo:
-  - Those binding warnings in log (use ':')
-  - MultiPlayers multiFarms
-  - Wiki
+  - Check results
   - Animate the on hover on hud icon
   - More specific preserved names / icons.
   - Testing Script
   - Linter / Autoformat / C# Conventions
-  - Check results
   - Fix ordering of SML params
-  - Double check sale price
-  - Move icon
   - Memoize
   - Improve title text
+  - MultiPlayers multiFarms
 
 Ideas:
   - Value of all assets

@@ -67,11 +67,11 @@ The shipping data is saved in CSV format with the following columns:
 
 ## Feedback and Support
 Feedback and comments appreciated.
-- Create an issue on [GitHub](TODO: Add github link)
+- Create an issue on [GitHub](https://github.com/24v/SproutSight)
 - Find me (https://discord.com/users/malcier) on the [Stardew Valley Discord](https://discord.gg/stardewvalley)
 
 ## See also
 - [Changelog](CHANGELOG.md)
 
 ## License
-MIT License - Feel free to use and modify this mod as you see fit.
+- [MIT License](LICENSE)
