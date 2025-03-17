@@ -94,7 +94,7 @@
 
                         <label layout="stretch" *outlet="header" text="Selected Years"/>
                         <lane orientation="vertical" margin="59,0,0,0" layout="stretch content" horizontal-content-alignment="start">
-                            <checkbox *repeat={^YearSelectionOptions} label-text={Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
+                            <checkbox *repeat={^YearSelectionOptions} label-text={:Text} is-checked={:IsChecked} click=|^^SelectYear(Year)|/>
                         </lane>
                     </expander>
 
@@ -156,7 +156,7 @@
 
                         <label layout="stretch" *outlet="header" text="Selected Years"/>
                         <lane orientation="vertical" margin="59,0,0,0" layout="stretch content" horizontal-content-alignment="start">
-                            <checkbox *repeat={^YearSelectionOptions} label-text={Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
+                            <checkbox *repeat={^YearSelectionOptions} label-text={:Text} is-checked={:IsChecked} click=|^^SelectYear(Year)|/>
                         </lane>
                     </expander>
 
@@ -205,8 +205,8 @@
                     <lane>
                         <label text={:CashFlowText} margin="0,0,10,10" />
                         <label text="(Note)" tooltip="Hover over year/season to see aggregated." scale=".5" layout="stretch"/>
-                        <dropdown option-min-width="100" options={^Periods} selected-option={<>^SelectedPeriod} />
-                        <dropdown option-min-width="100" options={^Operations} selected-option={<>^SelectedOperation} />
+                        <dropdown option-min-width="100" options={:^Periods} selected-option={<>^SelectedPeriod} />
+                        <dropdown option-min-width="100" options={:^Operations} selected-option={<>^SelectedOperation} />
                     </lane>
 
                     <!-- Controls -->
@@ -218,14 +218,14 @@
 
                         <label layout="stretch" *outlet="header" text="Selected Years"/>
                         <lane orientation="vertical" margin="59,0,0,0" layout="stretch content" horizontal-content-alignment="start">
-                            <checkbox *repeat={^YearSelectionOptions} label-text={:Text} is-checked={IsChecked} click=|^^SelectYear(Year)|/>
+                            <checkbox *repeat={^YearSelectionOptions} label-text={:Text} is-checked={:IsChecked} click=|^^SelectYear(Year)|/>
                         </lane>
                     </expander>
 
                     <!-- All View -->
                     <lane *case="All" *repeat={:CashFlowYearsReversed} orientation="vertical">
                         <lane *repeat={:SeasonElementsReversed} vertical-content-alignment="end"> 
-                            <lane layout="140px 40px" vertical-content-alignment="end" tooltip={Tooltip}>
+                            <lane layout="140px 40px" vertical-content-alignment="end" tooltip={:Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
                                 <image *if={IsSummer} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Summer} />
                                 <image *if={IsFall} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Fall} />
@@ -249,7 +249,6 @@
                     <lane *case="Season" vertical-content-alignment="end" layout="stretch content">
                         <label text="Seasons" margin="0,0,20,0" />
                         <lane *repeat={:CashFlowYears} margin="0,0,20,0" vertical-content-alignment="end">
-                            <!-- <image *repeat={SeasonElements} tint={Tint} fit="Stretch" margin="1,40,0,0" layout={Layout} tooltip={Tooltip} sprite={@Mods/StardewUI/Sprites/White} /> -->
                             <lane *repeat={:SeasonElements} orientation="vertical" margin="1,0,0,0">
                                 <image tint={:Tint} fit="stretch" layout={:Layout} tooltip={:Tooltip} margin="0,40,0,0" sprite={@Mods/StardewUI/Sprites/White} />
                                 <image tint={:Tint2} fit="stretch" layout={:Layout2} tooltip={:Tooltip2} sprite={@Mods/StardewUI/Sprites/White} />
