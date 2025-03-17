@@ -99,7 +99,7 @@
                     </expander>
 
                     <!-- All View -->
-                    <lane *case="All" *repeat={ShippedYearsReversed} orientation="vertical">
+                    <lane *case="All" *repeat={ShippedYearsReversed} orientation="vertical" margin="0,0,0,2">
                         <lane *repeat={:SeasonElementsReversed} vertical-content-alignment="end"> 
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={:Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
@@ -161,7 +161,7 @@
                     </expander>
 
                     <!-- All View -->
-                    <lane *case="All" *repeat={:WalletYearsReversed} orientation="vertical">
+                    <lane *case="All" *repeat={:WalletYearsReversed} orientation="vertical" margin="0,0,0,2">
                         <lane *repeat={:SeasonElementsReversed} vertical-content-alignment="end"> 
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={:Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />
@@ -223,7 +223,7 @@
                     </expander>
 
                     <!-- All View -->
-                    <lane *case="All" *repeat={:CashFlowYearsReversed} orientation="vertical">
+                    <lane *case="All" *repeat={:CashFlowYearsReversed} orientation="vertical" margin="0,0,0,2">
                         <lane *repeat={:SeasonElementsReversed} vertical-content-alignment="end"> 
                             <lane layout="140px 40px" vertical-content-alignment="end" tooltip={:Tooltip}>
                                 <image *if={IsSpring} layout="28px 16px" margin="0,0,0,5" sprite={@Mods/24v.SproutSight/Sprites/Cursors:Spring} />

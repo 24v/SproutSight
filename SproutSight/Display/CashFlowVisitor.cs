@@ -68,7 +68,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         int aggregatedIn = DoOperation(cashFlowInValues, true, totalDaysCovered);
         int aggregatedOut = DoOperation(cashFlowOutValues, false,  totalDaysCovered);
         int netValue = aggregatedIn - aggregatedOut;
-        return new AggValue(aggregatedIn, totalDaysCovered > 0, totalDaysCovered, aggregatedOut);
+        return new AggValue(aggregatedIn, totalDaysCovered > 0, totalDaysCovered, aggregatedOut, netValue);
     }
 
     public DayElement VisitCashFlow(DayNode day)
