@@ -1,7 +1,4 @@
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
-using System.Drawing;
-using StardewValley;
 
 namespace SproutSight;
 
@@ -9,11 +6,6 @@ internal static class StarControlIntegration
 {
     public static void Register(IStarControlApi starControl, IManifest mod, Action toggleDisplay)
     {
-        if (starControl is null)
-        {
-            return;
-        }
-
         Texture2D texture = Game1.content.Load<Texture2D>("Buildings/Shipping Bin");
         Rectangle sourceRectangle = new(0, 0, 32, 32);
         starControl.RegisterItems(
@@ -35,7 +27,7 @@ internal static class StarControlIntegration
 
         public string Title => "SproutSight";
 
-        public string Description => "Toggle SproutSight Pro(TM)";
+        public string Description => "Toggle SproutSight Pro";
 
         public Texture2D Texture => texture;
 

@@ -5,12 +5,15 @@ SproutSight Pro&trade; allows you to track and analyze your shipping data in for
 **Download on [Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/31705/)** \
 **Source on [Github](https://github.com/24v/SproutSight)**
 
-![SproutSight UI](docs/images/Overview.png)
+![SproutSight UI](<docs/images/Shipping View.png>)
 
 ## Features
 - 📊 **Detailed Shipping Records**: Tracks all items shipped through both main shipping bin and mini-shipping bins
 - 📈 **Visual Statistics**: View your shipping history with daily, seasonal, and yearly breakdowns
 - 💰 **Real-time Tracking**: See currently shipped items and their total proceeds
+- 💼 **Comprehensive Financial Data**: View shipments, wallet gold, and cash flow in a single interface
+- 📅 **Flexible Time Periods**: Display data by day, season, or year for detailed analysis
+- 🔢 **Advanced Aggregation Options**: Analyze your data using min, max, sum, or average aggregations
 - 📁 **CSV Export**: All data is saved in CSV format (at the end of the day) for easy external analysis
 - ⚙️ **Configurable Interface**: Access via hotkey (default: F8) or optional HUD icon
 - ️⭐ **Star Control Support**: Integrated with StarControl for easty controller setup
@@ -67,11 +70,11 @@ The shipping data is saved in CSV format with the following columns:
 
 ## Feedback and Support
 Feedback and comments appreciated.
-- Create an issue on [GitHub](TODO: Add github link)
+- Create an issue on [GitHub](https://github.com/24v/SproutSight)
 - Find me (https://discord.com/users/malcier) on the [Stardew Valley Discord](https://discord.gg/stardewvalley)
 
 ## See also
 - [Changelog](CHANGELOG.md)
 
 ## License
-MIT License - Feel free to use and modify this mod as you see fit.
+- [MIT License](LICENSE)

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 - Enhanced Financial Analytics
+### New Features
+- **Comprehensive Financial Data**: Added support for viewing wallet gold and cash flow in addition to shipments
+- **Flexible Time Periods**: Enhanced UI to display data by day, season, or year for more detailed analysis
+- **Advanced Aggregation Options**: Added multiple aggregation methods (min, max, sum, average) for better data insights
+- **Code Refactoring**: Reorganized project structure for better maintainability
+### Bug Fixes
+- Hud icon no longer shows during cutscenes.
+
 ## 0.1.2 - Add support for StarControl
 SproutSight should show up in the "Library" for StarControl.
 
