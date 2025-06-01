@@ -2,21 +2,19 @@
 
 SproutSight Pro&trade; is a comprehensive financial analytics tool for your Stardew Valley farm. Track and analyze your shipping data, wallet gold, and cash flow with an intuitive interface that provides detailed insights across days, seasons, and years. Whether you're optimizing profits or just curious about your farm's performance, SproutSight Pro&trade; offers powerful visualization and aggregation tools to help you understand your farm's financial health. All data is automatically saved to CSV files for additional external analysis.
 
-**Download on [Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/31705/)** \
+**Download on [Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/31705/)**
 **Source on [Github](https://github.com/24v/SproutSight)**
 
-![SproutSight UI](<docs/images/Shipping View.png>)
+![SproutSight UI](docs/images/Shipping%20View.png)
 
 ## Features
 - 💼 **Comprehensive Financial Data**: View shipments, wallet gold, and cash flow in a single interface
 - 📈 **Visual Statistics**: View your data with daily, seasonal, and yearly breakdowns
 - 🔢 **Advanced Aggregation Options**: Analyze your data using min, max, sum, or average aggregations
-- 📅 **Year Selection**: Select which years to view data on
 - 💰 **Real-time Tracking**: See currently shipped items and their total proceeds
-- 📊 **Detailed Shipping Records**: Tracks all items shipped through both main shipping bin and mini-shipping bins
 - 📁 **CSV Export**: All data is saved in CSV format (at the end of the day) for easy external analysis
-- ⚙️ **Configurable Interface**: Access via hotkey (default: F8) or optional HUD icon
 - ️⭐ **Star Control Support**: Integrated with StarControl for easy controller setup
+- ️⭐ **Iconic Framework Support**: Integrated with StarControl for easy controller setup
 
 ## Usage
 - Press F8 (configurable) or click the shipping bin icon in the HUD to open the statistics viewer

@@ -32,7 +32,7 @@ Todo:
 
 Ideas:
   - Value of all assets
-  - Make this a in-game element
+  - Make this an in-game element
   - Track All Expenses (e.g. Purchases, Sales, Ships, Building, Shipping, etc)
   - Show where items are being shipped from
 
@@ -41,35 +41,38 @@ Ideas:
 namespace SproutSight;
 internal sealed class ModEntry : Mod
 {
-    private string statsFolderPath = "";
-    private string viewAssetPrefix = "";
+    private string _statsFolderPath = "";
+    private string _viewAssetPrefix = "";
 
-    private IViewEngine? stardewUIViewEngine;
-    private IStarControlApi? starControl;
-    private IGenericModConfigMenuApi? genericModConfig;
-    private ModConfig Config = new();
+    private IViewEngine? _stardewUIViewEngine;
+    private IStarControlApi? _starControl;
+    private IGenericModConfigMenuApi? _genericModConfig;
+    private ModConfig _config = new();
+    private IIconicFrameworkApi? _iconicFrameworkApi;
 
     // In-Memory Repo of Tracked Data. This is always loaded from file OnDayStart.
-    private TrackedData trackedData = new();
+    private TrackedData _trackedData = new();
     // Pending items to be saved after the game saves
     private List<TrackedItemStack>? _pendingItems;
     private StardewDate? _pendingDate;
 
     // The Shipping icon in the hud
-    private IViewDrawable? hud;
+    private IViewDrawable? _hud;
     // Needed to respond to click / hover events
-    private Rectangle hudClickableArea;
+    private Rectangle _hudClickableArea;
 
     // For tracking total gold in and out
-    private int todayGoldIn = 0;
-    private int todayGoldOut = 0;
-    private int? lastGoldAmount = null;
+    private int _todayGoldIn = 0;
+    private int _todayGoldOut = 0;
+    private int? _lastGoldAmount = null;
 
 
     public override void Entry(IModHelper helper)
     {
-        statsFolderPath = helper.DirectoryPath + Path.DirectorySeparatorChar;
-        viewAssetPrefix = $"Mods/{ModManifest.UniqueID}/Views";
+        _statsFolderPath = helper.DirectoryPath + Path.DirectorySeparatorChar;
+        _viewAssetPrefix = $"Mods/{ModManifest.UniqueID}/Views";
+
+        _config = Helper.ReadConfig<ModConfig>();
 
         helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
@@ -96,69 +99,88 @@ internal sealed class ModEntry : Mod
     private void OnUpdateTicked(object? sender, StardewModdingAPI.Events.UpdateTickedEventArgs e)
     {
         // Day hasnt started
-        if (lastGoldAmount == null) 
+        if (_lastGoldAmount == null) 
         {
             return;
         }
         int currentGold = Game1.player.Money;
-        int goldAdded = currentGold - (int)lastGoldAmount;
+        int goldAdded = currentGold - (int)_lastGoldAmount;
         if (goldAdded > 0) 
         {
-            todayGoldIn += goldAdded;
-            Monitor.Log($"Player added gold: {goldAdded}. Current Out: {todayGoldOut}. Current In: {todayGoldIn}.", LogLevel.Trace);
+            _todayGoldIn += goldAdded;
+            Monitor.Log($"Player added gold: {goldAdded}. Current Out: {_todayGoldOut}. Current In: {_todayGoldIn}.", LogLevel.Trace);
 
         } else if (goldAdded < 0) 
         {
-            todayGoldOut += goldAdded;
-            Monitor.Log($"Player lost gold: {goldAdded}. Current Out: {todayGoldOut}. Current In: {todayGoldIn}.", LogLevel.Trace);
+            _todayGoldOut += goldAdded;
+            Monitor.Log($"Player lost gold: {goldAdded}. Current Out: {_todayGoldOut}. Current In: {_todayGoldIn}.", LogLevel.Trace);
 
         }
-        lastGoldAmount = currentGold;
+        _lastGoldAmount = currentGold;
     }
 
     private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
     {
-        stardewUIViewEngine = Helper.ModRegistry.GetApi<IViewEngine>("focustense.StardewUI");
-        starControl = Helper.ModRegistry.GetApi<IStarControlApi>("focustense.StarControl");
-        genericModConfig = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+        _stardewUIViewEngine = Helper.ModRegistry.GetApi<IViewEngine>("focustense.StardewUI");
+        _starControl = Helper.ModRegistry.GetApi<IStarControlApi>("focustense.StarControl");
+        _genericModConfig = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+        _iconicFrameworkApi = Helper.ModRegistry.GetApi<IIconicFrameworkApi>("furyx639.ToolbarIcons");
 
-        if (stardewUIViewEngine == null)
+        if (_stardewUIViewEngine == null)
         {
             Monitor.Log("Failed to load StardewUI API. Make sure the mod is installed.", LogLevel.Error);
             return;
         }
-        stardewUIViewEngine.RegisterViews($"Mods/{ModManifest.UniqueID}/Views", "assets/views");
-        stardewUIViewEngine.RegisterSprites($"Mods/{ModManifest.UniqueID}/Sprites", "assets/sprites");
-        stardewUIViewEngine.EnableHotReloading("/Users/demo/CascadeProjects/stardew_valley/CascadeProjects/windsurf-project/stardew_mod/SproutSight/SproutSight");
+        _stardewUIViewEngine.RegisterViews($"Mods/{ModManifest.UniqueID}/Views", "assets/views");
+        _stardewUIViewEngine.RegisterSprites($"Mods/{ModManifest.UniqueID}/Sprites", "assets/sprites");
+        _stardewUIViewEngine.EnableHotReloading("/Users/demo/CascadeProjects/stardew_valley/CascadeProjects/windsurf-project/stardew_mod/SproutSight/SproutSight");
 
         // Setup gmcm
-        if (genericModConfig is not null)
+        if (_genericModConfig is not null)
         {
-            genericModConfig.Register(
+            _genericModConfig.Register(
                 mod: this.ModManifest,
-                reset: () => this.Config = new ModConfig(),
-                save: () => this.Helper.WriteConfig(this.Config)
+                reset: () => this._config = new ModConfig(),
+                save: () => this.Helper.WriteConfig(this._config)
             );
 
-            genericModConfig.AddBoolOption(
+            _genericModConfig.AddBoolOption(
                 mod: this.ModManifest,
                 name: () => "Show Hud Icon",
                 tooltip: () => "Display a shipping to toggle the tracker view.",
-                getValue: () => this.Config.EnableHudIcon,
-                setValue: value => this.Config.EnableHudIcon = value
+                getValue: () => this._config.EnableHudIcon,
+                setValue: value => this._config.EnableHudIcon = value
             );
-            genericModConfig.AddKeybindList(
+            _genericModConfig.AddKeybindList(
                 mod: this.ModManifest,
                 name: () => "Tracker View Toggle",
-                getValue: () => this.Config.ToggleKey,
-                setValue: value => this.Config.ToggleKey = value
+                getValue: () => this._config.ToggleKey,
+                setValue: value => this._config.ToggleKey = value
             );
         }
 
         // Star Control
-        if (starControl is not null)
+        if (_starControl is not null)
         {
-            StarControlIntegration.Register(starControl, ModManifest, new Action(ShowStatsMenu));
+            StarControlIntegration.Register(_starControl, ModManifest, new Action(ShowStatsMenu));
+        }
+
+        // Iconic Framework Integration
+        if (_iconicFrameworkApi is not null)
+        {
+            _iconicFrameworkApi.AddToolbarIcon(
+                id: $"{ModManifest.UniqueID}.ShowSproutSight",
+                texturePath: "Buildings/Shipping Bin",
+                sourceRect: new Rectangle(0, 0, 32, 32),
+                getTitle: () => "SproutSight",
+                getDescription: () => "Open SproutSight Overview",
+                onClick: ShowStatsMenu
+            );
+            Monitor.Log("IconicFramework icon registered for SproutSight.", LogLevel.Trace);
+        }
+        else if (_iconicFrameworkApi is null)
+        {
+            Monitor.Log("IconicFramework API not found. SproutSight icon will not be added to the toolbar.", LogLevel.Trace);
         }
 
         Monitor.Log("Sprout Sight Updated => Game Launched!", LogLevel.Trace);
@@ -169,12 +191,12 @@ internal sealed class ModEntry : Mod
     {
         _pendingItems = null;
         _pendingDate = null;
-        lastGoldAmount = Game1.player.Money;
-        todayGoldOut = 0;
-        todayGoldIn = 0;
+        _lastGoldAmount = Game1.player.Money;
+        _todayGoldOut = 0;
+        _todayGoldIn = 0;
 
-        trackedData = new TrackingDataSerializer().LoadTrackedData(
-            statsFolderPath,
+        _trackedData = new TrackingDataSerializer().LoadTrackedData(
+            _statsFolderPath,
             Game1.player.Name,
             Game1.uniqueIDForThisGame
         );
@@ -197,7 +219,7 @@ internal sealed class ModEntry : Mod
 
         var handler = new TrackingDataSerializer();
         handler.SaveShippedItems(
-            statsFolderPath,
+            _statsFolderPath,
             Game1.player.Name,
             Game1.player.farmName.Value,
             _pendingItems,
@@ -208,13 +230,13 @@ internal sealed class ModEntry : Mod
 
         // todayGoldIn and todayGoldOut will be updated by the UpdateTicked before save
         handler.SaveGoldData(
-            statsFolderPath, 
+            _statsFolderPath, 
             Game1.player.Name, 
             Game1.player.farmName.Value, 
             Game1.uniqueIDForThisGame, 
             _pendingDate, 
-            todayGoldIn, 
-            todayGoldOut, 
+            _todayGoldIn, 
+            _todayGoldOut, 
             Game1.player.Money);
     }
 
@@ -225,7 +247,7 @@ internal sealed class ModEntry : Mod
             return;
         }
 
-        if (Config.ToggleKey.GetKeybindCurrentlyDown() != null)
+        if (_config.ToggleKey.GetKeybindCurrentlyDown() != null)
         {
             ShowStatsMenu();
         } 
@@ -242,12 +264,12 @@ internal sealed class ModEntry : Mod
 
     private void OnRenderedHud(object? sender, RenderedHudEventArgs e)
     {
-        if (!Config.EnableHudIcon) 
+        if (!_config.EnableHudIcon) 
         {
-            if (hud != null)
+            if (_hud != null)
             {
-                hud.Dispose();
-                hud = null;
+                _hud.Dispose();
+                _hud = null;
             }
             return;
         }
@@ -257,21 +279,21 @@ internal sealed class ModEntry : Mod
             return;
         }
 
-        hud ??= stardewUIViewEngine!.CreateDrawableFromAsset($"{viewAssetPrefix}/HudIcon");
+        _hud ??= _stardewUIViewEngine!.CreateDrawableFromAsset($"{_viewAssetPrefix}/HudIcon");
 
         int marginRight = 39;
         int marginTop = 262;
         var viewport = Game1.uiViewport;
         var x = viewport.Width - marginRight;
         var y = marginTop;
-        hud.Draw(e.SpriteBatch, new(x, y));
+        _hud.Draw(e.SpriteBatch, new(x, y));
 
         // We need hudClickable scaled coordinates for the OnButtonPress
         var scaleFactor = Game1.options.uiScale / Game1.options.zoomLevel;
         var scaledX = (int)Math.Round(x * scaleFactor);
         var scaledY = (int)Math.Round(y * scaleFactor);
         var scaledSize = (int)Math.Round(32 * scaleFactor);
-        hudClickableArea = new Rectangle(scaledX, scaledY, scaledSize, scaledSize);
+        _hudClickableArea = new Rectangle(scaledX, scaledY, scaledSize, scaledSize);
 
         // For some reason, GetScaledScreenPixels works differently here vs ButtonPressedEventArgs
         // So... just use the non scaled hud bounds
@@ -302,13 +324,13 @@ internal sealed class ModEntry : Mod
         }
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
         PrintShippedItems(shippedItems);
-        Monitor.Log($"Current Gold Totals: Current Out: {todayGoldOut}. Current In: {todayGoldIn}. Wallet{Game1.player.Money}", LogLevel.Debug);
+        Monitor.Log($"Current Gold Totals: Current Out: {_todayGoldOut}. Current In: {_todayGoldIn}. Wallet{Game1.player.Money}", LogLevel.Debug);
     }
 
     private void PrintHistoricalData(string command, string[] args)
     {
         Monitor.Log("Showing tracked data", LogLevel.Info);
-        trackedData.PrintTrackedData();
+        _trackedData.PrintTrackedData();
     }
 
     private void SaveCurrentData(string command, string[] args)
@@ -324,8 +346,8 @@ internal sealed class ModEntry : Mod
             Monitor.Log("Cannot load data - save not loaded", LogLevel.Warn);
             return;
         }
-        trackedData = new TrackingDataSerializer().LoadTrackedData(
-            statsFolderPath,
+        _trackedData = new TrackingDataSerializer().LoadTrackedData(
+            _statsFolderPath,
             Game1.player.Name,
             Game1.uniqueIDForThisGame
         );
@@ -336,7 +358,7 @@ internal sealed class ModEntry : Mod
     {
 
         var clickPosition = e.Cursor.GetScaledScreenPixels().ToPoint();
-        if (hudClickableArea.Contains(clickPosition))
+        if (_hudClickableArea.Contains(clickPosition))
         {
             ShowStatsMenu();
         }
@@ -381,7 +403,7 @@ internal sealed class ModEntry : Mod
         var date = StardewDate.GetTodaysDate();
         TrackingDataSerializer handler = new TrackingDataSerializer();
         handler.SaveShippedItems(
-            statsFolderPath,
+            _statsFolderPath,
             Game1.player.Name,
             Game1.player.farmName.Value,
             shippedItems,
@@ -389,36 +411,36 @@ internal sealed class ModEntry : Mod
             Game1.uniqueIDForThisGame
         );
         handler.SaveGoldData(
-            statsFolderPath, 
+            _statsFolderPath, 
             Game1.player.Name, 
             Game1.player.farmName.Value, 
             Game1.uniqueIDForThisGame, 
             date, 
-            todayGoldIn, 
-            todayGoldOut, 
+            _todayGoldIn, 
+            _todayGoldOut, 
             Game1.player.Money);
 
         Monitor.Log($"Saved shipping stats for {shippedItems.Count} items", LogLevel.Info);
-        Monitor.Log($"Saved gold stats: {todayGoldIn} {todayGoldOut} {Game1.player.Money}", LogLevel.Info);
+        Monitor.Log($"Saved gold stats: {_todayGoldIn} {_todayGoldOut} {Game1.player.Money}", LogLevel.Info);
         PrintShippedItems(shippedItems);
     }
 
     private void ShowStatsMenu()
     {
-        if (stardewUIViewEngine == null)
+        if (_stardewUIViewEngine == null)
         {
             return;
         }
 
         List<TrackedItemStack> shippedItems = GetCurrentShippedItems();
-        var context = new SproutSightViewModel(trackedData)
+        var context = new SproutSightViewModel(_trackedData)
         {
             CurrentItems = shippedItems,
-            TodayGoldIn = todayGoldIn,
-            TodayGoldOut = todayGoldOut
+            TodayGoldIn = _todayGoldIn,
+            TodayGoldOut = _todayGoldOut
         };
 
-        Game1.activeClickableMenu = stardewUIViewEngine.CreateMenuFromAsset($"{viewAssetPrefix}/SproutSightView", context);
+        Game1.activeClickableMenu = _stardewUIViewEngine.CreateMenuFromAsset($"{_viewAssetPrefix}/SproutSightView", context);
     }
 
     private void PrintShippedItems(List<TrackedItemStack> shippedItems)

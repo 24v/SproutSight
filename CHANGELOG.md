@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 - Iconic Framework Integration
+
+### Added
+- Iconic Framework Integration
+- Bugfix for config settings not persisting
+
 ## 0.2.0 - Enhanced Financial Analytics
 ### New Features
 - **Comprehensive Financial Data**: Added support for viewing wallet gold and cash flow in addition to shipments
