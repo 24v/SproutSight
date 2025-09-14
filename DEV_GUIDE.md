@@ -1,6 +1,8 @@
 # Development Guide
 
 ### Setup
+> SMAPI must be installed first
+
 ```bash
 git clone [repository-url]
 cd SproutSight

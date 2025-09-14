@@ -15,6 +15,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
     public int HighestSeasonOutValue { get; } = Math.Max(1, highestSeasonOut);
     public int HighestYearOutValue { get; } = Math.Max(1, highestYearOut);
 
+    public int HighestDayValue => Math.Max(HighestDayInValue, HighestDayOutValue);
+
+
     public int DoOperation(List<int> entries, bool forInValues, int? countOverride = null)
     {
         if (entries.Count == 0)
@@ -23,10 +26,10 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         }
         return operation switch
         {
-            Operation.Min => forInValues? entries.Min() : entries.Max(),
-            Operation.Max => forInValues? entries.Max() : entries.Min(),
+            Operation.Min => forInValues ? entries.Min() : entries.Max(),
+            Operation.Max => forInValues ? entries.Max() : entries.Min(),
             Operation.Sum => entries.Sum(),
-            Operation.Average => (int)Math.Round(entries.Sum() / 
+            Operation.Average => (int)Math.Round(entries.Sum() /
                 (float)(countOverride != null ? countOverride : entries.Count)),
             Operation.End => entries.Last(),
             _ => 0
@@ -79,7 +82,7 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         if (CashFlowByDate.TryGetValue(day.Date, out var goldInOut))
         {
             dayIn = goldInOut.In;
-            dayOut = goldInOut.Out;
+            dayOut = Math.Abs(goldInOut.Out);
         }
 
         string tooltip;
@@ -96,9 +99,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
                     $"Out: {DisplayHelper.FormatGoldNumber(dayOut)}";
             inTint = DisplayHelper.CashFlowInTint;
             outTint = DisplayHelper.CashFlowOutTint;
-            int inRowHeight = DisplayHelper.CalculateRowHeight(dayIn, HighestDayInValue);
+            int inRowHeight = DisplayHelper.CalculateRowHeight(dayIn, HighestDayValue);
             inLayout = DisplayHelper.FormatLayout(inRowHeight);
-            int outRowHeight = DisplayHelper.CalculateRowHeight(dayOut, HighestDayOutValue);
+            int outRowHeight = DisplayHelper.CalculateRowHeight(dayOut, HighestDayValue);
             outLayout = DisplayHelper.FormatLayout(outRowHeight);
             valid = true;
         }

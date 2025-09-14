@@ -19,7 +19,7 @@ internal class CashFlowFirstPassVisitor(Dictionary<StardewDate, GoldInOut> cashF
         if (cashFlowByDate.TryGetValue(day.Date, out var goldInOut))
         {
             dayIn = goldInOut.In;
-            dayOut = goldInOut.Out;
+            dayOut = Math.Abs(goldInOut.Out);
             HighestDayInValue = Math.Max(HighestDayInValue, dayIn);
             HighestDayOutValue = Math.Max(HighestDayOutValue, dayOut);
         }
