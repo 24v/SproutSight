@@ -5,18 +5,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
 {
     public Dictionary<StardewDate, GoldInOut> CashFlowByDate { get; } = goldInOut;
 
-    // Highest values for income at each level
-    public int HighestDayInValue { get; } = Math.Max(1, highestDayIn);
-    public int HighestSeasonInValue { get; } = Math.Max(1, highestSeasonIn);
-    public int HighestYearInValue { get; } = Math.Max(1, highestYearIn);
-
-    // Highest values for expenses at each level
-    public int HighestDayOutValue { get; } = Math.Max(1, highestDayOut);
-    public int HighestSeasonOutValue { get; } = Math.Max(1, highestSeasonOut);
-    public int HighestYearOutValue { get; } = Math.Max(1, highestYearOut);
-
-    public int HighestDayValue => Math.Max(HighestDayInValue, HighestDayOutValue);
-
+    public int HighestDayValue => Math.Max(1, Math.Max(highestDayIn, highestDayOut));
+    public int HighestSeasonValue => Math.Max(1, Math.Max(highestSeasonIn, highestSeasonOut));
+    public int HighestYearValue => Math.Max(1, Math.Max(highestYearIn, highestYearOut));
 
     public int DoOperation(List<int> entries, bool forInValues, int? countOverride = null)
     {
@@ -140,9 +131,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         var aggregatedOut = aggValue.Value2;
         var netValue = aggValue.Value3;
 
-        int inRowHeight = DisplayHelper.CalculateRowHeight(aggregatedIn, HighestSeasonInValue);
+        int inRowHeight = DisplayHelper.CalculateRowHeight(aggregatedIn, HighestSeasonValue);
         string inLayout = DisplayHelper.FormatLayout(inRowHeight);
-        int outRowHeight = DisplayHelper.CalculateRowHeight(aggregatedOut, HighestSeasonOutValue);
+        int outRowHeight = DisplayHelper.CalculateRowHeight(aggregatedOut, HighestSeasonValue);
         string outLayout = DisplayHelper.FormatLayout(outRowHeight);
 
         string inTint;
@@ -214,9 +205,9 @@ internal class CashFlowVisitor(Dictionary<StardewDate, GoldInOut> goldInOut, Ope
         var aggregatedOut = aggValue.Value2;
         var netValue = aggValue.Value3;
 
-        int inRowHeight = DisplayHelper.CalculateRowHeight(aggregatedIn, HighestYearInValue);
+        int inRowHeight = DisplayHelper.CalculateRowHeight(aggregatedIn, HighestYearValue);
         string inLayout = DisplayHelper.FormatLayout(inRowHeight);
-        int outRowHeight = DisplayHelper.CalculateRowHeight(aggregatedOut, HighestYearOutValue);
+        int outRowHeight = DisplayHelper.CalculateRowHeight(aggregatedOut, HighestYearValue);
         string outLayout = DisplayHelper.FormatLayout(outRowHeight);
 
         string inTint;

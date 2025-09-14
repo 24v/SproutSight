@@ -1,7 +1,7 @@
 {
     "Name": "SproutSight",
     "Author": "24v",
-    "Version": "0.3.0",
+    "Version": "0.3.1",
     "Description": "Track and analyze your farm's shipping data",
     "UniqueID": "24v.SproutSight",
     "EntryDll": "SproutSight.dll",

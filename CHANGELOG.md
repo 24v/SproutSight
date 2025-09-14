@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 - Hotfix for Cash Flow View
+
+### Fixed
+- Fix calculation and display for net cash flow.
+
 ## 0.3.0 - Iconic Framework Integration
 
 ### Added
